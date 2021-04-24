@@ -20,4 +20,3 @@ clean_up_docker <-
       }
       
     }
-    
