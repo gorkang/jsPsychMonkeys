@@ -1,20 +1,25 @@
+# DEBUG -------------------------------------------------------------------
+
+# BENCHMARK: invalidate initial container
+# if (file.exists("_targets/objects/container_24000") == TRUE ) targets::tar_invalidate(matches("container_24000"))
+
+
 # Parameters --------------------------------------------------------------
 
-  participants = list(uid = 24000)
-  # participants = list(uid = 24000:24010)
+  participants = list(uid = 24000) # e.g. [1:100]
   
   parameters = list(pid = "test/TEST-ALL-ITEMS",
                     browserName = "chrome",
                     big_container = FALSE,
                     initial_wait = 2,
-                    DEBUG = TRUE,
-                    debug_file = FALSE,
+                    screenshot = TRUE,
+                    DEBUG = FALSE,
+                    debug_file = TRUE,
                     open_VNC = FALSE)
   
-  parameters_local_server = list(local_or_server = "server", # server / local
+  parameters_local_server = list(local_or_server = "server", # [server/local]
                                  folder_downloads = "~/Downloads",
                                  local_folder_tasks = "Downloads/test_prototol")
-
 
 
 # Libraries ---------------------------------------------------------------
@@ -44,14 +49,15 @@ lapply(list.files("./R", full.names = TRUE, pattern = ".R"), source)
   tar_option_set(packages = packages_to_load, # Load packages for all targets
                  error = "workspace") # Needed to load workspace on error to debug
   
-  # Restore output to console
+  # Restore output to console (in case it was left hanging...)
     suppressWarnings(sink())
     sink(type = "message")
-
+    
 
 # Targets -----------------------------------------------------------------
 
 list(
+  # Maybe add parameters to a target?
   # tar_target(configuration, options(crayon.enabled = TRUE)),
   
   tarchetypes::tar_map(
@@ -82,11 +88,11 @@ list(
     # Complete task
     tar_target(
       task,
-      complete_task_new(
-      # complete_task_old(
+      complete_task(
         parameters_local_server = parameters_local_server,
         uid = uid,
         initial_wait = parameters$initial_wait,
+        screenshot = parameters$screenshot,
         DEBUG = parameters$DEBUG,
         open_VNC = parameters$open_VNC,
         container_name = remoteDriver$container_name,
@@ -99,9 +105,9 @@ list(
       clean_container,
       clean_up_docker(
         container_name = task,
+        keep_alive = FALSE,
         DEBUG = parameters$DEBUG
       )
     )
   )
-  
 )

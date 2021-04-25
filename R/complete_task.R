@@ -1,8 +1,9 @@
 # Function to complete a task
-complete_task_new <-
+complete_task <-
   function(parameters_local_server,
            uid,
            initial_wait = 2,
+           screenshot = FALSE,
            DEBUG = FALSE,
            open_VNC = FALSE,
            container_name = NULL,
@@ -10,9 +11,9 @@ complete_task_new <-
     
   # DEBUG
   # debug_function(complete_task_simple) # TODO: Make it work with lists
-    DEBUG = TRUE
-    debug_docker(24000)
-    reconnect_to_VNC("container24000", DEBUG = TRUE)
+    # DEBUG = TRUE
+    # debug_docker(24000)
+    # reconnect_to_VNC("container24000", DEBUG = TRUE)
     
   
     
@@ -46,7 +47,7 @@ complete_task_new <-
 
     # Create log for each worker
     if (parameters$debug_file == TRUE) {
-      con <- file(paste0("log/pid_", parameters$pid, "_uid_", uid, ".log"))
+      con <- file(paste0("log/pid_", gsub("/", "_", parameters$pid), "_uid_", uid, ".log"))
       sink(con, append = TRUE)
       sink(con, append = TRUE, type = "message")
     }    
@@ -82,12 +83,15 @@ complete_task_new <-
     
     # Condition to stop while
     continue = TRUE
+    index = 1
     
     while (continue) {
-    # remDr$screenshot(display = TRUE)
+    
+      if (!exists("index")) index = 1
+      if (screenshot == TRUE) remDr$screenshot(file = paste0("outputs/screenshots/", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
       
       # Get elements of website
-      list_get_elements = get_elements2(remDr = remDr, DEBUG = DEBUG)
+      list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG)
       
       # Interact with the elements we found
       continue_interact = interact_with_element(list_get_elements, DEBUG = DEBUG)    
@@ -98,12 +102,12 @@ complete_task_new <-
       
       # If we are in DEBUG mode and continue is FALSE, load the debug_docker to help DEBUG and stop targets
       if (DEBUG == TRUE & continue == FALSE) {
-        
         # debug_docker(uid)
         cat(crayon::bgCyan("\ncomplete_task_new.R == END OF EXPERIMENT!. IF WE stop() is because we are in DEBUG MODE\n"))
         # stop()
-        
       }
+      
+      index = index + 1
     }
   
 
