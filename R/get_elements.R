@@ -1,7 +1,7 @@
 
 # Get all id's, classes... ------------------------------------------------
 
-get_elements2 <- function(remDr, DEBUG = FALSE) {
+get_elements <- function(remDr, DEBUG = FALSE) {
   
   # DEBUG -------------------------------------------------------------------
   ## CONTROL + P
