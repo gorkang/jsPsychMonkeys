@@ -2,24 +2,24 @@
 
 # BENCHMARK: invalidate initial container
 # if (file.exists("_targets/objects/container_24000") == TRUE ) targets::tar_invalidate(matches("container_24000"))
-
+# targets::tar_destroy()
 
 # Parameters --------------------------------------------------------------
 
   participants = list(uid = 24000) # e.g. [1:100]
   
-  parameters = list(pid = "test/TEST-ALL-ITEMS",
+  parameters = list(pid = "test/TEST-ALL-ITEMS", # ["test/TEST-ALL-ITEMS", 999, "test/1x"]
                     browserName = "chrome",
                     big_container = FALSE,
                     initial_wait = 2,
-                    screenshot = TRUE,
-                    DEBUG = FALSE,
-                    debug_file = TRUE,
+                    screenshot = FALSE,
+                    DEBUG = TRUE,
+                    debug_file = FALSE,
                     open_VNC = FALSE)
   
-  parameters_local_server = list(local_or_server = "server", # [server/local]
+  parameters_local_server = list(local_or_server = "server", # [server, local]
                                  folder_downloads = "~/Downloads",
-                                 local_folder_tasks = "Downloads/test_prototol")
+                                 local_folder_tasks = "Downloads/tests/1x") #["Downloads/tests/test_prototol", "Downloads/tests/1x"]
 
 
 # Libraries ---------------------------------------------------------------
@@ -34,7 +34,7 @@
   Sys.setenv(R_CLI_NUM_COLORS = crayon::num_ansi_colors()) # So crayon colors work
   
   # List of packages to use
-  packages_to_load = c("targets", "tarchetypes", "dplyr", "glue", "purrr", "RSelenium", "XML")
+  packages_to_load = c("targets", "tarchetypes", "dplyr", "glue", "purrr", "readr", "RSelenium", "rvest" ,"XML")
     
     
 # Functions ---------------------------------------------------------------
@@ -58,7 +58,7 @@ lapply(list.files("./R", full.names = TRUE, pattern = ".R"), source)
 
 list(
   # Maybe add parameters to a target?
-  # tar_target(configuration, options(crayon.enabled = TRUE)),
+  # tar_target(configuration, ),
   
   tarchetypes::tar_map(
     values = participants,
@@ -105,7 +105,7 @@ list(
       clean_container,
       clean_up_docker(
         container_name = task,
-        keep_alive = FALSE,
+        keep_alive = TRUE,
         DEBUG = parameters$DEBUG
       )
     )

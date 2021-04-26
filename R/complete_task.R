@@ -11,6 +11,7 @@ complete_task <-
     
   # DEBUG
   # debug_function(complete_task_simple) # TODO: Make it work with lists
+    # screenshot = FALSE
     # DEBUG = TRUE
     # debug_docker(24000)
     # reconnect_to_VNC("container24000", DEBUG = TRUE)
@@ -87,18 +88,21 @@ complete_task <-
     
     while (continue) {
     
+      # TODO: warning con multiple checkboxes!
+      
+      cat(crayon::bgMagenta("  --- SCREEN: ", index, " ---"))
       if (!exists("index")) index = 1
       if (screenshot == TRUE) remDr$screenshot(file = paste0("outputs/screenshots/", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
       
       # Get elements of website
-      list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG)
+      list_get_elements = get_elements(remDr = remDr, index = index, DEBUG = DEBUG)
+      # list_get_elements = get_elements_OLD(remDr = remDr, index = index, DEBUG = DEBUG)
       
       # Interact with the elements we found
-      continue_interact = interact_with_element(list_get_elements, DEBUG = DEBUG)    
+      interact_with_element(list_get_elements, DEBUG = DEBUG)    
+      # if (DEBUG == TRUE) cat(crayon::bgYellow("\n  get_elements$continue:", list_get_elements$continue, "interact$continue: ", continue_interact, "\n"))
       
-      if (DEBUG == TRUE) cat(crayon::bgYellow("\n  get_elements$continue:", list_get_elements$continue, "interact$continue: ", continue_interact, "\n"))
-      
-      continue = list_get_elements$continue & continue_interact
+      continue = list_get_elements$continue# & continue_interact
       
       # If we are in DEBUG mode and continue is FALSE, load the debug_docker to help DEBUG and stop targets
       if (DEBUG == TRUE & continue == FALSE) {

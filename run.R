@@ -31,9 +31,13 @@ system('docker stop $(docker ps -q)') # KILL all docker instances
   # complete_task_old 26.724 sec elapsed
 
   targets::tar_visnetwork(targets_only = TRUE, label = "time")
-  
+
+system('docker stop $(docker ps -q)') # KILL all docker instances  
 targets::tar_destroy()
-system('docker stop $(docker ps -q)') # KILL all docker instances
+targets::tar_make()
+
+
+targets::tar_invalidate(matches("task_24000"))
 targets::tar_make()
 
   tictoc::tic()
@@ -46,7 +50,7 @@ targets::tar_make()
 
   targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE)
   targets::tar_meta(fields = c(name, warnings))
-  # targets::tar_meta(fields = c(name, seconds)) %>% tidyr::drop_na() %>% write.csv("NEW.csv")
+  targets::tar_meta(fields = c(name, seconds)) %>% tidyr::drop_na() %>% write.csv("NEW2.csv")
 
 
 # Parallel ----------------------------------------------------------------
