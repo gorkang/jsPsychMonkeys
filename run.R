@@ -22,6 +22,9 @@ system('docker stop $(docker ps -q)') # KILL all docker instances
 
 # Launch  -----------------------------------------------------------------
 
+targets::tar_invalidate(matches("task_24000"))
+targets::tar_make()
+
   # PROTOCOL 999
   # complete_task_new 149.408 sec elapsed
   # complete_task_old 
@@ -37,8 +40,6 @@ targets::tar_destroy()
 targets::tar_make()
 
 
-targets::tar_invalidate(matches("task_24000"))
-targets::tar_make()
 
   tictoc::tic()
     targets::tar_destroy()

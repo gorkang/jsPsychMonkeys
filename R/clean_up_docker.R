@@ -2,7 +2,7 @@ clean_up_docker <-
   function(container_name = "test",
            keep_alive = FALSE,
            DEBUG = FALSE) {
-    
+  
     
 
   # CHECK -------------------------------------------------------------------
@@ -35,7 +35,7 @@ clean_up_docker <-
       
     } else {
       
-      if (DEBUG == TRUE) cat(crayon::green("NOT removing container", container_name, " [keep_alive = TRUE]\n"))
+      if (DEBUG == TRUE) cat(crayon::yellow("NOT removing container", container_name, " [keep_alive = TRUE]\n"))
       
     }
     

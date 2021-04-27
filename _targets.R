@@ -6,15 +6,15 @@
 
 # Parameters --------------------------------------------------------------
 
-  participants = list(uid = 24000) # e.g. [1:100]
+  participants = list(uid = 24000:24100) # e.g. [1:100]
   
-  parameters = list(pid = "test/TEST-ALL-ITEMS", # ["test/TEST-ALL-ITEMS", 999, "test/1x"]
+  parameters = list(pid = "test/1x", # ["test/TEST-ALL-ITEMS", 999, "test/1x"]
                     browserName = "chrome",
-                    big_container = FALSE,
+                    big_container = TRUE,
                     initial_wait = 2,
                     screenshot = FALSE,
-                    DEBUG = TRUE,
-                    debug_file = FALSE,
+                    DEBUG = FALSE,
+                    debug_file = TRUE,
                     open_VNC = FALSE)
   
   parameters_local_server = list(local_or_server = "server", # [server, local]

@@ -11,6 +11,8 @@ complete_task <-
     
   # DEBUG
   # debug_function(complete_task_simple) # TODO: Make it work with lists
+    # open_VNC = FALSE
+    # initial_wait = 0
     # screenshot = FALSE
     # DEBUG = TRUE
     # debug_docker(24000)
@@ -24,6 +26,9 @@ complete_task <-
       cat(crayon::bgYellow("NO DOCKER IMAGE available.\n"), crayon::silver("Probably need to do:\n targets::tar_destroy() & targets::tar_make()\n\n"))
       stop()
     } else {
+      
+      cat(crayon::bgWhite("\n\nVNC launching\n\n"))
+      
       if (open_VNC == TRUE) reconnect_to_VNC(container_name, DEBUG = TRUE)
     }
     
@@ -48,7 +53,7 @@ complete_task <-
 
     # Create log for each worker
     if (parameters$debug_file == TRUE) {
-      con <- file(paste0("log/pid_", gsub("/", "_", parameters$pid), "_uid_", uid, ".log"))
+      con <- file(paste0("outputs/log/pid_", gsub("/", "_", parameters$pid), "_uid_", uid, ".log"))
       sink(con, append = TRUE)
       sink(con, append = TRUE, type = "message")
     }    
@@ -74,10 +79,10 @@ complete_task <-
     LAUNCH_TASK = launch_task_safely(links_tasks, time_wait = 1)
     
     # INITIAL WAIT FOR PAGE TO LOAD
-    if (DEBUG == TRUE) cat(crayon::bgGreen(paste0("\n  START OF EXPERIMENT. waiting ", initial_wait, "s [If it fails, increase wait]  \n")))
+    if (DEBUG == TRUE) cat(crayon::bgGreen(paste0("\n  START OF EXPERIMENT. waiting ", initial_wait, "s")), crayon::yellow("[If it fails, increase wait]  \n"))
     Sys.sleep(initial_wait)
     
-    if (length(LAUNCH_TASK$error) > 0) cat(crayon::red("ERROR: launching task [launch_task()]\n"))
+    if (length(LAUNCH_TASK$error) > 0) cat(crayon::bgRed(" ERROR: launching task [launch_task()] \n"))
 
   
   # Loop through items of a task --------------------------------------------
@@ -88,8 +93,6 @@ complete_task <-
     
     while (continue) {
     
-      # TODO: warning con multiple checkboxes!
-      
       cat(crayon::bgMagenta("  --- SCREEN: ", index, " ---"))
       if (!exists("index")) index = 1
       if (screenshot == TRUE) remDr$screenshot(file = paste0("outputs/screenshots/", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
@@ -112,6 +115,7 @@ complete_task <-
       }
       
       index = index + 1
+      
     }
   
 

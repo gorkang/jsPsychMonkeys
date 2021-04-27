@@ -15,50 +15,49 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE) {
 
   # INPUTS ------------------------------------------------------------------
   
-  if (length(list_get_elements$name_inputs$id) > 0) {
+    if (length(list_get_elements$name_inputs$id) > 0) {
+    
+      # source("R/helper_select_input.R")  
+      output_select_input = select_input(list_get_elements, DEBUG = DEBUG)
   
-    # source("R/helper_select_input.R")  
-    output_select_input = select_input(list_get_elements, DEBUG = DEBUG)
-
-    
-  # } else if (nrow(list_get_elements$name_inputs) > 1) {
-  #   
-  #   output_select_input = select_input(list_get_elements)
-  #   
-  } else {
-    
-    # if (DEBUG == TRUE) cat(crayon::red("No input elements found\n"))
-    output_select_input = list(selected_input = 
-                                 tibble(name = "NO input element found"),
-                               input_text = "")
-    
-  }
+    } else {
+      
+      # if (DEBUG == TRUE) cat(crayon::red("No input elements found\n"))
+      output_select_input = list(selected_input = tibble(name = "NO input element found"),
+                                 input_text = "")
+      
+    }
   
   
   
   # BUTTONS -----------------------------------------------------------------
   
-  if (length(list_get_elements$name_buttons$id) == 1) {
+    if (length(list_get_elements$name_buttons$id) == 1) {
+      
+      selected_button_name = list_get_elements$name_buttons$id
+      list_get_elements$list_elements[[selected_button_name]]$clickElement()
+      
+    } else if (length(list_get_elements$name_buttons$id) > 1) {
+      
+        # IF WE ARE IN CONSENT and debugging: always start
+        if (DEBUG == TRUE & all(list_get_elements$name_buttons$id == c("start", "end"))) {
+
+          selected_button_name = c("start", "end")
+          list_get_elements$list_elements[["start"]]$clickElement()
+          
+        } else {
+          
+          selected_button_name = list_get_elements$name_buttons[sample(1:nrow(list_get_elements$name_buttons), 1),]$id
+          list_get_elements$list_elements[[selected_button_name]]$clickElement()
+          
+        }
+      
+    } else {
+      
+      selected_button_name = "No buttons found"
+
+    }
     
-    selected_button_name = list_get_elements$name_buttons$id
-    list_get_elements$list_elements[[selected_button_name]]$clickElement()
-    
-  } else if (nrow(list_get_elements$name_buttons) > 1) {
-    
-    # IF WE ARE IN CONSENT:
-    if (DEBUG == TRUE & all(list_get_elements$name_buttons$id == c("start", "end"))) list_get_elements$list_elements[["start"]]$clickElement()
-    
-    selected_button_name = list_get_elements$name_buttons[sample(1:nrow(list_get_elements$name_buttons), 1),]$id
-    # selected_button_name = selected_button$name
-    list_get_elements$list_elements[[selected_button_name]]$clickElement()
-    
-  } else {
-    
-    selected_button_name = "No buttons found"
-    # No buttons found
-    # cat(crayon::red("No buttons found\n"))
-  }
-  
   
 
   # MESSAGE -----------------------------------------------------------------

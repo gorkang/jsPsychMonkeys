@@ -55,53 +55,56 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
     # html-form -------------------------------------------------------------------
     
   } else if (any(selected_input$type_extracted %in% c("html-form"))) {
-    
-    number_textboxes = length(list_get_elements$name_inputs$name)
-    type = list_get_elements$name_inputs$type
-    
-    if (number_textboxes == 1 & (type != "number" | is.na(type))) {
       
-      # One textbox. Probably a searchable list
-      selected_input = list_get_elements$name_inputs[sample(1:nrow(list_get_elements$name_inputs), 1),]
+      number_textboxes = length(list_get_elements$name_inputs$name)
+      type = list_get_elements$name_inputs$type
       
-      name_list = list_get_elements$list_elements[[selected_input_name]]$getElementAttribute("list") %>% unlist()
-      options_list = remDr$findElements(using = 'xpath', paste0("//datalist[@id='", name_list, "']/option"))
-      num_selected = sample(length(options_list), 1)
-      input_text = options_list[[num_selected]]$getElementAttribute("value") %>% unlist()
-      
-      list_get_elements$list_elements[[selected_input_name]]$clearElement()
-      list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
-      
-    } else if (number_textboxes == 1 & type == "number") {
-      
-      # Default Limits
-      min_num = 0
-      max_num = 100
-      
-      # If max and min exist, replace default limits
-      if (!is.na(list_get_elements$name_inputs$min)) min_num = as.numeric(list_get_elements$name_inputs$min)
-      if (!is.na(list_get_elements$name_inputs$max)) max_num = as.numeric(list_get_elements$name_inputs$max)
-      
-      # Create random number
-      input_text = as.character(sample(min_num:max_num, 1))
-      
-      list_get_elements$list_elements[[selected_input_name]]$clearElement()
-      list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
-      
-    } else {
-      
-      # Multiple textboxes  
-      input_text = as.character(stringi::stri_rand_strings(n = number_textboxes, length = 10))
-      
-      1:number_textboxes %>% 
-        purrr::map(~ {
-          selected_input_name = list_get_elements$name_inputs$name[.x]
+      if (number_textboxes == 1) {
+        
+        if (type != "number" | is.na(type)) {
+          
+          # One textbox. Probably a searchable list
+          selected_input = list_get_elements$name_inputs[sample(1:nrow(list_get_elements$name_inputs), 1),]
+          
+          name_list = list_get_elements$list_elements[[selected_input_name]]$getElementAttribute("list") %>% unlist()
+          options_list = remDr$findElements(using = 'xpath', paste0("//datalist[@id='", name_list, "']/option"))
+          num_selected = sample(length(options_list), 1)
+          input_text = options_list[[num_selected]]$getElementAttribute("value") %>% unlist()
+          
           list_get_elements$list_elements[[selected_input_name]]$clearElement()
-          list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text[.x]))
-        })
+          list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
+          
+        } else if (type == "number") {
+          
+          # Default Limits
+          min_num = 0
+          max_num = 100
+          
+          # If max and min exist, replace default limits
+          if (!is.na(list_get_elements$name_inputs$min)) min_num = as.numeric(list_get_elements$name_inputs$min)
+          if (!is.na(list_get_elements$name_inputs$max)) max_num = as.numeric(list_get_elements$name_inputs$max)
+          
+          # Create random number
+          input_text = as.character(sample(min_num:max_num, 1))
+          
+          list_get_elements$list_elements[[selected_input_name]]$clearElement()
+          list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
+        
+        }
+        
+      # Multiple textboxes    
+      } else {
+        
+        input_text = as.character(stringi::stri_rand_strings(n = number_textboxes, length = 10))
+        
+        1:number_textboxes %>% 
+          purrr::walk(~ {
+            selected_input_name = list_get_elements$name_inputs$name[.x]
+            list_get_elements$list_elements[[selected_input_name]]$clearElement()
+            list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text[.x]))
+          })
+      }
       
-    }
-    
     
     # radio -------------------------------------------------------------------
     
@@ -119,6 +122,11 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
     # Default Limits
     min_num = 0
     max_num = 100
+    
+    if (grepl("Rut Completo", list_get_elements$name_contents$content)) {
+      min_num = 100000000
+      max_num = 999999999
+    }
     
     # If max and min exist, replace default limits
     if (!is.na(list_get_elements$name_inputs$min)) min_num = as.numeric(list_get_elements$name_inputs$min)
@@ -161,6 +169,7 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
     destination_slider = sample(min_slider:max_slider, 1)
     trip_slider = destination_slider - initial_value_slider
     path_slider = rep(trip_slider / abs(trip_slider), abs(trip_slider))
+    
     # If we will stay in the same position, need to choose a path that does not go beyond min or max
     if (length(path_slider) == 0) {
       if (initial_value_slider == min_slider) {
@@ -170,12 +179,8 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
       }
     }
     
-    replacement = c("left_arrow", "b", "right_arrow")
-    patterns = c(-1, 0, 1)
-    final_vector = stringr::str_replace_all(path_slider, setNames(replacement, patterns))
-    
+    final_vector = stringr::str_replace_all(path_slider, setNames(c("left_arrow", "b", "right_arrow"), c(-1, 0, 1)))
     input_text = 1:length(final_vector) %>% purrr::map(~ list(key = final_vector[.x])) %>% flatten()
-    
     list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(sendKeys = input_text)
     
     
@@ -197,7 +202,6 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
     
     input_text = "No input elements "
     
-    # if (DEBUG == TRUE) cat(crayon::red("No input elements found\n"))
   }
   
   output_select_input = list(selected_input = selected_input,
