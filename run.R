@@ -66,7 +66,7 @@ targets::tar_make()
   system('docker stop $(docker ps -q)') # KILL all docker instances
   targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE)
   tictoc::tic()
-  targets::tar_make_future(workers = 11) 
+  targets::tar_make_future(workers = future::availableCores() - 1) 
   tictoc::toc()
 
   

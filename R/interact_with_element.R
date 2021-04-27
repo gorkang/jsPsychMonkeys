@@ -7,11 +7,8 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE) {
     # DEBUG = TRUE
     # debug_docker(24000)
     # list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_elements
-  
-  
 
-  # STATUS ------------------------------------------------------------------
-    # DELETE ME (?)
+  
 
   # INPUTS ------------------------------------------------------------------
   
@@ -27,8 +24,7 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE) {
                                  input_text = "")
       
     }
-  
-  
+
   
   # BUTTONS -----------------------------------------------------------------
   
@@ -63,23 +59,15 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE) {
   # MESSAGE -----------------------------------------------------------------
 
   if (DEBUG == TRUE) cat(crayon::yellow("\n[SCREEN]:", paste(output_select_input$selected_input$name, collapse = ", "), "|", paste(selected_button_name, collapse = ", "), "[response]:", output_select_input$input_text), "\n")
-  # if (DEBUG == TRUE) cat(crayon::yellow("\n[SCREEN]:", paste(output_select_input$selected_input$type_extracted, collapse = ", "), "|", paste(selected_button$name, collapse = ", "), "[response]:", output_select_input$input_text), "")
-  
+
+
+  # Output ------------------------------------------------------------------
+
   output_interact = 
     list(input = output_select_input$selected_input,
          button = selected_button_name,
          response = output_select_input$input_text)
 
-  
-  # Check end ---------------------------------------------------------------
-  
-    # THIS IS THE END OF THE EXPERIMENT
-  # if ("end" %in% list_get_elements$name_status$status) {
-  #   continue_interact = FALSE 
-  # } else {
-  #   continue_interact = TRUE
-  # }
-  
-  # return(output_interact)
+    # return(output_interact)
   
 }

@@ -10,32 +10,52 @@ complete_task <-
            remDr = NULL) {
     
   # DEBUG
-  # debug_function(complete_task_simple) # TODO: Make it work with lists
+    # debug_function(complete_task_simple) # TODO: Make it work with lists
+    # reconnect_to_VNC("container24000", DEBUG = TRUE)
+    
     # open_VNC = FALSE
     # initial_wait = 0
     # screenshot = FALSE
     # DEBUG = TRUE
     # debug_docker(24000)
-    # reconnect_to_VNC("container24000", DEBUG = TRUE)
     
-  
     
   # CHECKS --------------------------------------------------------------
   
+    # Docker container exists? 
     if (length(reconnect_to_VNC()) == 0) {
       cat(crayon::bgYellow("NO DOCKER IMAGE available.\n"), crayon::silver("Probably need to do:\n targets::tar_destroy() & targets::tar_make()\n\n"))
       stop()
     } else {
       
-      cat(crayon::bgWhite("\n\nVNC launching\n\n"))
-      
-      if (open_VNC == TRUE) reconnect_to_VNC(container_name, DEBUG = TRUE)
+      if (DEBUG == TRUE & open_VNC == TRUE) {
+        cat(crayon::bgWhite("\n\nVNC launching\n\n"))
+        reconnect_to_VNC(container_name, DEBUG = TRUE)
+      }
     }
     
+    # Critical variables exist?
     if (!exists("uid")) uid = 0
+    if (!exists("time_wait")) time_wait = 1
+    
     
     # Maybe necessary (?)
     remDr <<- remDr
+    
+    
+  # SAFER functions ---------------------------------------------------------
+    
+    # If fails, tries again, waiting a bit longer
+    launch_task <- function(links_tasks, time_wait) {
+      Sys.sleep(time_wait)
+      if (DEBUG == TRUE) cat(crayon::yellow("Opening link:", links_tasks, "\n"))
+      remDr$navigate(links_tasks)
+    }
+    
+    launch_task_safely = safely(launch_task)
+    
+    get_elements_safely = safely(get_elements)
+    
     
 
   # Create link -------------------------------------------------------------
@@ -62,20 +82,10 @@ complete_task <-
   # Message -----------------------------------------------------------------
   
     if (DEBUG == TRUE) cat(crayon::underline(crayon::green(uid, "- ", links_tasks), "\n"))
-    # if (DEBUG == TRUE) cli::cli_h2("{uid} - {links_tasks}\n")
-    
-    if (!exists("time_wait")) time_wait = 1
     
     
   # Go to task --------------------------------------------------------------
   
-    # If fails, tries again, waiting a bit longer
-    launch_task <- function(links_tasks, time_wait) {
-      Sys.sleep(time_wait)
-      if (DEBUG == TRUE) cat(crayon::yellow("Opening link:", links_tasks, "\n"))
-      remDr$navigate(links_tasks)
-    }
-    launch_task_safely = safely(launch_task)
     LAUNCH_TASK = launch_task_safely(links_tasks, time_wait = 1)
     
     # INITIAL WAIT FOR PAGE TO LOAD
@@ -93,27 +103,30 @@ complete_task <-
     
     while (continue) {
     
-      cat(crayon::bgMagenta("  --- SCREEN: ", index, " ---"))
+      if (DEBUG == TRUE) cat(crayon::bgMagenta("  --- SCREEN: ", index, " ---\n"))
       if (!exists("index")) index = 1
       if (screenshot == TRUE) remDr$screenshot(file = paste0("outputs/screenshots/", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
       
-      # Get elements of website
-      list_get_elements = get_elements(remDr = remDr, index = index, DEBUG = DEBUG)
-      # list_get_elements = get_elements_OLD(remDr = remDr, index = index, DEBUG = DEBUG)
       
-      # Interact with the elements we found
-      interact_with_element(list_get_elements, DEBUG = DEBUG)    
-      # if (DEBUG == TRUE) cat(crayon::bgYellow("\n  get_elements$continue:", list_get_elements$continue, "interact$continue: ", continue_interact, "\n"))
+      ## Get elements of website ----------------------------
       
-      continue = list_get_elements$continue# & continue_interact
+        list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 1, DEBUG = DEBUG)
+        
+        if (!is.null(list_get_elements$error)) { 
+            Sys.sleep(5)
+            list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 2, DEBUG = DEBUG)
+          }
+          
+        # When there is an error, usually we will have some content here (we "cause" the error with a stop())
+        list_get_elements = list_get_elements$result
+  
+        
+      # Interact with the elements we found ------------------
+      if (list_get_elements$continue == TRUE) interact_with_element(list_get_elements, DEBUG = DEBUG)
       
-      # If we are in DEBUG mode and continue is FALSE, load the debug_docker to help DEBUG and stop targets
-      if (DEBUG == TRUE & continue == FALSE) {
-        # debug_docker(uid)
-        cat(crayon::bgCyan("\ncomplete_task_new.R == END OF EXPERIMENT!. IF WE stop() is because we are in DEBUG MODE\n"))
-        # stop()
-      }
       
+      # Output of while
+      continue = list_get_elements$continue
       index = index + 1
       
     }
@@ -126,7 +139,7 @@ complete_task <-
     sink() 
     sink(type = "message")
   }
-  
+
   return(container_name)
-  
+
 }

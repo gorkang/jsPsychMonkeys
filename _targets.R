@@ -1,25 +1,19 @@
-# DEBUG -------------------------------------------------------------------
-
-# BENCHMARK: invalidate initial container
-# if (file.exists("_targets/objects/container_24000") == TRUE ) targets::tar_invalidate(matches("container_24000"))
-# targets::tar_destroy()
-
 # Parameters --------------------------------------------------------------
 
-  participants = list(uid = 24000:24100) # e.g. [1:100]
+  participants = list(uid = 24000) # e.g. [1:100]
   
-  parameters = list(pid = "test/1x", # ["test/TEST-ALL-ITEMS", 999, "test/1x"]
+  parameters = list(pid = 2, # ["test/TEST-ALL-ITEMS", 999, "test/1x", "test/1x/Bank"]
                     browserName = "chrome",
                     big_container = TRUE,
                     initial_wait = 2,
                     screenshot = FALSE,
-                    DEBUG = FALSE,
-                    debug_file = TRUE,
-                    open_VNC = FALSE)
+                    DEBUG = TRUE,
+                    debug_file = FALSE,
+                    open_VNC = TRUE)
   
   parameters_local_server = list(local_or_server = "server", # [server, local]
                                  folder_downloads = "~/Downloads",
-                                 local_folder_tasks = "Downloads/tests/1x") #["Downloads/tests/test_prototol", "Downloads/tests/1x"]
+                                 local_folder_tasks = "Downloads/tests/test_prototol") #["Downloads/tests/test_prototol", "Downloads/tests/1x"]
 
 
 # Libraries ---------------------------------------------------------------
@@ -30,7 +24,11 @@
   suppressMessages(suppressWarnings(library(future.callr)))
   
   # Needed here if we run make_future()
-  plan(callr)
+  # plan(callr)
+  future::plan(callr)
+  # future::tweak(strategy = "multisession", workers = availableCores() - 1)
+  future::tweak(strategy = "multicore")
+  
   Sys.setenv(R_CLI_NUM_COLORS = crayon::num_ansi_colors()) # So crayon colors work
   
   # List of packages to use
@@ -39,8 +37,8 @@
     
 # Functions ---------------------------------------------------------------
 
-# Source all /R files
-lapply(list.files("./R", full.names = TRUE, pattern = ".R"), source)
+  # Source all /R files
+  lapply(list.files("./R", full.names = TRUE, pattern = ".R"), source)
   
 
 # Maintenance -------------------------------------------------------------
@@ -56,58 +54,58 @@ lapply(list.files("./R", full.names = TRUE, pattern = ".R"), source)
 
 # Targets -----------------------------------------------------------------
 
-list(
-  # Maybe add parameters to a target?
-  # tar_target(configuration, ),
-  
-  tarchetypes::tar_map(
-    values = participants,
+  list(
+    # Maybe add parameters to a target?
+    # tar_target(configuration, ),
     
-    # Create docker container
-    tar_target(
-      container,
-      only_docker(
-        container_name = paste0("container", uid),
-        browserName = parameters$browserName,
-        DEBUG = parameters$DEBUG,
-        big_container = parameters$big_container,
-        folder_downloads = parameters_local_server$folder_downloads
-      )
-    ),
-    
-    # Open browser
-    tar_target(
-      remoteDriver,
-      only_create_remDr(
-        container_port = container$container_port,
-        browserName = parameters$browserName,
-        container_name = container$container_name
-      )
-    ),
-    
-    # Complete task
-    tar_target(
-      task,
-      complete_task(
-        parameters_local_server = parameters_local_server,
-        uid = uid,
-        initial_wait = parameters$initial_wait,
-        screenshot = parameters$screenshot,
-        DEBUG = parameters$DEBUG,
-        open_VNC = parameters$open_VNC,
-        container_name = remoteDriver$container_name,
-        remDr = remoteDriver$remDr
-      )
-    ),
-    
-    # Clean up after participants finish
-    tar_target(
-      clean_container,
-      clean_up_docker(
-        container_name = task,
-        keep_alive = TRUE,
-        DEBUG = parameters$DEBUG
+    tarchetypes::tar_map(
+      values = participants,
+      
+      # Create docker container
+      tar_target(
+        container,
+        only_docker(
+          container_name = paste0("container", uid),
+          browserName = parameters$browserName,
+          DEBUG = parameters$DEBUG,
+          big_container = parameters$big_container,
+          folder_downloads = parameters_local_server$folder_downloads
+        )
+      ),
+      
+      # Open browser
+      tar_target(
+        remoteDriver,
+        only_create_remDr(
+          container_port = container$container_port,
+          browserName = parameters$browserName,
+          container_name = container$container_name
+        )
+      ),
+      
+      # Complete task
+      tar_target(
+        task,
+        complete_task(
+          parameters_local_server = parameters_local_server,
+          uid = uid,
+          initial_wait = parameters$initial_wait,
+          screenshot = parameters$screenshot,
+          DEBUG = parameters$DEBUG,
+          open_VNC = parameters$open_VNC,
+          container_name = remoteDriver$container_name,
+          remDr = remoteDriver$remDr
+        )
+      ),
+      
+      # Clean up after participants finish
+      tar_target(
+        clean_container,
+        clean_up_docker(
+          container_name = task,
+          keep_alive = TRUE,
+          DEBUG = parameters$DEBUG
+        )
       )
     )
   )
-)

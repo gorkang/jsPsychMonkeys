@@ -24,6 +24,24 @@ only_docker <-
     
     # CHECKS ------------------------------------------------------------------
     if (!browserName %in% c("chrome", "firefox")) message("Use 'firefox' or 'chrome' as browserName parameter")
+
+    available_RAM = as.numeric(system("awk '/MemFree/ {print $2}' /proc/meminfo", intern = TRUE))
+    
+    if (available_RAM < 8000000) {
+      
+      NUMBER_dockers_LOW = length(reconnect_to_VNC())
+      
+      if (!exists("NUMBER_dockers")) NUMBER_dockers = NUMBER_dockers_LOW
+      cat(crayon::bgRed("\n\n --- LOW RAM --- dockers: ", NUMBER_dockers_LOW, "\n\n"))
+      
+      while (NUMBER_dockers >= NUMBER_dockers_LOW) {
+        Sys.sleep(10)
+        NUMBER_dockers = length(reconnect_to_VNC()) 
+        cat(crayon::bgWhite("\n\n --- LOW RAM --- dockers: ", NUMBER_dockers_LOW, "/", NUMBER_dockers, "\n\n"))
+      }
+      
+    }
+    
     
     # Check if exists
     if (is_empty(system(sprintf('docker ps -q -f name=%s', container_name), intern = TRUE))) {

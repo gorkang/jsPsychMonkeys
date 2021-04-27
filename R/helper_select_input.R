@@ -1,32 +1,49 @@
 select_input <- function(list_get_elements, DEBUG = FALSE) {
   
-  # REVIEW
-  # html-form: In html-form items, we do not have (yet) a standard way to name items. BUT we do have one for buttons
-  if ("jspsych-btn jspsych-survey-html-form" %in% list_get_elements$name_buttons$class) list_get_elements$name_inputs$type_extracted = "html-form"
-  
-  # Randomly select one of the inputs
-  selected_input = list_get_elements$name_inputs[sample(1:nrow(list_get_elements$name_inputs), 1),]
-  selected_input_name = selected_input$id
-  
-  
-  if (DEBUG == TRUE) cat(crayon::yellow("Selected", selected_input_name, "from", nrow(list_get_elements$name_inputs), "elements \n"))
-  
-  
-  # CATCH ALL condition: When we can't extract an input type, try everything (?) ---------------------------
-  
-  # TODO: CREATE SAFE ClearElement helper function to be able to include ALL types in the ALL
-  if (list_get_elements$name_inputs %>% filter(id == selected_input_name) %>% pull(type_extracted) == "ALL") {
+  # DEBUG
+    # remDr$screenshot(display = TRUE)
     
-    cat(crayon::bgYellow(" WARNING: Unknown type of input· Trying ALL\n"))
+    ## CONTROL + P
+    # DEBUG = TRUE
+    # debug_docker(24000)
+    # source("R/complete_task.R")
+    # list_get_elements = get_elements_safely(remDr = remDr, DEBUG = DEBUG, try_number = 2); list_get_elements
+    # list_get_elements$result
     
-    # Anything with ClearElement errors. 
-    # ERRORS: "date", "html-form" "number", "text",  "slider",
-    types_of_input = c("radio", "multi-select")
-    selected_input = 1:length(types_of_input) %>% 
-      map_df(~ list_get_elements$name_inputs %>% filter(id == selected_input_name) %>% 
-               mutate(type_extracted = types_of_input[.x]))
-  }
+  # SELECTED ----------------------------------------------------------------
   
+    # Randomly select one of the inputs
+    selected_input = list_get_elements$name_inputs[sample(1:nrow(list_get_elements$name_inputs), 1),]
+    selected_input_name = selected_input$id
+    
+    # if (DEBUG == TRUE) cat(crayon::yellow("Selected", selected_input_name, "from", nrow(list_get_elements$name_inputs), "elements \n"))
+    
+
+  # CHECK -------------------------------------------------------------------
+
+    # REVIEW
+    # html-form: In html-form items, we do not have (yet) a standard way to name items. BUT we do have one for buttons
+    if ("jspsych-btn jspsych-survey-html-form" %in% list_get_elements$name_buttons$class) list_get_elements$name_inputs$type_extracted = "html-form"
+  
+    # CATCH ALL condition: When we can't extract an input type, try everything (?)
+    # TODO: CREATE SAFE ClearElement helper function to be able to include ALL types in the ALL
+    if (list_get_elements$name_inputs %>% filter(id == selected_input_name) %>% pull(type_extracted) == "ALL") {
+      
+      cat(crayon::bgYellow(" WARNING: Unknown type of input· Trying ALL\n"))
+      
+      # Anything with ClearElement errors. 
+      # ERRORS: "date", "html-form" "number", "text",  "slider",
+      types_of_input = c("radio", "multi-select")
+      selected_input = 1:length(types_of_input) %>% 
+        map_df(~ list_get_elements$name_inputs %>% filter(id == selected_input_name) %>% 
+                 mutate(type_extracted = types_of_input[.x]))
+    }
+  
+    
+
+  # TYPES OF INPUTS ------------------------------------------------------------
+    
+
   # checkbox -------------------------------------------------------------------
   
   if (any(selected_input$type_extracted %in% c("checkbox"))) {
@@ -35,11 +52,8 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
     
     list_get_elements$list_elements[[selected_input_name]]$clickElement()
     
-    if (DEBUG == TRUE) cat(crayon::bgCyan(" NOTE: Checkbox checked. Waiting 1 seconds...\n"))
-    Sys.sleep(1)
     
-    
-    # date --------------------------------------------------------------------  
+  # date --------------------------------------------------------------------  
     
   } else if (any(selected_input$type_extracted %in% c("date"))) {
     
@@ -52,29 +66,28 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
     list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
     
     
-    # html-form -------------------------------------------------------------------
+  # email --------------------------------------------------------------------  
+      
+  } else if (any(selected_input$type_extracted %in% c("email"))) {
+    
+    input_text = paste0(as.character(stringi::stri_rand_strings(n = 1, length = sample(5:10, 1))), "@gmail.com")
+    
+    list_get_elements$list_elements[[selected_input_name]]$clearElement()
+    list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
+    
+    
+  # html-form -------------------------------------------------------------------
     
   } else if (any(selected_input$type_extracted %in% c("html-form"))) {
       
       number_textboxes = length(list_get_elements$name_inputs$name)
       type = list_get_elements$name_inputs$type
+      type[is.na(type)] = "" # If there are NA's, replace
+      # if (is.na(type)) type = ""
       
       if (number_textboxes == 1) {
         
-        if (type != "number" | is.na(type)) {
-          
-          # One textbox. Probably a searchable list
-          selected_input = list_get_elements$name_inputs[sample(1:nrow(list_get_elements$name_inputs), 1),]
-          
-          name_list = list_get_elements$list_elements[[selected_input_name]]$getElementAttribute("list") %>% unlist()
-          options_list = remDr$findElements(using = 'xpath', paste0("//datalist[@id='", name_list, "']/option"))
-          num_selected = sample(length(options_list), 1)
-          input_text = options_list[[num_selected]]$getElementAttribute("value") %>% unlist()
-          
-          list_get_elements$list_elements[[selected_input_name]]$clearElement()
-          list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
-          
-        } else if (type == "number") {
+        if (type == "number") {
           
           # Default Limits
           min_num = 0
@@ -89,7 +102,29 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
           
           list_get_elements$list_elements[[selected_input_name]]$clearElement()
           list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
-        
+          
+        } else if (type == "email") {
+          
+          input_text = paste0(as.character(stringi::stri_rand_strings(n = 1, length = sample(5:10, 1))), "@gmail.com")
+          
+          list_get_elements$list_elements[[selected_input_name]]$clearElement()
+          list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
+          
+        } else if (type == "") {
+          
+          # One textbox. Probably a searchable list
+          selected_input = list_get_elements$name_inputs[sample(1:nrow(list_get_elements$name_inputs), 1),]
+          
+          name_list = list_get_elements$list_elements[[selected_input_name]]$getElementAttribute("list") %>% unlist()
+          options_list = remDr$findElements(using = 'xpath', paste0("//datalist[@id='", name_list, "']/option"))
+          num_selected = sample(length(options_list), 1)
+          input_text = options_list[[num_selected]]$getElementAttribute("value") %>% unlist()
+          
+          list_get_elements$list_elements[[selected_input_name]]$clearElement()
+          list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
+          
+        } else {
+          if (DEBUG == TRUE) cat(crayon::bgRed(" UNKNOWN html-form \n"))
         }
         
       # Multiple textboxes    
@@ -106,7 +141,7 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
       }
       
     
-    # radio -------------------------------------------------------------------
+  # radio -------------------------------------------------------------------
     
   } else if (any(selected_input$type_extracted %in% c("radio"))) {
     
@@ -115,7 +150,7 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
     list_get_elements$list_elements[[selected_input_name]]$clickElement()
     
     
-    # number ------------------------------------------------------------------
+  # number ------------------------------------------------------------------
     
   } else if (any(selected_input$type_extracted %in% c("number"))) {
     
@@ -123,10 +158,14 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
     min_num = 0
     max_num = 100
     
-    if (grepl("Rut Completo", list_get_elements$name_contents$content)) {
+    content_text = list_get_elements$name_contents$content
+    if (length(content_text) == 0) content_text = ""
+    
+    if (grepl("Rut Completo| rut |celular", content_text)) {
       min_num = 100000000
       max_num = 999999999
     }
+
     
     # If max and min exist, replace default limits
     if (!is.na(list_get_elements$name_inputs$min)) min_num = as.numeric(list_get_elements$name_inputs$min)
@@ -139,7 +178,7 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
     list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
     
     
-    # text --------------------------------------------------------------------
+  # text --------------------------------------------------------------------
     
   } else if (any(selected_input$type_extracted %in% c("text"))) {
     
@@ -158,7 +197,7 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
     
     
     
-    # slider ------------------------------------------------------------------
+  # slider ------------------------------------------------------------------
     
   } else if (any(selected_input$type_extracted %in% c("slider"))) {
     
