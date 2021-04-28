@@ -9,7 +9,7 @@ only_docker <-
     # DEBUG
     # debug_function(only_docker)
     
-    # container_name = "testX"
+    # container_name = "container_24010"
     # browserName = "chrome"
     # DEBUG = TRUE
     # big_container = FALSE
@@ -27,17 +27,19 @@ only_docker <-
 
     available_RAM = as.numeric(system("awk '/MemFree/ {print $2}' /proc/meminfo", intern = TRUE))
     
-    if (available_RAM < 8000000) {
+    if (available_RAM < 800000) {
       
       NUMBER_dockers_LOW = length(reconnect_to_VNC())
       
       if (!exists("NUMBER_dockers")) NUMBER_dockers = NUMBER_dockers_LOW
-      cat(crayon::bgRed("\n\n --- LOW RAM --- dockers: ", NUMBER_dockers_LOW, "\n\n"))
+      # cat(crayon::bgRed("\n\n --- LOW RAM --- dockers: ", NUMBER_dockers_LOW, "\n\n"))
       
-      while (NUMBER_dockers >= NUMBER_dockers_LOW) {
-        Sys.sleep(10)
+      # while (NUMBER_dockers >= NUMBER_dockers_LOW) {
+      if (NUMBER_dockers >= NUMBER_dockers_LOW) {
+        cat(crayon::bgWhite("\n\n --- LOW RAM --- dockers: ", NUMBER_dockers_LOW, "/", NUMBER_dockers, "Pause for 60s...\n\n"))
+        Sys.sleep(60)
         NUMBER_dockers = length(reconnect_to_VNC()) 
-        cat(crayon::bgWhite("\n\n --- LOW RAM --- dockers: ", NUMBER_dockers_LOW, "/", NUMBER_dockers, "\n\n"))
+    
       }
       
     }
@@ -108,6 +110,8 @@ only_docker <-
       if (DEBUG == TRUE) cat(crayon::yellow("Docker image", container_name, " not running. Launching...\n"))
       
       if (folder_downloads == "") {
+        # https://docs.docker.com/engine/reference/run/
+        # -e "ENABLE_CORS=true" 
         system(paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label)) # NO Mapeando Downloads
       } else {
         system(paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v ', folder_downloads, ':/home/seluser/Downloads -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label)) # Mapeando Downloads
