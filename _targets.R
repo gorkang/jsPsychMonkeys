@@ -1,17 +1,18 @@
 # Parameters --------------------------------------------------------------
 
-  participants = list(uid = 24000) # e.g. [1:100]
+  participants = list(uid = 24001:24005) # e.g. [1:100]
   
-  parameters = list(pid = 2, # ["test/TEST-ALL-ITEMS", 999, "test/1x", "test/1x/Bank"]
+  parameters = list(pid = 999, # ["test/TEST-ALL-ITEMS", 2, 999, "test/1x", "test/1x/Bank"] # SERVER
                     browserName = "chrome",
-                    big_container = TRUE,
+                    big_container = FALSE,
+                    keep_alive = TRUE,
                     initial_wait = 2,
                     screenshot = FALSE,
                     DEBUG = TRUE,
                     debug_file = FALSE,
-                    open_VNC = TRUE)
+                    open_VNC = FALSE)
   
-  parameters_local_server = list(local_or_server = "server", # [server, local]
+  parameters_local_server = list(local_or_server = "local", # [server, local]
                                  folder_downloads = "~/Downloads",
                                  local_folder_tasks = "Downloads/tests/test_prototol") #["Downloads/tests/test_prototol", "Downloads/tests/1x"]
 
@@ -22,17 +23,17 @@
   suppressMessages(suppressWarnings(library(tarchetypes)))
   suppressMessages(suppressWarnings(library(future)))
   suppressMessages(suppressWarnings(library(future.callr)))
-  
-  # Needed here if we run make_future()
-  # plan(callr)
-  future::plan(callr)
-  # future::tweak(strategy = "multisession", workers = availableCores() - 1)
-  future::tweak(strategy = "multicore")
-  
-  Sys.setenv(R_CLI_NUM_COLORS = crayon::num_ansi_colors()) # So crayon colors work
-  
+
   # List of packages to use
   packages_to_load = c("targets", "tarchetypes", "dplyr", "glue", "purrr", "readr", "RSelenium", "rvest" ,"XML")
+
+  
+  # Needed here if we run make_future()
+    # https://github.com/HenrikBengtsson/future/#controlling-how-futures-are-resolved
+    future::plan(callr)
+    future::tweak(strategy = "multisession")# REVIEW: while (NUMBER_dockers >= NUMBER_dockers_LOW)  of only_docker.R
+    # future::tweak(strategy = "multicore") # NOT working on Rstudio?
+    future::tweak(strategy = "transparent")
     
     
 # Functions ---------------------------------------------------------------
@@ -43,6 +44,9 @@
 
 # Maintenance -------------------------------------------------------------
 
+  # So crayon colors work when using future
+  Sys.setenv(R_CLI_NUM_COLORS = crayon::num_ansi_colors()) 
+  
   # target options (packages, errors...)
   tar_option_set(packages = packages_to_load, # Load packages for all targets
                  error = "workspace") # Needed to load workspace on error to debug
@@ -103,7 +107,7 @@
         clean_container,
         clean_up_docker(
           container_name = task,
-          keep_alive = TRUE,
+          keep_alive = parameters$keep_alive,
           DEBUG = parameters$DEBUG
         )
       )
