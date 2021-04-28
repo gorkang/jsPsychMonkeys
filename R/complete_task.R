@@ -3,6 +3,7 @@ complete_task <-
   function(parameters_local_server,
            uid,
            initial_wait = 2,
+           wait_retry = 2,
            screenshot = FALSE,
            DEBUG = FALSE,
            open_VNC = FALSE,
@@ -15,6 +16,7 @@ complete_task <-
     
     # open_VNC = FALSE
     # initial_wait = 0
+    # wait_retry = 2
     # screenshot = FALSE
     # DEBUG = TRUE
     # debug_docker(24000)
@@ -112,8 +114,9 @@ complete_task <-
       
         list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 1, DEBUG = DEBUG)
         
+        # If we don't get any elements on out first try, wait wait_retry and try again (important when loading images, htmls, etc.)
         if (!is.null(list_get_elements$error)) { 
-            Sys.sleep(5)
+            Sys.sleep(wait_retry)
             list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 2, DEBUG = DEBUG)
           }
           
