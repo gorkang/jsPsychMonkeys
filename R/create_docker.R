@@ -1,4 +1,4 @@
-only_docker <-
+create_docker <-
   function(container_name = "test",
            browserName = "chrome",
            DEBUG = FALSE,
@@ -26,6 +26,7 @@ only_docker <-
     # CHECKS ------------------------------------------------------------------
     if (!browserName %in% c("chrome", "firefox")) message("Use 'firefox' or 'chrome' as browserName parameter")
 
+    # If we are in testing mode, use the test/ folder in the project
     if (parameters_docker$task$local_or_server == "test") folder_downloads = here::here("tests/jspsych-6_3_1/")
     
     
@@ -33,7 +34,7 @@ only_docker <-
     # Available RAM
     available_RAM = as.numeric(system("awk '/MemFree/ {print $2}' /proc/meminfo", intern = TRUE))
     
-    if (available_RAM < 800000) {
+    if (available_RAM < 80000) {
       
       NUMBER_dockers_LOW = length(reconnect_to_VNC())
       
@@ -78,7 +79,6 @@ only_docker <-
     # Start docker session ----------------------------------------------------
     
     # Get image if we don't have it already (to use VNC use DEBUG = TRUE)
-    # TODO: CHECK if we have the "latest"
     if (DEBUG == TRUE) {
       debug_label = '-debug'
     } else {
@@ -86,57 +86,46 @@ only_docker <-
     }
     
     
-    # Look for the "latest" version of the docker container 
+    # REVIEW: Look for the "latest" version of the docker container 
     if (system(paste0('docker images -a |  grep "', browserName, debug_label, '"'), intern = TRUE) %>% grepl("latest", .) %>% any(.) == FALSE) {
-      
-      if (DEBUG == TRUE) {
-        # if (DEBUG == TRUE) message("* Pull docker image - DEBUG mode: ")
-        cat(crayon::silver("\n-docker pull\n"))
-        # debug_label = '-debug'
-        system(paste0('docker pull --quiet selenium/standalone-', browserName, debug_label))  
-      } else {
-        # if (DEBUG == TRUE) message("* Pull docker image - normal mode: ")
-        # debug_label = ''
-        system(paste0('docker pull --quiet selenium/standalone-', browserName))  
-      }
-      
-      # Wait
+      if (DEBUG == TRUE) cat(crayon::silver("Pulling docker for ", paste0(browserName, debug_label), " as we don't have the latest\n"))
+      system(paste0('docker pull --quiet selenium/standalone-', browserName, debug_label))
       Sys.sleep(5)
-      
-      
     } else {
       if (DEBUG == TRUE) cat(crayon::silver("Not pulling docker for ", paste0(browserName, debug_label), ", already have it\n"))
     }
     
     
     # Run docker session. Map home directory to download docker container
-    
     if (length(system(paste0('docker ps --filter "name=', container_name, '"'), intern = TRUE)) == 1) {
       
       if (DEBUG == TRUE) cat(crayon::yellow("Docker image", container_name, " not running. Launching...\n"))
       
       if (folder_downloads == "") {
-        # https://docs.docker.com/engine/reference/run/
-        # -e "ENABLE_CORS=true" 
-        system(paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label)) # NO Mapeando Downloads
+        # REVIEW: https://docs.docker.com/engine/reference/run/ || -e "ENABLE_CORS=true" 
+        system(paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label)) # Not mapping local folder
       } else {
-        system(paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v ', folder_downloads, ':/home/seluser/Downloads -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label)) # Mapeando Downloads
+        system(paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v ', folder_downloads, ':/home/seluser/Downloads -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label)) # Mapping local folder
       }
     } else {
       if (DEBUG == TRUE) cat(crayon::green("Docker image", container_name, " already running.\n"))
     } 
     
 
-
-    # Get port
+    # Get port ---------------------------------------------------------------
+    
     container_port_raw <- system(sprintf('docker port %s', container_name), intern = TRUE)
     container_port <- max(as.integer(gsub('.*:(.*)$', '\\1', container_port_raw)))
     if (is.na(container_port)) cat(crayon::red("Port not found?"))
     
+    
+
+  # OUTPUT ------------------------------------------------------------------
+
     list(container_name = container_name,
          container_port = container_port, # THIS REVIEW
          browserName = browserName
          )
     
     
-      }
+    }

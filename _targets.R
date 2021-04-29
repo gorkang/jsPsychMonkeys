@@ -1,6 +1,7 @@
 # Parameters --------------------------------------------------------------
   
   parameters_monkeys = list(
+    
     participants = list(uid = 24000),
     
     docker = list(
@@ -14,16 +15,16 @@
       DEBUG = TRUE,
       screenshot = FALSE,
       debug_file = FALSE,
-      open_VNC = TRUE
+      open_VNC = FALSE
     ),
     
     task_params = list(
       pid = 999,
-      local_or_server = "server", # ["local", "server", "test"]
+      local_or_server = "local", # ["local", "server", "test"]
       local_folder_tasks = "Downloads/tests/test_prototol",
       server_folder_tasks = "test/1x",
       initial_wait = 2,
-      wait_retry = 5
+      wait_retry = 2
     )
   )
   
@@ -42,8 +43,6 @@
     # https://github.com/HenrikBengtsson/future/#controlling-how-futures-are-resolved
     future::plan(callr)
     future::tweak(strategy = "multisession")# REVIEW: while (NUMBER_dockers >= NUMBER_dockers_LOW)  of only_docker.R
-    # future::tweak(strategy = "multicore") # NOT working on Rstudio?
-    # future::tweak(strategy = "transparent")
     
     
 # Functions ---------------------------------------------------------------
@@ -76,8 +75,6 @@
 # Targets -----------------------------------------------------------------
 
   list(
-    # Maybe add parameters to a target?
-    # tar_target(parameters_monkeys, ),
     
     tarchetypes::tar_map(
       values = parameters_monkeys$participants,
@@ -85,7 +82,7 @@
       # Create docker container
       tar_target(
         container,
-        only_docker(
+        create_docker(
           container_name = paste0("container", uid),
           browserName = parameters_monkeys$docker$browserName,
           DEBUG = parameters_monkeys$debug$DEBUG,
@@ -95,13 +92,44 @@
         )
       ),
       
-      # Open browser
+      # Open remote Driver and browser
       tar_target(
         remoteDriver,
-        only_create_remDr(
+        create_remDr(
           container_port = container$container_port,
           browserName = container$browserName,
+          # wait_create = 5,
+          # wait_open = 3,
           container_name = container$container_name
+        )
+      ),
+      
+      
+      # Create links
+      tar_target(
+        links_tar,
+        create_links(
+          parameters_task = parameters_monkeys,
+          uid = uid,
+          DEBUG = parameters_monkeys$debug$DEBUG,
+          container_name = remoteDriver$container_name,
+          remDr = remoteDriver$remDr
+        )
+      ),
+      
+      
+      # Launch task
+      tar_target(
+        launch,
+        launch_task(
+          parameters_task = parameters_monkeys,
+          uid = uid,
+          links = links_tar$links,
+          initial_wait = parameters_monkeys$task_params$initial_wait,
+          DEBUG = parameters_monkeys$debug$DEBUG,
+          open_VNC = parameters_monkeys$debug$open_VNC,
+          container_name = links_tar$container_name,
+          remDr = links_tar$remDr
         )
       ),
       
@@ -111,13 +139,11 @@
         complete_task(
           parameters_task = parameters_monkeys,
           uid = uid,
-          initial_wait = parameters_monkeys$task_params$initial_wait,
           wait_retry = parameters_monkeys$task_params$wait_retry,
           screenshot = parameters_monkeys$debug$screenshot,
           DEBUG = parameters_monkeys$debug$DEBUG,
-          open_VNC = parameters_monkeys$debug$open_VNC,
-          container_name = remoteDriver$container_name,
-          remDr = remoteDriver$remDr
+          container_name = launch$container_name,
+          remDr = launch$remDr
         )
       ),
       

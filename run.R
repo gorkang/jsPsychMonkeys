@@ -4,27 +4,27 @@
   # First time
   # targets::tar_renv()
 
+# Visualize ---------------------------------------------------------------
+
+targets::tar_visnetwork(targets_only = TRUE, label = "time")
+targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE)
+
 
 # CLEAN UP ----------------------------------------------------------------
 
-  targets::tar_invalidate(matches("task_24000"))
-  targets::tar_destroy()
   system('docker stop $(docker ps -q)') # KILL all docker instances
   # system('docker ps -a', intern = TRUE) # List containers
 
+  targets::tar_invalidate(matches("task_24000"))
+  targets::tar_destroy()
 
-# Visualize ---------------------------------------------------------------
-
-  targets::tar_visnetwork(targets_only = TRUE, label = "time")
-  targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE)
-  
   
 # Launch  -----------------------------------------------------------------
 
   targets::tar_destroy()
   system('docker stop $(docker ps -q)') # KILL all docker instances
   
-  targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE)
+  targets::tar_watch(seconds = 1, outdated = FALSE, targets_only = TRUE)
   targets::tar_make()
 
 

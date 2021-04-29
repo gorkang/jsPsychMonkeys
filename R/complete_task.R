@@ -37,13 +37,11 @@ complete_task <-
     
   # CHECKS --------------------------------------------------------------
   
-    # If Docker container exists, stop execution.
+    # If Docker container does not exist, stop execution.
     if (length(reconnect_to_VNC(container_name = container_name, just_check = TRUE)) == 0) {
-      
-      cat(crayon::bgYellow("NO DOCKER IMAGE available.\n"), crayon::silver("Probably need to do:\n targets::tar_destroy() & targets::tar_make()\n\n"))
-      tar_invalidate(paste0("container_", parameters_task$participants$uid))
-      cat(crayon::bgYellow("invalidated ", container_name, " to restart process\n\n"))
-      
+      cat(crayon::bgRed("NO DOCKER IMAGE available.\n"), crayon::silver("Maybe need to do:\n targets::tar_destroy() & targets::tar_make()\n\n"))
+      targets::tar_invalidate(paste0("container_", parameters_task$participants$uid))
+      cat(crayon::bgYellow("Invalidated ", container_name, " to restart process\n\n"))
       stop()
       
     } else {
@@ -65,37 +63,8 @@ complete_task <-
     
   # SAFER functions ---------------------------------------------------------
     
-    # If fails, tries again, waiting a bit longer
-    launch_task <- function(links_tasks, wait_retry) {
-      Sys.sleep(wait_retry)
-      if (DEBUG == TRUE) cat(crayon::yellow("Opening link:", links_tasks, "\n"))
-      remDr$navigate(links_tasks)
-    }
-    
-    launch_task_safely = safely(launch_task)
-    
+    # Get elements
     get_elements_safely = safely(get_elements)
-    
-    
-
-  # Create link -------------------------------------------------------------
-
-    if (parameters_task$task$local_or_server == "server") {
-      
-      source(".vault/SERVER_PATH.R") # server:path
-      parameters_task$task$server_path = server_path
-      links_tasks = paste0(parameters_task$task$server_path, parameters_task$task$server_folder_tasks, "/?uid=", uid, "&pid=", parameters_task$task$pid)
-      
-    } else if (parameters_task$task$local_or_server == "test") {
-      
-      path_tests = gsub("tests/jspsych-6_3_1/", "", dir(path = "tests/jspsych-6_3_1/examples", pattern = "jspsych.*.html", full.names = TRUE))
-      links_tasks = paste0("file:///home/seluser/Downloads/", path_tests[1], "?uid=", uid, "&pid=", parameters_task$task$pid)
-      
-    } else {
-      # By default, use local
-      links_tasks = paste0("file:///home/seluser/", parameters_task$task$local_folder_tasks, "/index.html?uid=", uid, "&pid=", parameters_task$task$pid)
-      
-    }
     
 
   # START LOG ----------------------------------------------------------------
@@ -105,23 +74,7 @@ complete_task <-
       con <- file(paste0("outputs/log/pid_", gsub("/", "_", parameters_task$task$pid), "_uid_", uid, ".log"))
       sink(con, append = TRUE)
       sink(con, append = TRUE, type = "message")
-    }    
-  
-  
-  # Message -----------------------------------------------------------------
-  
-    if (DEBUG == TRUE) cat(crayon::underline(crayon::green(uid, "- ", links_tasks), "\n"))
-    
-    
-  # Go to task --------------------------------------------------------------
-  
-    LAUNCH_TASK = launch_task_safely(links_tasks, wait_retry = 1)
-    
-    # INITIAL WAIT FOR PAGE TO LOAD
-    if (DEBUG == TRUE) cat(crayon::bgGreen(paste0("\n  START OF EXPERIMENT. waiting ", initial_wait, "s")), crayon::yellow("[If it fails, increase wait]  \n"))
-    Sys.sleep(initial_wait)
-    
-    if (length(LAUNCH_TASK$error) > 0) cat(crayon::bgRed(" ERROR: launching task [launch_task()] \n"))
+    }
 
   
   # Loop through items of a task --------------------------------------------
@@ -145,7 +98,7 @@ complete_task <-
         if (!is.null(list_get_elements$error)) { 
             Sys.sleep(wait_retry)
             list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 2, DEBUG = DEBUG)
-          }
+            }
           
         # When there is an error, usually we will have some content here (we "cause" the error with a stop())
         list_get_elements = list_get_elements$result
