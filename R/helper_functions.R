@@ -52,7 +52,12 @@ check_trialids <- function(local_folder_tasks) {
 #' @export
 #'
 #' @examples reconnect_to_VNC("test1")
-reconnect_to_VNC <- function(container_name = NULL, port = NULL, DEBUG = FALSE) {
+reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = NULL, DEBUG = FALSE) {
+  
+  # DEBUG
+  # container_name = container24000
+  # just_check = TRUE
+  # port = NULL
   
   if (!is.null(port)) container_port = port
   
@@ -62,18 +67,32 @@ reconnect_to_VNC <- function(container_name = NULL, port = NULL, DEBUG = FALSE) 
     
   } else {
     
-    container_port_raw <- system(sprintf('docker port %s', container_name), intern = TRUE)
-    container_port <- min(as.integer(gsub('.*:(.*)$', '\\1', container_port_raw)))
-    if (is.na(container_port[1])) cat(crayon::red("Port not found?"))
+    if (just_check == TRUE) {
     
-    
-    # Open VNC, using second port in container_port, the password is 'secret'
-    vnc_command = paste0('vncviewer 127.0.0.1:', container_port)
-    cat(crayon::yellow(paste0("\nOpen VNC - localhost:", container_port, " pwd: secret\n"), crayon::black(vnc_command, "\n")))
-    if (DEBUG == TRUE) cat(crayon::silver(" DEBUG:", container_port_raw))
-    # system(paste0('echo "', MESSAGE, '"'))
+      # Outputs the name of the container if it exists, NULL otherwise  
+      containers_available = system('docker ps -a --format "{{.Names}}"', intern = TRUE) # Print container names
+      if (!container_name %in% containers_available) {
+        NULL
+      } else {
+        container_name
+      }
+      
+      
+    } else {
 
-    system(paste0(vnc_command, ' &'))
+      container_port_raw <- system(sprintf('docker port %s', container_name), intern = TRUE)
+      container_port <- min(as.integer(gsub('.*:(.*)$', '\\1', container_port_raw)))
+      if (is.na(container_port[1])) cat(crayon::red("Port not found?"))
+      
+      
+      # Open VNC, using second port in container_port, the password is 'secret'
+      vnc_command = paste0('vncviewer 127.0.0.1:', container_port)
+      cat(crayon::yellow(paste0("\nOpen VNC - localhost:", container_port, " pwd: secret\n"), crayon::black(vnc_command, "\n")))
+      if (DEBUG == TRUE) cat(crayon::silver(" DEBUG:", container_port_raw))
+      # system(paste0('echo "', MESSAGE, '"'))
+      
+      system(paste0(vnc_command, ' &'))      
+    }
   }
 
 }

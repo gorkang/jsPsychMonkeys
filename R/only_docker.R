@@ -3,17 +3,18 @@ only_docker <-
            browserName = "chrome",
            DEBUG = FALSE,
            big_container = FALSE,
-           folder_downloads = "~/Downloads") {
+           folder_downloads = "~/Downloads",
+           parameters_docker) {
     
     
     # DEBUG
     # debug_function(only_docker)
     
-    # container_name = "container_24010"
+    # container_name = "container24000"
     # browserName = "chrome"
     # DEBUG = TRUE
     # big_container = FALSE
-    # folder_downloads = "~/Downloads"
+    # folder_downloads = "~/Downloads/2"
     
     
     # Packages -------------------------------------------------------------
@@ -25,6 +26,11 @@ only_docker <-
     # CHECKS ------------------------------------------------------------------
     if (!browserName %in% c("chrome", "firefox")) message("Use 'firefox' or 'chrome' as browserName parameter")
 
+    if (parameters_docker$task$local_or_server == "test") folder_downloads = here::here("tests/jspsych-6_3_1/")
+    
+    
+    
+    # Available RAM
     available_RAM = as.numeric(system("awk '/MemFree/ {print $2}' /proc/meminfo", intern = TRUE))
     
     if (available_RAM < 800000) {

@@ -1,22 +1,32 @@
 # Parameters --------------------------------------------------------------
-
-  participants = list(uid = 24001:24005) # e.g. [1:100]
   
-  parameters = list(pid = 999, # ["test/TEST-ALL-ITEMS", 2, 999, "test/1x", "test/1x/Bank"] # SERVER
-                    browserName = "chrome",
-                    big_container = FALSE,
-                    keep_alive = TRUE,
-                    initial_wait = 2,
-                    screenshot = FALSE,
-                    DEBUG = TRUE,
-                    debug_file = FALSE,
-                    open_VNC = FALSE)
+  parameters_monkeys = list(
+    participants = list(uid = 24000),
+    
+    docker = list(
+      browserName = "chrome",
+      big_container = FALSE,
+      keep_alive = TRUE,
+      folder_downloads = "~/Downloads"
+    ),
+    
+    debug = list(
+      DEBUG = TRUE,
+      screenshot = FALSE,
+      debug_file = FALSE,
+      open_VNC = TRUE
+    ),
+    
+    task_params = list(
+      pid = 999,
+      local_or_server = "server", # ["local", "server", "test"]
+      local_folder_tasks = "Downloads/tests/test_prototol",
+      server_folder_tasks = "test/1x",
+      initial_wait = 2,
+      wait_retry = 5
+    )
+  )
   
-  parameters_local_server = list(local_or_server = "local", # [server, local]
-                                 folder_downloads = "~/Downloads",
-                                 local_folder_tasks = "Downloads/tests/test_prototol") #["Downloads/tests/test_prototol", "Downloads/tests/1x"]
-
-
 # Libraries ---------------------------------------------------------------
 
   suppressMessages(suppressWarnings(library(targets)))
@@ -33,7 +43,7 @@
     future::plan(callr)
     future::tweak(strategy = "multisession")# REVIEW: while (NUMBER_dockers >= NUMBER_dockers_LOW)  of only_docker.R
     # future::tweak(strategy = "multicore") # NOT working on Rstudio?
-    future::tweak(strategy = "transparent")
+    # future::tweak(strategy = "transparent")
     
     
 # Functions ---------------------------------------------------------------
@@ -48,8 +58,15 @@
   Sys.setenv(R_CLI_NUM_COLORS = crayon::num_ansi_colors()) 
   
   # target options (packages, errors...)
-  tar_option_set(packages = packages_to_load, # Load packages for all targets
-                 error = "workspace") # Needed to load workspace on error to debug
+  tar_option_set(
+    # Load packages for all targets
+    packages = packages_to_load,
+    # to load workspace on error to debug
+    error = "workspace",
+    memory = "transient",
+    garbage_collection = TRUE
+    ) 
+  
   
   # Restore output to console (in case it was left hanging...)
     suppressWarnings(sink())
@@ -60,20 +77,21 @@
 
   list(
     # Maybe add parameters to a target?
-    # tar_target(configuration, ),
+    # tar_target(parameters_monkeys, ),
     
     tarchetypes::tar_map(
-      values = participants,
+      values = parameters_monkeys$participants,
       
       # Create docker container
       tar_target(
         container,
         only_docker(
           container_name = paste0("container", uid),
-          browserName = parameters$browserName,
-          DEBUG = parameters$DEBUG,
-          big_container = parameters$big_container,
-          folder_downloads = parameters_local_server$folder_downloads
+          browserName = parameters_monkeys$docker$browserName,
+          DEBUG = parameters_monkeys$debug$DEBUG,
+          big_container = parameters_monkeys$docker$big_container,
+          folder_downloads = parameters_monkeys$docker$folder_downloads,
+          parameters_docker = parameters_monkeys
         )
       ),
       
@@ -82,7 +100,7 @@
         remoteDriver,
         only_create_remDr(
           container_port = container$container_port,
-          browserName = parameters$browserName,
+          browserName = container$browserName,
           container_name = container$container_name
         )
       ),
@@ -91,12 +109,13 @@
       tar_target(
         task,
         complete_task(
-          parameters_local_server = parameters_local_server,
+          parameters_task = parameters_monkeys,
           uid = uid,
-          initial_wait = parameters$initial_wait,
-          screenshot = parameters$screenshot,
-          DEBUG = parameters$DEBUG,
-          open_VNC = parameters$open_VNC,
+          initial_wait = parameters_monkeys$task_params$initial_wait,
+          wait_retry = parameters_monkeys$task_params$wait_retry,
+          screenshot = parameters_monkeys$debug$screenshot,
+          DEBUG = parameters_monkeys$debug$DEBUG,
+          open_VNC = parameters_monkeys$debug$open_VNC,
           container_name = remoteDriver$container_name,
           remDr = remoteDriver$remDr
         )
@@ -107,8 +126,8 @@
         clean_container,
         clean_up_docker(
           container_name = task,
-          keep_alive = parameters$keep_alive,
-          DEBUG = parameters$DEBUG
+          keep_alive = parameters_monkeys$docker$keep_alive,
+          DEBUG = parameters_monkeys$debug$DEBUG
         )
       )
     )

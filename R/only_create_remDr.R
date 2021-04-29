@@ -2,10 +2,10 @@ only_create_remDr <- function(container_port, browserName, container_name = NULL
   
   # DEBUG
   # targets::tar_load(container_24000)
-  # browserName = parameters$browserName
+  # browserName = parameters_monkeys$docker$browserName
   # container_name = container_24000$container_name
   # container_port = container_24000$container_port
-  # DEBUG = parameters$DEBUG
+  # DEBUG = parameters_monkeys$debug$DEBUG
   
 
   # CHECK -------------------------------------------------------------------
@@ -26,7 +26,7 @@ only_create_remDr <- function(container_port, browserName, container_name = NULL
         Sys.sleep(time_wait)
       } else if (errored == TRUE) {
         if (DEBUG == TRUE) cat(crayon::red("Error creating remoteDriver. Retrying after", paste0(time_wait, "s\n")))
-            Sys.sleep(time_wait)
+        Sys.sleep(time_wait)
       }
       
       # Create remote driver
