@@ -182,3 +182,41 @@ debug_function <- function(name_function) {
   }
 }
 
+
+
+
+#' tar_make_future_rowwise
+#' 
+#' Makes tar_make_future() work row-wise by assigning priorities to targets using their uid. This allows you to run as many participants as you want, avoiding memory issues.
+#'
+#' @param TARGETS 
+#' @param parameters_monkeys 
+tar_make_future_rowwise <- function(TARGETS, parameters_monkeys) {
+  
+  assign_priority <- function(uid, target_name) {
+    # browser()
+    uid_container = gsub(".*_(.*)", "\\1", TARGETS[[1]][[target_name]][[uid]][["settings"]][["name"]])
+    prioriry_container = as.numeric(uid_container) / max(parameters_monkeys$participants$uid)
+    TARGETS[[1]][[target_name]][[uid]][["settings"]][["priority"]] = prioriry_container
+    
+  }
+  
+  1:length(parameters_monkeys$participants$uid) %>%
+    walk(~{
+      index_uid = .x
+      1:length(names(TARGETS[[1]])) %>%
+        walk(~{
+          index_target = .x
+          # cat("uid = ", uid_walk, "name = ", .x)
+          assign_priority(uid = index_uid, target_name = index_target)
+        })
+    })
+
+  
+  # TARGETS[[1]]$container[[1]]$settings$priority
+  # TARGETS[[1]]$container[[2]]$settings$priority
+  
+}
+
+# TARGETS[[1]]$remoteDriver[[1]]$settings$priority
+# TARGETS[[1]]$remoteDriver[[2]]$settings$priority

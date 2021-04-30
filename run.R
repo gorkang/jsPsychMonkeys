@@ -24,7 +24,7 @@ targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE)
   targets::tar_destroy()
   system('docker stop $(docker ps -q)') # KILL all docker instances
   
-  targets::tar_watch(seconds = 1, outdated = FALSE, targets_only = TRUE)
+  targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE)
   targets::tar_make()
 
 
@@ -33,8 +33,8 @@ targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE)
   targets::tar_destroy()
   system('docker stop $(docker ps -q)') # KILL all docker instances
   
-  targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE)
-  targets::tar_make_future(workers = future::availableCores() - 2) 
+  targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE)
+  targets::tar_make_future(workers = future::availableCores() - 2)
 
   
 # GET Containers ----------------------------------------------------------

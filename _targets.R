@@ -2,17 +2,17 @@
   
   parameters_monkeys = list(
     
-    participants = list(uid = 24000),
+    participants = list(uid = 1:10),
     
     docker = list(
       browserName = "chrome",
       big_container = FALSE,
-      keep_alive = TRUE,
+      keep_alive = FALSE,
       folder_downloads = "~/Downloads"
     ),
     
     debug = list(
-      DEBUG = TRUE,
+      DEBUG = FALSE,
       screenshot = FALSE,
       debug_file = FALSE,
       open_VNC = FALSE
@@ -21,7 +21,7 @@
     task_params = list(
       pid = 999,
       local_or_server = "local", # ["local", "server", "test"]
-      local_folder_tasks = "Downloads/tests/test_prototol",
+      local_folder_tasks = "Downloads/tests/2", # ["Downloads/tests/test_prototol", "Downloads/tests/2"]
       server_folder_tasks = "test/1x",
       initial_wait = 2,
       wait_retry = 2
@@ -34,6 +34,9 @@
   suppressMessages(suppressWarnings(library(tarchetypes)))
   suppressMessages(suppressWarnings(library(future)))
   suppressMessages(suppressWarnings(library(future.callr)))
+  suppressMessages(suppressWarnings(library(purrr)))
+  suppressMessages(suppressWarnings(library(dplyr)))
+  
 
   # List of packages to use
   packages_to_load = c("targets", "tarchetypes", "dplyr", "glue", "purrr", "readr", "RSelenium", "rvest" ,"XML")
@@ -74,7 +77,7 @@
 
 # Targets -----------------------------------------------------------------
 
-  list(
+TARGETS =  list(
     
     tarchetypes::tar_map(
       values = parameters_monkeys$participants,
@@ -89,7 +92,7 @@
           big_container = parameters_monkeys$docker$big_container,
           folder_downloads = parameters_monkeys$docker$folder_downloads,
           parameters_docker = parameters_monkeys
-        )
+        ), priority = .5
       ),
       
       # Open remote Driver and browser
@@ -101,7 +104,7 @@
           # wait_create = 5,
           # wait_open = 3,
           container_name = container$container_name
-        )
+        ), priority = .5
       ),
       
       
@@ -114,7 +117,7 @@
           DEBUG = parameters_monkeys$debug$DEBUG,
           container_name = remoteDriver$container_name,
           remDr = remoteDriver$remDr
-        )
+        ), priority = .5
       ),
       
       
@@ -130,7 +133,7 @@
           open_VNC = parameters_monkeys$debug$open_VNC,
           container_name = links_tar$container_name,
           remDr = links_tar$remDr
-        )
+        ), priority = .5
       ),
       
       # Complete task
@@ -144,7 +147,7 @@
           DEBUG = parameters_monkeys$debug$DEBUG,
           container_name = launch$container_name,
           remDr = launch$remDr
-        )
+        ), priority = .5
       ),
       
       # Clean up after participants finish
@@ -154,7 +157,17 @@
           container_name = task,
           keep_alive = parameters_monkeys$docker$keep_alive,
           DEBUG = parameters_monkeys$debug$DEBUG
-        )
+        ), priority = .5
       )
     )
   )
+
+    
+    
+
+  # Change priorities  ------------------------------------------------------
+    # We assign priorities so the target's progress is row-wise 
+    # This way, a participant should finish before starting a new one, avoiding memory issues
+    tar_make_future_rowwise(TARGETS = TARGETS, parameters_monkeys = parameters_monkeys)
+
+TARGETS
