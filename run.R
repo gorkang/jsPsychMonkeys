@@ -13,6 +13,7 @@ targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE)
 # CLEAN UP ----------------------------------------------------------------
 
   system('docker stop $(docker ps -q)') # KILL all docker instances
+  system('docker rm -v $(docker ps -a --format "{{.Names}}")') # KILL all docker images
   # system('docker ps -a', intern = TRUE) # List containers
 
   targets::tar_invalidate(matches("task_24000"))
