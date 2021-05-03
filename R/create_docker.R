@@ -10,11 +10,12 @@ create_docker <-
     # DEBUG
     # debug_function(only_docker)
     
-    # container_name = "container24000"
+    # container_name = "container1"
     # browserName = "chrome"
     # DEBUG = TRUE
     # big_container = FALSE
-    # folder_downloads = "~/Downloads/2"
+    # folder_downloads = "~/Downloads/"
+    # parameters_docker = parameters_monkeys
     
     
     # Packages -------------------------------------------------------------
@@ -35,25 +36,26 @@ create_docker <-
     available_RAM = as.numeric(system("awk '/MemFree/ {print $2}' /proc/meminfo", intern = TRUE))
     
     if (available_RAM < 80000) {
-      
+
       NUMBER_dockers_LOW = length(reconnect_to_VNC())
-      
+
       if (!exists("NUMBER_dockers")) NUMBER_dockers = NUMBER_dockers_LOW
       # cat(crayon::bgRed("\n\n --- LOW RAM --- dockers: ", NUMBER_dockers_LOW, "\n\n"))
-      
+
       # while (NUMBER_dockers >= NUMBER_dockers_LOW) {
       if (NUMBER_dockers >= NUMBER_dockers_LOW) {
         cat(crayon::bgWhite("\n\n --- LOW RAM --- dockers: ", NUMBER_dockers_LOW, "/", NUMBER_dockers, "Pause for 60s...\n\n"))
         Sys.sleep(60)
-        NUMBER_dockers = length(reconnect_to_VNC()) 
-    
+        NUMBER_dockers = length(reconnect_to_VNC())
+
       }
-      
+
     }
     
-    
     # Check if exists
-    if (is_empty(system(sprintf('docker ps -q -f name=%s', container_name), intern = TRUE))) {
+    # if (is_empty(system(sprintf('docker ps -q -f name=%s', container_name), intern = TRUE))) { # WITH THIS SINTAX, container1 == container10
+      
+    if (container_name %in% system('docker ps -a --format "{{.Names}}"', intern = TRUE) == FALSE) {
       
       # Container does not exist
       if (DEBUG == TRUE) cli::cli_alert_info("Container {container_name} does not exist. Creating it...\n") #cat(crayon::yellow("Container", container_name, "does not exist. Creating it...\n"))
@@ -97,7 +99,7 @@ create_docker <-
     
     
     # Run docker session. Map home directory to download docker container
-    if (length(system(paste0('docker ps --filter "name=', container_name, '"'), intern = TRUE)) == 1) {
+    if (container_name %in% system('docker ps -a --format "{{.Names}}"', intern = TRUE) == FALSE) {
       
       if (DEBUG == TRUE) cat(crayon::yellow("Docker image", container_name, " not running. Launching...\n"))
       
