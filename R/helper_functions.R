@@ -55,22 +55,24 @@ check_trialids <- function(local_folder_tasks) {
 reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = NULL, DEBUG = FALSE) {
   
   # DEBUG
-  # container_name = container24000
+  # container_name = "container1"
   # just_check = TRUE
   # port = NULL
-  
-  if (!is.null(port)) container_port = port
-  
+  # DEBUG = TRUE
+    
   if (is.null(container_name)) {
+    # List containers
     
     system('docker ps -a --format "{{.Names}}"', intern = TRUE) # Print container names
     
   } else {
     
     if (just_check == TRUE) {
+      # Check if container exists
     
       # Outputs the name of the container if it exists, NULL otherwise  
       containers_available = system('docker ps -a --format "{{.Names}}"', intern = TRUE) # Print container names
+      
       if (!container_name %in% containers_available) {
         NULL
       } else {
@@ -79,19 +81,36 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
       
       
     } else {
+      # Connect to container
 
-      container_port_raw <- system(sprintf('docker port %s', container_name), intern = TRUE)
-      container_port <- min(as.integer(gsub('.*:(.*)$', '\\1', container_port_raw)))
-      if (is.na(container_port[1])) cat(crayon::red("Port not found?"))
-      
-      
-      # Open VNC, using second port in container_port, the password is 'secret'
-      vnc_command = paste0('vncviewer 127.0.0.1:', container_port)
-      cat(crayon::yellow(paste0("\nOpen VNC - localhost:", container_port, " pwd: secret\n"), crayon::black(vnc_command, "\n")))
-      if (DEBUG == TRUE) cat(crayon::silver(" DEBUG:", container_port_raw), "\n\n")
-      # system(paste0('echo "', MESSAGE, '"'))
-      
-      system(paste0(vnc_command, ' &'))      
+      if (grepl("debug", system('docker ps -a --format "{{.Image}}"', intern = TRUE))) {
+        # CHECK if it is a debug container      
+        
+        if (!is.null(port)) {
+          
+          container_port = port
+          
+        } else { 
+          
+          # Get container port
+          container_port_raw <- system(sprintf('docker port %s', container_name), intern = TRUE)
+          container_port <- min(as.integer(gsub('.*:(.*)$', '\\1', container_port_raw)))
+          if (is.na(container_port[1])) cat(crayon::red("Port not found?"))
+          
+        }
+        
+        # Open VNC, using second port in container_port, the password is 'secret'
+        vnc_command = paste0('vncviewer 127.0.0.1:', container_port)
+        cat(crayon::yellow(paste0("\nOpen VNC - localhost:", container_port, " pwd: secret\n"), crayon::black(vnc_command, "\n")))
+        if (DEBUG == TRUE) cat(crayon::silver(" DEBUG:", container_port_raw), "\n\n")
+        
+        system(paste0(vnc_command, ' &'))
+        
+      } else {
+        
+        cat(crayon::bgRed("Docker container NOT in debug mode.\n"), crayon::silver("To connect, a container needs to be launched with the DEBUG=TRUE in _targets.R\n\n"))
+        
+      }
     }
   }
 
@@ -106,23 +125,32 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
 #' @export
 #'
 #' @examples debug_docker(24000)
-debug_docker <- function(uid_participant) {
+debug_docker <- function(uid_participant, parameters_debug = parameters_monkeys) {
   
   # DEBUG
   # uid_participant = 24000
+  # parameters_debug = parameters_monkeys
   
   suppressMessages(source(shrtcts::locate_shortcuts_source()))
   suppressMessages(source(here::here("_targets.R")))
+
+  # Extract parameters from parameters_monkeys
+  DEBUG <<- parameters_debug$debug$DEBUG
+  screenshot <<- parameters_debug$debug$screenshot
+  debug_file <<- parameters_debug$debug$debug_file
+  open_VNC <<- parameters_debug$debug$open_VNC
+  parameters_task <<- parameters_debug
   
-  DEBUG = TRUE
+  
   uid = uid_participant
-  container_name = paste0("container_", uid)
-  driver_name = paste0("remoteDriver_", uid)
-  targets::tar_load(eval(container_name))
+  container_name_tar <- paste0("container_", uid)
+  container_name <<- paste0("container", uid)
+  driver_name <<- paste0("remoteDriver_", uid)
+  targets::tar_load(eval(container_name_tar))
   targets::tar_load(eval(driver_name))
   remDr <<- get(driver_name)$remDr
   
-  cat(crayon::green(glue("Loaded {container_name} \n")))
+  cat(crayon::green(glue("Loaded {container_name_tar} \n")))
   
 }
 
