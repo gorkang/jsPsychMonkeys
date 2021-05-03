@@ -11,6 +11,9 @@ create_links <-
            remDr = NULL) {
     
     
+    # DEBUG
+    # debug_docker(uid_participant = 24000)
+    
     
     
     # CHECKS -----------------------------------------------------------------
@@ -49,10 +52,9 @@ create_links <-
       
     } else {
       # By default, use local
-      random_uid = round(runif(n = 1, min = 1, max = 25000), 0)
-      
-      links_tasks = paste0("file:///home/seluser/", parameters_task$task$local_folder_tasks, "/index.html?uid=", random_uid, "&pid=", parameters_task$task$pid)
-      # links_tasks = paste0("file:///home/seluser/", parameters_task$task$local_folder_tasks, "/index.html?uid=", uid, "&pid=", parameters_task$task$pid)
+      # random_uid = round(runif(n = 1, min = 1, max = 99000), 0)
+      # links_tasks = paste0("file:///home/seluser/", parameters_task$task$local_folder_tasks, "/index.html?uid=", random_uid, "&pid=", parameters_task$task$pid)
+      links_tasks = paste0("file:///home/seluser/", parameters_task$task$local_folder_tasks, "/index.html?uid=", uid, "&pid=", parameters_task$task$pid)
       
     }
     

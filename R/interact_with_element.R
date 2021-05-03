@@ -7,7 +7,7 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE) {
     # DEBUG = TRUE
     # debug_docker(24000)
     # list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_elements
-
+    
   
 
   # INPUTS ------------------------------------------------------------------
@@ -21,7 +21,7 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE) {
       
       # if (DEBUG == TRUE) cat(crayon::red("No input elements found\n"))
       output_select_input = list(selected_input = tibble(name = "NO input element found"),
-                                 input_text = "")
+                                 input_text = "''")
       
     }
 
@@ -54,9 +54,10 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE) {
 
     }
     
-  
 
   # MESSAGE -----------------------------------------------------------------
+
+  if (DEBUG == TRUE & length(list_get_elements$name_buttons$id) == 1 & list_get_elements$name_buttons$id == "jspsych-instructions-next") cat(crayon::bold("\n[STARTING TASK]:", gsub("\n", "", list_get_elements$name_contents$content), "\n"))
 
   if (DEBUG == TRUE) cat(crayon::yellow("\n[SCREEN]:", paste(output_select_input$selected_input$name, collapse = ", "), "|", paste(selected_button_name, collapse = ", "), "[response]:", output_select_input$input_text), "\n")
 
