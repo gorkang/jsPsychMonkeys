@@ -219,20 +219,22 @@ debug_function <- function(name_function) {
 #'
 #' @param TARGETS 
 #' @param parameters_monkeys 
-tar_make_future_rowwise <- function(TARGETS, parameters_monkeys) {
+tar_make_future_rowwise <- function(TARGETS, uids) {
+  
+  # TODO: The number in TARGETS[[2]] depends on the position of the tar_map() target!
   
   assign_priority <- function(uid, target_name) {
     # browser()
-    uid_container = gsub(".*_(.*)", "\\1", TARGETS[[1]][[target_name]][[uid]][["settings"]][["name"]])
-    prioriry_container = as.numeric(uid_container) / max(parameters_monkeys$participants$uid)
-    TARGETS[[1]][[target_name]][[uid]][["settings"]][["priority"]] = prioriry_container
+    uid_container = gsub(".*_(.*)", "\\1", TARGETS[[2]][[target_name]][[uid]][["settings"]][["name"]])
+    prioriry_container = as.numeric(uid_container) / max(uids)
+    TARGETS[[2]][[target_name]][[uid]][["settings"]][["priority"]] = prioriry_container
     
   }
   
-  1:length(parameters_monkeys$participants$uid) %>%
+  1:length(uids) %>%
     walk(~{
       index_uid = .x
-      1:length(names(TARGETS[[1]])) %>%
+      1:length(names(TARGETS[[2]])) %>%
         walk(~{
           index_target = .x
           # cat("uid = ", uid_walk, "name = ", .x)

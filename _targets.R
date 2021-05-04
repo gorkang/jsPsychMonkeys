@@ -1,32 +1,17 @@
-# Parameters --------------------------------------------------------------
+# Parameters ----- [EDIT ONLY THIS SECTION] --------------------------------
   
-  parameters_monkeys = list(
-    
-    participants = list(uid = 1:10),
-    
-    docker = list(
-      browserName = "chrome",
-      big_container = FALSE,
-      keep_alive = FALSE,
-      folder_downloads = "~/Downloads"
-    ),
-    
-    debug = list(
-      DEBUG = FALSE,
-      screenshot = FALSE,
-      debug_file = FALSE,
-      open_VNC = FALSE
-    ),
-    
-    task_params = list(
-      pid = 999,
-      local_or_server = "local", # ["local", "server", "test"]
-      local_folder_tasks = "Downloads/tests/2", # ["Downloads/tests/test_prototol", "Downloads/tests/2"]
-      server_folder_tasks = "test/1x",
-      initial_wait = 2,
-      wait_retry = 2
-    )
+  # Minimal parameters for your simulation. 
+  # For a complete list of possible parameters, see set_parameters()
+  parameters_monkeys_minimal = list(
+    uid = 1:10,
+    # keep_alive = TRUE, 
+    # DEBUG = TRUE,
+    # open_VNC = TRUE,
+    local_folder_tasks = "Downloads/tests/test_prototol"
+    # server_folder_tasks = "test/1x"
   )
+  
+
   
 # Libraries ---------------------------------------------------------------
 
@@ -42,10 +27,9 @@
   packages_to_load = c("targets", "tarchetypes", "dplyr", "glue", "purrr", "readr", "RSelenium", "rvest" ,"XML")
 
   
-  # Needed here if we run make_future()
-    # https://github.com/HenrikBengtsson/future/#controlling-how-futures-are-resolved
-    future::plan(callr)
-    future::tweak(strategy = "multisession")# REVIEW: while (NUMBER_dockers >= NUMBER_dockers_LOW)  of only_docker.R
+  # For tar_make_future() [https://github.com/HenrikBengtsson/future/#controlling-how-futures-are-resolved]
+  future::plan(callr)
+  future::tweak(strategy = "multisession")
     
     
 # Functions ---------------------------------------------------------------
@@ -61,12 +45,10 @@
   
   # target options (packages, errors...)
   tar_option_set(
-    # Load packages for all targets
-    packages = packages_to_load,
-    # to load workspace on error to debug
-    error = "workspace",
-    memory = "transient",
-    garbage_collection = TRUE
+    packages = packages_to_load, # Load packages for all targets
+    error = "workspace", # to load workspace on error to debug
+    memory = "transient", # Memory management
+    garbage_collection = TRUE # Memory management
     ) 
   
   
@@ -79,8 +61,15 @@
 
 TARGETS =  list(
     
+  tar_target(
+    parameters_monkeys,
+    set_parameters(parameters_input = parameters_monkeys_minimal), 
+    priority = 1
+  ),
+  
     tarchetypes::tar_map(
-      values = parameters_monkeys$participants,
+      # values = parameters_monkeys$participants,
+      values = list(uid = parameters_monkeys_minimal$uid),
       
       # Create docker container
       tar_target(
@@ -101,8 +90,6 @@ TARGETS =  list(
         create_remDr(
           container_port = container$container_port,
           browserName = container$browserName,
-          # wait_create = 5,
-          # wait_open = 3,
           container_name = container$container_name
         ), priority = .5
       ),
@@ -168,6 +155,6 @@ TARGETS =  list(
   # Change priorities  ------------------------------------------------------
     # We assign priorities so the target's progress is row-wise 
     # This way, a participant should finish before starting a new one, avoiding memory issues
-    tar_make_future_rowwise(TARGETS = TARGETS, parameters_monkeys = parameters_monkeys)
+    tar_make_future_rowwise(TARGETS = TARGETS, uids = parameters_monkeys_minimal$uid)
 
 TARGETS
