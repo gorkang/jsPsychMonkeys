@@ -12,18 +12,19 @@ targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE)
 
 # CLEAN UP ----------------------------------------------------------------
 
+  system('docker ps -a', intern = TRUE) # List containers
+
   system('docker stop $(docker ps -q)') # KILL all docker instances
   system('docker rm -v $(docker ps -a --format "{{.Names}}")') # KILL all docker images
-  # system('docker ps -a', intern = TRUE) # List containers
-
-  targets::tar_invalidate(matches("task_24000"))
-  targets::tar_destroy()
+  
+  targets::tar_destroy() # Destroy _targets folder
+  targets::tar_invalidate(matches("task_1")) # Invalidate specific target
 
   
 # Launch  -----------------------------------------------------------------
 
-  targets::tar_destroy()
   system('docker stop $(docker ps -q)') # KILL all docker instances
+  targets::tar_destroy()
   
   targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE)
   targets::tar_make()
@@ -31,8 +32,8 @@ targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE)
 
 # Parallel ----------------------------------------------------------------
 
-  targets::tar_destroy()
   system('docker stop $(docker ps -q)') # KILL all docker instances
+  targets::tar_destroy()
   
   targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE)
   targets::tar_make_future(workers = future::availableCores() - 2)
@@ -42,12 +43,12 @@ targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE)
 
   # debug_docker(24000)
   reconnect_to_VNC()
-  reconnect_to_VNC("container24000", DEBUG = TRUE)
+  reconnect_to_VNC("container1", DEBUG = TRUE)
   
 
 # CHECK META --------------------------------------------------------------
 
-  targets::tar_meta(fields = c(name, warnings))
+  targets::tar_meta(fields = c(name, warnings)) %>% tidyr::drop_na(warnings)
   targets::tar_meta(fields = c(name, seconds)) %>% tidyr::drop_na()
   
   
