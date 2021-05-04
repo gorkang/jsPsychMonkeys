@@ -222,6 +222,8 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
     input_text = 1:length(final_vector) %>% purrr::map(~ list(key = final_vector[.x])) %>% flatten()
     list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(sendKeys = input_text)
     
+    input_text_human_readable = destination_slider
+    
     
     # multi-select ------------------------------------------------------------
     
@@ -243,8 +245,16 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
     
   }
   
+    
+
+  # OUTPUT ------------------------------------------------------------------
+
+  if (!exists("input_text_human_readable")) input_text_human_readable = input_text
+    
   output_select_input = list(selected_input = selected_input,
-                             input_text = input_text)
+                             input_text = input_text,
+                             input_text_human_readable = input_text_human_readable)
+  
   return(output_select_input)
   
 }
