@@ -3,11 +3,12 @@
   # Minimal parameters for your simulation. 
   # For a complete list of possible parameters, see set_parameters()
   parameters_monkeys_minimal = list(
-    uid = 1:10,
-    # keep_alive = TRUE, 
+    uid = 1:2,
+    random_id = FALSE,
+    keep_alive = TRUE,
     # DEBUG = TRUE,
-    # open_VNC = TRUE,
-    local_folder_tasks = "Downloads/tests/test_prototol"
+    open_VNC = TRUE,
+    local_folder_tasks = c("Downloads/tests/test_prototol")#, "Downloads/tests/994")
     # server_folder_tasks = "test/1x"
   )
   
@@ -101,6 +102,7 @@ TARGETS =  list(
         create_links(
           parameters_task = parameters_monkeys,
           uid = uid,
+          uid_URL = parameters_monkeys$task_params$uid_URL,
           DEBUG = parameters_monkeys$debug$DEBUG,
           container_name = remoteDriver$container_name,
           remDr = remoteDriver$remDr
@@ -108,32 +110,19 @@ TARGETS =  list(
       ),
       
       
-      # Launch task
-      tar_target(
-        launch,
-        launch_task(
-          parameters_task = parameters_monkeys,
-          uid = uid,
-          links = links_tar$links,
-          initial_wait = parameters_monkeys$task_params$initial_wait,
-          DEBUG = parameters_monkeys$debug$DEBUG,
-          open_VNC = parameters_monkeys$debug$open_VNC,
-          container_name = links_tar$container_name,
-          remDr = links_tar$remDr
-        ), priority = .5
-      ),
-      
       # Complete task
       tar_target(
         task,
         complete_task(
           parameters_task = parameters_monkeys,
           uid = uid,
+          links = links_tar$links,
           wait_retry = parameters_monkeys$task_params$wait_retry,
           screenshot = parameters_monkeys$debug$screenshot,
           DEBUG = parameters_monkeys$debug$DEBUG,
-          container_name = launch$container_name,
-          remDr = launch$remDr
+          open_VNC = parameters_monkeys$debug$open_VNC,
+          container_name = remoteDriver$container_name,
+          remDr = remoteDriver$remDr
         ), priority = .5
       ),
       

@@ -2,6 +2,7 @@
 complete_task <-
   function(parameters_task,
            uid,
+           links,
            initial_wait = 2,
            wait_retry = 2,
            screenshot = FALSE,
@@ -12,27 +13,9 @@ complete_task <-
     
     
   # DEBUG
-    # debug_function(complete_task_simple) # TODO: Make it work with lists
-    # reconnect_to_VNC("container24000", DEBUG = TRUE)
-    
-    
-    # parameters_task = parameters_monkeys
-    # uid = 24000
-    # initial_wait = parameters_monkeys$task_params$initial_wait
-    # wait_retry = parameters_monkeys$task_params$wait_retry
-    # screenshot = parameters_monkeys$debug$screenshot
-    # DEBUG = parameters_monkeys$debug$DEBUG
-    # open_VNC = parameters_monkeys$debug$open_VNC
-    # tar_load(paste0("remoteDriver_", uid))
-    # container_name = get(paste0("remoteDriver_", uid))$container_name
-    # remDr = get(paste0("remoteDriver_", uid))$remDr
-    
-    # open_VNC = FALSE
-    # initial_wait = 0
-    # wait_retry = 2
-    # screenshot = FALSE
-    # DEBUG = TRUE
-    # debug_docker(24000)
+    # debug_function("complete_task")
+    # targets::tar_load("parameters_monkeys")
+    # debug_docker(uid_participant = 2, parameters_debug = parameters_monkeys)
     
     
   # CHECKS --------------------------------------------------------------
@@ -62,6 +45,16 @@ complete_task <-
     
     
   # SAFER functions ---------------------------------------------------------
+
+    # Launch task
+    launch_task <- function(links, wait_retry) {
+      if (length(links) != 1) stop("links passed to remDr$navigate are != 1")
+      Sys.sleep(wait_retry) 
+      if (DEBUG == TRUE) cat(crayon::yellow("Opening link:", links, "\n"))
+      remDr$navigate(links)
+    }
+    
+    launch_task_safely = safely(launch_task)
     
     # Get elements
     get_elements_safely = safely(get_elements)
@@ -76,45 +69,74 @@ complete_task <-
       sink(con, append = TRUE, type = "message")
     }
 
+    
+    
+  # Loop through links in a specific container and browser ---------------------
   
-  # Loop through items of a task --------------------------------------------
+  # Condition to stop while
+  continue_links = TRUE
+  index_links = 1
+  
+  while (continue_links) {    
     
-    # Condition to stop while
-    continue = TRUE
-    index = 1
     
-    while (continue) {
+    # Go to task --------------------------------------------------------------
     
-      if (DEBUG == TRUE) cat(crayon::bgMagenta("  --- SCREEN: ", index, " ---\n"))
-      if (!exists("index")) index = 1
-      if (screenshot == TRUE) remDr$screenshot(file = paste0("outputs/screenshots/", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
+    LAUNCH_TASK = launch_task_safely(links[index_links], wait_retry = 1)
+    
+    # INITIAL WAIT FOR PAGE TO LOAD
+    if (DEBUG == TRUE) cat(crayon::bgGreen(paste0("\n  START OF EXPERIMENT. waiting ", initial_wait, "s")), crayon::yellow("[If it fails, increase wait]  \n"))
+    Sys.sleep(initial_wait)
+    
+    if (length(LAUNCH_TASK$error) > 0) cat(crayon::bgRed(" ERROR: launching task [launch_task()] \n"), crayon::black(LAUNCH_TASK$error))
+    
+    
+    # Loop through items of a task --------------------------------------------
       
+      # Condition to stop while
+      continue = TRUE
+      index = 1
       
-      ## Get elements of website ----------------------------
+      while (continue) {
       
-        list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 1, DEBUG = DEBUG)
+        if (DEBUG == TRUE) cat(crayon::bgMagenta("  --- SCREEN: ", index, " ---\n"))
+        if (!exists("index")) index = 1
+        if (screenshot == TRUE) remDr$screenshot(file = paste0("outputs/screenshots/", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
         
-        # If we don't get any elements on out first try, wait wait_retry and try again (important when loading images, htmls, etc.)
-        if (!is.null(list_get_elements$error)) { 
-            Sys.sleep(wait_retry)
-            list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 2, DEBUG = DEBUG)
-            }
+        
+        ## Get elements of website ----------------------------
+        
+          list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 1, DEBUG = DEBUG)
           
-        # When there is an error, usually we will have some content here (we "cause" the error with a stop())
-        list_get_elements = list_get_elements$result
-  
+          # If we don't get any elements on out first try, wait wait_retry and try again (important when loading images, htmls, etc.)
+          if (!is.null(list_get_elements$error)) { 
+              Sys.sleep(wait_retry)
+              list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 2, DEBUG = DEBUG)
+              }
+            
+          # When there is an error, usually we will have some content here (we "cause" the error with a stop())
+          list_get_elements = list_get_elements$result
+    
+          
+        # Interact with the elements we found ------------------
+        if (list_get_elements$continue == TRUE) interact_with_element(list_get_elements, DEBUG = DEBUG)
         
-      # Interact with the elements we found ------------------
-      if (list_get_elements$continue == TRUE) interact_with_element(list_get_elements, DEBUG = DEBUG)
+        
+        # Output of while
+        continue = list_get_elements$continue
+        index = index + 1
+        
+      }
       
       
-      # Output of while
-      continue = list_get_elements$continue
-      index = index + 1
       
-    }
+      # links while loop
+      index_links = index_links + 1
+      
+      # Exit condition for links while loop
+      if (is.na(links[index_links])) continue_links = FALSE
   
-
+  }
   # END LOG -----------------------------------------------------------------
 
   # Restore output to console
