@@ -33,6 +33,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
                            debug_file = FALSE,
                            open_VNC = FALSE, 
                            pid = 999,
+                           uid_URL = TRUE,
                            local_or_server = "test", # ["local", "server", "test"]
                            local_folder_tasks = "", # ["Downloads/tests/test_prototol", "Downloads/tests/2"]
                            server_folder_tasks = "",
@@ -72,6 +73,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
     if (!is.null(parameters_input$debug_file)) debug_file = parameters_input$debug_file
     if (!is.null(parameters_input$open_VNC)) open_VNC = parameters_input$open_VNC
     if (!is.null(parameters_input$pid)) pid = parameters_input$pid
+    if (!is.null(parameters_input$uid_URL)) uid_URL = parameters_input$uid_URL
     if (!is.null(parameters_input$initial_wait)) initial_wait = parameters_input$initial_wait
     if (!is.null(parameters_input$wait_retry)) wait_retry = parameters_input$wait_retry
     
@@ -122,6 +124,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
       
       task_params = list(
         pid = pid,
+        uid_URL = uid_URL,
         local_or_server = local_or_server,
         local_folder_tasks = local_folder_tasks,
         server_folder_tasks = server_folder_tasks,

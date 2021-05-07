@@ -2,6 +2,7 @@
 create_links <-
   function(parameters_task,
            uid,
+           uid_URL = TRUE,
            # initial_wait = 2,
            # wait_retry = 2,
            # screenshot = FALSE,
@@ -12,9 +13,9 @@ create_links <-
     
     
     # DEBUG
-    # debug_docker(uid_participant = 24000)
-    
-    
+    # targets::tar_load("parameters_monkeys")
+    # debug_docker(uid_participant = 2, parameters_debug = parameters_monkeys)
+
     
     # CHECKS -----------------------------------------------------------------
     
@@ -39,22 +40,27 @@ create_links <-
 
     # Create link -------------------------------------------------------------
     
+    if (uid_URL == TRUE) {
+      uid_string = ""
+    } else {
+      uid_string = paste0("&uid=", uid)
+    }
+    
     if (parameters_task$task$local_or_server == "server") {
       
       source(".vault/SERVER_PATH.R") # server:path
       parameters_task$task$server_path = server_path
-      links_tasks = paste0(parameters_task$task$server_path, parameters_task$task$server_folder_tasks, "/?uid=", uid, "&pid=", parameters_task$task$pid)
+      links_tasks = paste0(parameters_task$task$server_path, parameters_task$task$server_folder_tasks, "/index.html?pid=", parameters_task$task$pid,uid_string)
       
     } else if (parameters_task$task$local_or_server == "test") {
       
       path_tests = gsub("tests/jspsych-6_3_1/", "", dir(path = "tests/jspsych-6_3_1/examples", pattern = "jspsych.*.html", full.names = TRUE))
       links_tasks = paste0("file:///home/seluser/Downloads/", path_tests[1], "?uid=", uid, "&pid=", parameters_task$task$pid)
       
+      
     } else {
       # By default, use local
-      # random_uid = round(runif(n = 1, min = 1, max = 99000), 0)
-      # links_tasks = paste0("file:///home/seluser/", parameters_task$task$local_folder_tasks, "/index.html?uid=", random_uid, "&pid=", parameters_task$task$pid)
-      links_tasks = paste0("file:///home/seluser/", parameters_task$task$local_folder_tasks, "/index.html?uid=", uid, "&pid=", parameters_task$task$pid)
+      links_tasks = paste0("file:///home/seluser/", parameters_task$task$local_folder_tasks, "/index.html?pid=", parameters_task$task$pid,uid_string)
       
     }
     
