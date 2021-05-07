@@ -31,6 +31,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
                            DEBUG = FALSE, 
                            screenshot = FALSE,
                            debug_file = FALSE,
+                           console_logs = FALSE,
                            open_VNC = FALSE, 
                            pid = 999,
                            uid_URL = TRUE,
@@ -73,6 +74,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
     if (!is.null(parameters_input$DEBUG)) DEBUG = parameters_input$DEBUG
     if (!is.null(parameters_input$screenshot)) screenshot = parameters_input$screenshot
     if (!is.null(parameters_input$debug_file)) debug_file = parameters_input$debug_file
+    if (!is.null(parameters_input$console_logs)) console_logs = parameters_input$console_logs
     if (!is.null(parameters_input$open_VNC)) open_VNC = parameters_input$open_VNC
     if (!is.null(parameters_input$pid)) pid = parameters_input$pid
     if (!is.null(parameters_input$uid_URL)) uid_URL = parameters_input$uid_URL
@@ -122,6 +124,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
         DEBUG = DEBUG,
         screenshot = screenshot,
         debug_file = debug_file,
+        console_logs = console_logs,
         open_VNC = open_VNC
       ),
       

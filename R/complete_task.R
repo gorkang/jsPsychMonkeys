@@ -7,6 +7,7 @@ complete_task <-
            wait_retry = 2,
            screenshot = FALSE,
            DEBUG = FALSE,
+           console_logs = TRUE,
            open_VNC = FALSE,
            container_name = NULL,
            remDr = NULL) {
@@ -96,6 +97,7 @@ complete_task <-
       # Condition to stop while
       continue = TRUE
       index = 1
+      console_logs_list = list()
       
       while (continue) {
       
@@ -103,6 +105,7 @@ complete_task <-
         if (!exists("index")) index = 1
         if (screenshot == TRUE) remDr$screenshot(file = paste0("outputs/screenshots/", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
         
+        if (console_logs == TRUE) console_logs_list[[index]] = remDr$log(type = "browser")
         
         ## Get elements of website ----------------------------
         
@@ -127,8 +130,15 @@ complete_task <-
         index = index + 1
         
       }
+      ## END of while task items
       
-      
+      # Store console logs of browser
+      if (console_logs == TRUE) {
+        # Store browser console logs
+        numbered_console_logs = console_logs_list %>% setNames(seq_along(.))  %>% .[lengths(.) != 0]
+        DF_console_logs = console_logs_list %>% bind_rows() %>% mutate(page_number = names(numbered_console_logs))
+        write_csv(DF_console_logs, paste0("outputs/log/", uid, "_console_logs", "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".csv"))
+      }
       
       # links while loop
       index_links = index_links + 1
@@ -137,13 +147,16 @@ complete_task <-
       if (is.na(links[index_links])) continue_links = FALSE
   
   }
+  ## END of while links
+  
+  
   # END LOG -----------------------------------------------------------------
 
-  # Restore output to console
-  if (parameters_task$debug$debug_file == TRUE) {
-    sink() 
-    sink(type = "message")
-  }
+    # Restore output to console
+    if (parameters_task$debug$debug_file == TRUE) {
+      sink() 
+      sink(type = "message")
+    }
 
   return(container_name)
 
