@@ -6,6 +6,10 @@ create_remDr <-
            DEBUG = FALSE) {
     
   # DEBUG
+    # debug_function("create_remDr")
+    # targets::tar_load("parameters_monkeys")
+    # debug_docker(uid_participant = 2, parameters_debug = parameters_monkeys)
+    
   # targets::tar_load(container_24001)
   # browserName = parameters_monkeys$docker$browserName
   # container_name = container_24001$container_name
@@ -40,8 +44,9 @@ create_remDr <-
       }
       
       # Create remote driver
-      if (disable_web_security == TRUE) {
-        remDr <- remoteDriver(remoteServerAddr = "localhost", port = container_port, browserName = browserName, extraCapabilities = list(chromeOptions = list(args = list("--disable-web-security"))))
+      if (disable_web_security == TRUE & browserName == "chrome") {
+        remDr <- remoteDriver(remoteServerAddr = "localhost", port = container_port, browserName = browserName, 
+                              extraCapabilities = list(chromeOptions = list(args = list("--disable-web-security"))))#, "--enable-logging"
       } else {
         remDr <- remoteDriver(remoteServerAddr = "localhost", port = container_port, browserName = browserName)
       }
@@ -67,7 +72,7 @@ create_remDr <-
     
     
     # Close all browser instances
-    closeALL <- function(time_wait = 1) {
+    clean_open <- function(time_wait = 1) {
       
       # Wait for driver to be created
       Sys.sleep(time_wait)
@@ -75,20 +80,19 @@ create_remDr <-
       remDr$closeall()
       
       if (DEBUG == TRUE) cat(crayon::yellow("\n-About to open a browser... \n"))
-      # Sys.sleep(1)
+      
+      # OPEN browser
       remDr$open(silent = !DEBUG)
       
     }
     
-    closeALL_safely = safely(closeALL)
+    clean_open_safely = safely(clean_open)
     
-    CLOSEALL_SAFELY = closeALL_safely(time_wait = 1)
+    CLEAN_OPEN_SAFELY = clean_open_safely(time_wait = 1)
     
-    if (length(CLOSEALL_SAFELY$error) > 0) {
+    if (length(CLEAN_OPEN_SAFELY$error) > 0) {
       cat(crayon::bgRed("ERROR: creating closing browsers [create_remDr()]\n"))
-      CLOSEALL_SAFELY = closeALL_safely(time_wait = 2)
-      
-      
+      CLEAN_OPEN_SAFELY = clean_open_safely(time_wait = 2)
     }
     # remDr$closeall()
     
