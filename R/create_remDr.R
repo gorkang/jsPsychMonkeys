@@ -1,5 +1,10 @@
-create_remDr <- function(container_port, browserName, container_name = NULL, DEBUG = FALSE) {
-  
+create_remDr <-
+  function(container_port,
+           browserName,
+           container_name = NULL,
+           disable_web_security = FALSE,
+           DEBUG = FALSE) {
+    
   # DEBUG
   # targets::tar_load(container_24001)
   # browserName = parameters_monkeys$docker$browserName
@@ -19,6 +24,8 @@ create_remDr <- function(container_port, browserName, container_name = NULL, DEB
   }
   
   
+    
+
   # Create browser instance -------------------------------------------------
   
     if (DEBUG == TRUE) cat(crayon::silver("Create remoteDriver: [", container_port, "] [", browserName, "] [", container_name, "] [", "\n"))
@@ -33,7 +40,11 @@ create_remDr <- function(container_port, browserName, container_name = NULL, DEB
       }
       
       # Create remote driver
-      remDr <- remoteDriver(remoteServerAddr = "localhost", port = container_port, browserName = browserName)
+      if (disable_web_security == TRUE) {
+        remDr <- remoteDriver(remoteServerAddr = "localhost", port = container_port, browserName = browserName, extraCapabilities = list(chromeOptions = list(args = list("--disable-web-security"))))
+      } else {
+        remDr <- remoteDriver(remoteServerAddr = "localhost", port = container_port, browserName = browserName)
+      }
       return(remDr)
     }
     create_remDr_safely = safely(create_remDr)

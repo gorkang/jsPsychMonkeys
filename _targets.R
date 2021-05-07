@@ -4,11 +4,12 @@
   # For a complete list of possible parameters, see set_parameters()
   parameters_monkeys_minimal = list(
     uid = 1:2,
-    random_id = FALSE,
+    # uid_URL = FALSE,
     keep_alive = TRUE,
     # DEBUG = TRUE,
     open_VNC = TRUE,
-    local_folder_tasks = c("Downloads/tests/test_prototol")#, "Downloads/tests/994")
+    disable_web_security = TRUE,
+    local_folder_tasks = "Downloads/tests/2"
     # server_folder_tasks = "test/1x"
   )
   
@@ -91,7 +92,8 @@ TARGETS =  list(
         create_remDr(
           container_port = container$container_port,
           browserName = container$browserName,
-          container_name = container$container_name
+          container_name = container$container_name,
+          disable_web_security = parameters_monkeys$remDr_params$disable_web_security
         ), priority = .5
       ),
       
