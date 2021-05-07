@@ -93,16 +93,18 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
         parameters_input$local_or_server = "server"
       } else {
         cat(crayon::bgRed(" ERROR: you need to set either 'local_folder_tasks' or 'server_folder_tasks' in parameters_monkeys_minimal \n"))
-        
       }
       
       if (!is.null(parameters_input$local_folder_tasks)) local_folder_tasks = parameters_input$local_folder_tasks
       if (!is.null(parameters_input$server_folder_tasks)) server_folder_tasks = parameters_input$server_folder_tasks
       if (!is.null(parameters_input$local_or_server)) local_or_server = parameters_input$local_or_server
       
+      # Disable parameters not compatible with non-chrome browsers
+      if (browserName != "chrome") console_logs = FALSE
+      if (browserName != "chrome") disable_web_security = FALSE
       
-    # DEBUG
       
+    # Enable DEBUG if debug_file or open_VNC are TRUE
       if (debug_file == TRUE) DEBUG = TRUE
       if (open_VNC == TRUE) DEBUG = TRUE
   
