@@ -82,8 +82,7 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
       
     } else {
       # Connect to container
-
-      if (grepl("debug", system('docker ps -a --format "{{.Image}}"', intern = TRUE))) {
+      if (any(grepl("debug", system('docker ps -a --format "{{.Image}}"', intern = TRUE)))) {
         # CHECK if it is a debug container      
         
         if (!is.null(port)) {
@@ -142,7 +141,7 @@ debug_docker <- function(uid_participant, parameters_debug = parameters_monkeys)
   parameters_task <<- parameters_debug
   
   
-  uid = uid_participant
+  uid <<- uid_participant
   container_name_tar <- paste0("container_", uid)
   container_name <<- paste0("container", uid)
   driver_name <<- paste0("remoteDriver_", uid)
@@ -169,14 +168,15 @@ debug_docker <- function(uid_participant, parameters_debug = parameters_monkeys)
 debug_function <- function(name_function) {
   
   # DEBUG
-  # name_function = "prepare_CRS"
+  # name_function = "launch_task"
   
   # Function to tar_load or assign the parameters
   load_parameters <- function(parameters_function_separated, NUM) {
     if (length(parameters_function_separated[[NUM]]) == 1) {
       targets::tar_load(parameters_function_separated[[NUM]], envir = .GlobalEnv)
     } else if (length(parameters_function_separated[[NUM]]) == 2) {
-      assign(parameters_function_separated[[NUM]][1], parameters_function_separated[[NUM]][2], envir = .GlobalEnv)
+      # assign(parameters_function_separated[[NUM]][1], parameters_function_separated[[NUM]][2], envir = .GlobalEnv)
+      assign(parameters_function_separated[[NUM]][1], eval(parse(text = parameters_function_separated[[NUM]][2])), envir = .GlobalEnv)
     }
   }
   
@@ -185,23 +185,31 @@ debug_function <- function(name_function) {
   if (substitute(name_function) != "name_function") name_function = substitute(name_function) #if (!interactive()) is so substitute do not overwrite name_function when in interactive mode
   
   # Parses _targets.R
-  code <- parse("_targets.R")
-  if (file.exists("targets/targets_main.R")) code <- c(code, parse("targets/targets_main.R"))
   # code <- parse("_targets.R")
+  # if (file.exists("targets/targets_main.R")) code <- c(code, parse("targets/targets_main.R"))
   
   # Finds the chunk where name_function is, and cleans the "\"
-  text_targets = grep(name_function, code, value = TRUE) %>% gsub("[^A-Za-z0-9\\(\\),_= ]", "", .)
+  # text_targets = grep(name_function, code, value = TRUE) %>% gsub("[^A-Za-z0-9\\(\\),_= ]", "", .)
   
   # Gets and separates then parameters of the function
-  parameters_function_raw = gsub(paste0(".*", name_function, "\\((.*?)).*"), "\\1", text_targets) %>% gsub(" ", "", .)
+  # parameters_function_raw = gsub(paste0(".*", name_function, "\\((.*?)).*"), "\\1", text_targets) %>% gsub(" ", "", .)
   
-  if (length(parameters_function_raw) > 0) {
+  # if (length(parameters_function_raw) > 0) {
     
-    parameters_function_separated = strsplit(parameters_function_raw, ",") %>% unlist() %>% strsplit(., "=")
+    # parameters_function_separated = strsplit(parameters_function_raw, ",") %>% unlist() %>% strsplit(., "=")
+    
+  DF_function = tar_manifest() %>% filter(grepl(name_function, command)) %>% pull(command) %>% last()
+  if (!is.na(DF_function)) {
+  
+    string_function = gsub(name_function, "", DF_function) %>% gsub(" |\\\\n|\\(|\\)", "", .)
+    LOADME = stringr::str_extract_all(string_function, "=.*?[,\\$]", simplify = TRUE) %>% gsub("\\$|,|=", "", .) %>% as.vector() %>% unique()
+    tar_load(all_of(LOADME))
+
+    parameters_function_separated = strsplit(string_function, ",") %>% unlist() %>% strsplit(., "=")
     
     # For each of the parameters, applies the load_parameters() function
-    TEMP = seq_along(parameters_function_separated) %>% map(~ load_parameters(parameters_function_separated, NUM = .x))
-    cat(crayon::green("Loaded: "), gsub(",", ", ", parameters_function_raw), "\n")
+    seq_along(parameters_function_separated) %>% walk(~ load_parameters(parameters_function_separated, NUM = .x))
+    cat(crayon::green("Loaded: "), gsub(",", ", ", name_function), "\n")
     
   } else {
     
