@@ -5,7 +5,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
   
   # DEBUG -------------------------------------------------------------------
   
-  # reconnect_to_VNC(container_name = "container24000")
+  # reconnect_to_VNC(container_name = "container2")
   # remDr$screenshot(display = TRUE)
   
   # DEBUG = TRUE
@@ -142,8 +142,9 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
       
     # DF_elements_options
     
+    
     # Store table for DEBUG
-    if (DEBUG == TRUE) write_csv(DF_elements_options, paste0("outputs/DF/EXTRACTED_", index, "_NEW.csv"))
+    # if (DEBUG == TRUE) write_csv(DF_elements_options, paste0("outputs/DF/EXTRACTED_", index, "_NEW.csv"))
     
 
     
@@ -201,10 +202,8 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     } else if (length(list_elements) == 0 | length(ID_names) == 0) {
       
       if (DEBUG == TRUE) cat(crayon::bgGreen("\n  --- END OF EXPERIMENT --- \nNO elements found. CHECK: \n- 'outputs/END.png'\n -'outputs/source/'\n"))
-      
-        write_lines(page_source[[1]][1], paste0("outputs/source/end_", index, ".html"))
-        
-      if (DEBUG == TRUE) remDr$screenshot(file = "outputs/screenshots/END-DEBUG-get_elements-good-end.png")
+      # if (DEBUG == TRUE) write_lines(page_source[[1]][1], paste0("outputs/source/end_", index, ".html"))
+      # if (DEBUG == TRUE) remDr$screenshot(file = "outputs/screenshots/END-DEBUG-get_elements-good-end.png")
         
         continue = FALSE
     
