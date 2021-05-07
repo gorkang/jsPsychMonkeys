@@ -12,9 +12,11 @@ The goal of this package is to simplify testing a jsPysch experiment, generating
 jsPsychMonkeys can run local or online experiments. You can launch as many participants as you want (laws of Physics and time constraints for virtual Monkey's labour still apply), including a parallel horde (your number of CPU cores are the limit). You can also ask the monkeys to take a screenshot of every screen they see, etc.
 
 
-## How to use this
+## How to use it
 
-### 1) Download the jsMonkeys project
+---  
+
+#### 1) Download the jsMonkeys project
 
 To download this project to your computer:  
 
@@ -23,25 +25,31 @@ if (!require('usethis')) install.packages('usethis'); library('usethis')
 usethis::use_course("https://github.com/gorkang/jsPsychMonkeys")
 ```
 
-### 2) Setup
+---  
+
+#### 2) Setup
 
 Install the dependencies (see packages used in `_targets_packages.R`) and make sure you have all the necessary folders:  
 
 `source("setup.R")`  
 
+---  
 
-### 3) Parameters
+
+#### 3) Parameters
 
 Edit the `Parameters` section of the `_targets.R` file. The minimal set of parameters needed are:  
 
 ```
 parameters_monkeys_minimal = list(
   uid = 1:10, # User id's for the participants. 
-  local_folder_tasks = "Downloads/tests/2" # Where is your jsPsych protocol located
+  local_folder_tasks = "Downloads/tests/2" # Location of your jsPsych protocol
 )
-````
+```
 
-### 4) Release the Monkeys! 
+---  
+
+#### 4) Release the Monkeys! 
 
 If you want a sequential process: 
 
@@ -61,3 +69,45 @@ In `run.R` you can see the typical set of commands needed for a variety of situa
 
 
 ![](man/figures/jsMonkeys_parallel.gif)
+
+
+---  
+
+## Other options
+
+---  
+
+#### Launch monkeys on a server
+
+You will need a `.vault/SERVER_PATH.R` file that contains the path where the protocols are located in your server: `server_path = "http://URL_OF_YOUR_SERVER/PROTOCOLS_GENERAL_FOLDER/"`  
+
+With the `server_folder_tasks` you will set the subfolder where the protocol is located. In the example below the monkeys would go to, `http://URL_OF_YOUR_SERVER/PROTOCOLS_GENERAL_FOLDER/1`  
+
+```
+parameters_monkeys_minimal = list(
+  uid = 1:10, # User id's for the participants. 
+  server_folder_tasks = "1" # Location of your jsPsych protocol
+)
+```
+
+---  
+
+### Other parameters
+
+There are a few parameters that can be useful:  
+
+- `uid_URL = TRUE`: The uid is passed in the URL (e.g. `&uid=1`)  
+
+- `local_folder_tasks = rep("Downloads/tests/test_prototol", 25)`: Passing a vector of multiple tasks will make the monkeys to complete all of them.  
+
+- `keep_alive = TRUE` Keep the docker container alive after completing the tasks  
+
+- `DEBUG = TRUE` Activate DEBUG mode. Lot's of stuff will show up in the console.  
+
+- `open_VNC = TRUE` Activate DEBUG mode and open a VNC container to see the monkey's progress.  
+
+- `screenshot = TRUE` The monkeys will take a picture of all the pages they see. The .png files are stored in `outputs/screenshots`  
+
+- `debug_file = TRUE` Activate DEBUG mode and store all the console output in the `outputs/log`  
+
+- `big_container = TRUE` Sets the Shared memory size (/dev/shm) to 2 gigabytes. This is useful to avoid long/complex protocols to crash
