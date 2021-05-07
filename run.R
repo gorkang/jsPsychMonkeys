@@ -6,8 +6,9 @@
 
 # Visualize ---------------------------------------------------------------
 
+targets::tar_visnetwork(targets_only = TRUE, label = "time", exclude = "parameters_monkeys")
 targets::tar_visnetwork(targets_only = TRUE, label = "time")
-targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE)
+targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE, label = "time")
 
 
 # CLEAN UP ----------------------------------------------------------------
@@ -50,5 +51,5 @@ targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE)
 
   targets::tar_meta(fields = c(name, warnings)) %>% tidyr::drop_na(warnings)
   targets::tar_meta(fields = c(name, seconds)) %>% tidyr::drop_na()
-  
+  targets::tar_manifest()
   
