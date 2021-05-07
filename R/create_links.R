@@ -40,7 +40,7 @@ create_links <-
 
     # Create link -------------------------------------------------------------
     
-    if (uid_URL == TRUE) {
+    if (uid_URL == FALSE) {
       uid_string = ""
     } else {
       uid_string = paste0("&uid=", uid)
