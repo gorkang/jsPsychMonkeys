@@ -5,7 +5,7 @@
   parameters_monkeys_minimal = list(
     uid = 1:2,
     # uid_URL = FALSE,
-    keep_alive = TRUE,
+    # keep_alive = TRUE,
     # console_logs = FALSE,
     open_VNC = TRUE,
     disable_web_security = TRUE,
