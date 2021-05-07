@@ -6,9 +6,9 @@
 
 # Visualize ---------------------------------------------------------------
 
-targets::tar_visnetwork(targets_only = TRUE, label = "time", exclude = "parameters_monkeys")
-targets::tar_visnetwork(targets_only = TRUE, label = "time")
-targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE, label = "time")
+  targets::tar_visnetwork(targets_only = TRUE, label = "time", exclude = "parameters_monkeys")
+  targets::tar_visnetwork(targets_only = TRUE, label = "time")
+  targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE, label = "time")
 
 
 # CLEAN UP ----------------------------------------------------------------
@@ -24,25 +24,25 @@ targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE, label = 
   
 # Launch  -----------------------------------------------------------------
 
+  targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE)
+  
   system('docker stop $(docker ps -q)') # KILL all docker instances
   targets::tar_destroy()
-  
-  targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE)
   targets::tar_make()
 
 
 # Parallel ----------------------------------------------------------------
 
+  targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE)
+  
   system('docker stop $(docker ps -q)') # KILL all docker instances
   targets::tar_destroy()
-  
-  targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE)
   targets::tar_make_future(workers = future::availableCores() - 2)
 
   
 # GET Containers ----------------------------------------------------------
 
-  # debug_docker(24000)
+  # debug_docker(1)
   reconnect_to_VNC()
   reconnect_to_VNC("container1", DEBUG = TRUE)
   
