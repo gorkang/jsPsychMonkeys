@@ -112,4 +112,7 @@ There are a few parameters that can be useful:
 
 - `big_container = TRUE` Sets the Shared memory size (/dev/shm) to 2 gigabytes. This is useful to avoid long/complex protocols to crash
 
-- `disable_web_security = TRUE` If you are running a local protocol that loads external files (e.g. consent form in a html file), you may need this
+- `disable_web_security = TRUE` If you are running a local protocol that loads external files (e.g. consent form in a html file), you may need this. Only works with chrome.
+
+- `console_logs = TRUE` Store the browser's console logs. Only works with chrome.
+
