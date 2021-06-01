@@ -80,7 +80,6 @@ complete_task <-
   
   while (continue_links) {    
     
-    
     # Go to task --------------------------------------------------------------
     
     LAUNCH_TASK = launch_task_safely(links[index_links], wait_retry = 1)
@@ -125,6 +124,18 @@ complete_task <-
         if (list_get_elements$continue == TRUE) interact_with_element(list_get_elements, DEBUG = DEBUG)
         
         
+          
+
+        # FORCED WAIT -------------------------------------------------------------
+          
+          # if (index == 5) {
+          #   set.seed(index_links)
+          #   time_wait = sample(c(1, 5, 10, 60), 1)
+          #   cat("MONITO esperando", time_wait, "segundos en pantalla", index, "\n")
+          #   Sys.sleep(time_wait)
+          # }
+                  
+          
         # Output of while
         continue = list_get_elements$continue
         index = index + 1
