@@ -39,7 +39,6 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
 
     page_source = remDr$getPageSource()
     page_source_rvest <- read_html(page_source[[1]])
-    # page_source_rvest <- read_html("outputs/source/end_4.html")
 
 
   # Get html elements -------------------------------------------------------
@@ -141,7 +140,6 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
                ))
       
     # DF_elements_options
-    
     
     # Store table for DEBUG
     # if (DEBUG == TRUE) write_csv(DF_elements_options, paste0("outputs/DF/EXTRACTED_", index, "_NEW.csv"))

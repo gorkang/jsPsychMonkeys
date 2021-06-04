@@ -44,8 +44,6 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
                            wait_retry = 2,
                            forced_random_wait = FALSE) {
   
-  
-  
   # DEBUG
   # parameters_input = parameters_monkeys_minimal
   # uid = 1

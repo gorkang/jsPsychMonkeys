@@ -11,7 +11,7 @@
     keep_alive = TRUE,
     console_logs = FALSE,
     screenshot = FALSE,
-    debug_file = TRUE,
+    debug_file = FALSE,
     DEBUG = TRUE,
     open_VNC = FALSE,
     disable_web_security = TRUE,
@@ -68,8 +68,6 @@
   # Restore output to console (in case it was left hanging...)
     suppressWarnings(sink())
     sink(type = "message")
-    Sys.setenv(NO_COLOR = FALSE)
-    # Sys.setenv(crayon.enabled = TRUE)
     
 
 # Targets -----------------------------------------------------------------

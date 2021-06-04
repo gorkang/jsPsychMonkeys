@@ -196,6 +196,7 @@ debug_function <- function(name_function) {
   
   # DEBUG
   # name_function = "launch_task"
+  # name_function = "set_parameters"
   
   # Function to tar_load or assign the parameters
   load_parameters <- function(parameters_function_separated, NUM) {
@@ -277,11 +278,6 @@ tar_make_future_rowwise <- function(TARGETS, uids) {
         })
     })
 
-  
   # TARGETS[[1]]$container[[1]]$settings$priority
-  # TARGETS[[1]]$container[[2]]$settings$priority
   
 }
-
-# TARGETS[[1]]$remoteDriver[[1]]$settings$priority
-# TARGETS[[1]]$remoteDriver[[2]]$settings$priority
