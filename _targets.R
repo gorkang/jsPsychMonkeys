@@ -11,7 +11,7 @@
     keep_alive = TRUE,
     console_logs = FALSE,
     screenshot = FALSE,
-    debug_file = FALSE,
+    debug_file = TRUE,
     DEBUG = TRUE,
     open_VNC = FALSE,
     disable_web_security = TRUE,
@@ -49,8 +49,12 @@
 
 # Maintenance -------------------------------------------------------------
 
-  # So crayon colors work when using future
-  #Sys.setenv(R_CLI_NUM_COLORS = crayon::num_ansi_colors()) 
+  # So crayon colors work when using future and when in interactive mode
+  if (!is.null(parameters_monkeys_minimal$debug_file)) {
+    if (parameters_monkeys_minimal$debug_file == FALSE) Sys.setenv(R_CLI_NUM_COLORS = crayon::num_ansi_colors())
+  } else {
+    Sys.setenv(R_CLI_NUM_COLORS = crayon::num_ansi_colors())
+  }
   
   # target options (packages, errors...)
   tar_option_set(
