@@ -1,11 +1,12 @@
-interact_with_element <- function(list_get_elements, DEBUG = FALSE) {
+interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL) {
   
   # DEBUG
     # remDr$screenshot(display = TRUE)
   
     ## CONTROL + P
     # DEBUG = TRUE
-    # debug_docker(24000)
+    # targets::tar_load("parameters_monkeys")
+    # debug_docker(1)
     # list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_elements
     # list_get_elements = list_get_elements$result
   
@@ -70,11 +71,13 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE) {
 
   # MESSAGE -----------------------------------------------------------------
 
-  if (DEBUG == TRUE & length(list_get_elements$name_buttons$id) == 1 & all(list_get_elements$name_buttons$id == "jspsych-instructions-next")) cat(crayon::bold("\n[STARTING TASK]:", gsub("\n", "", list_get_elements$name_contents$content), "\n"))
-
-  if (DEBUG == TRUE) cat(crayon::yellow("\n[SCREEN]:"), crayon::silver(paste0(paste(output_select_input$selected_input$name, collapse = ", "), "|", paste(selected_button_name, collapse = ", "), ":")),  content_str, crayon::yellow("[response]:"), crayon::white( paste(output_select_input$input_text_human_readable, collapse = ", ")), "\n")
-
-
+  # if (DEBUG == TRUE & length(list_get_elements$name_buttons$id) == 1 & all(list_get_elements$name_buttons$id == "jspsych-instructions-next")) cat(crayon::bold("\n[STARTING TASK]:", gsub("\n", "", list_get_elements$name_contents$content), "\n"))
+  if (DEBUG == TRUE & length(list_get_elements$name_buttons$id) == 1 & all(list_get_elements$name_buttons$id == "jspsych-instructions-next")) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bold("[Instructions]:", gsub("\n", "", list_get_elements$name_contents$content), "\n")))
+  
+  # if (DEBUG == TRUE) cat(crayon::yellow("\n[SCREEN]:"), crayon::silver(paste0(paste(output_select_input$selected_input$name, collapse = ", "), "|", paste(selected_button_name, collapse = ", "), ":")),  content_str, crayon::yellow("[response]:"), crayon::white( paste(output_select_input$input_text_human_readable, collapse = ", ")), "\n")
+  if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::yellow("[SCREEN]", paste0("[", index, "]"), ":"), crayon::silver(paste0(paste(output_select_input$selected_input$name, collapse = ", "), "|", paste(selected_button_name, collapse = ", "), ":")),  content_str, crayon::yellow("[response]:"), crayon::white( paste(output_select_input$input_text_human_readable, collapse = ", ")), "\n"))
+  
+  
   # Output ------------------------------------------------------------------
 
   output_interact = 

@@ -1,16 +1,23 @@
 # Parameters ----- [EDIT ONLY THIS SECTION] --------------------------------
   
+  # Number of workers is defined in run.R: targets::tar_make_future(workers = future::availableCores() - 2)
+
+
   # Minimal parameters for your simulation. 
   # For a complete list of possible parameters, see set_parameters()
   parameters_monkeys_minimal = list(
-    uid = 1:2,
-    # uid_URL = FALSE,
-    # keep_alive = TRUE,
-    # console_logs = FALSE,
-    open_VNC = TRUE,
+    uid = 3,
+    uid_URL = FALSE,
+    keep_alive = TRUE,
+    console_logs = FALSE,
+    screenshot = FALSE,
+    debug_file = FALSE,
+    DEBUG = TRUE,
+    open_VNC = FALSE,
     disable_web_security = TRUE,
-    local_folder_tasks = "Downloads/tests/2"
-    # server_folder_tasks = "test/1x"
+    forced_random_wait = TRUE,
+    local_folder_tasks = rep("Downloads/tests/test_prototol", 15) #"Downloads/tests/2/"
+    # server_folder_tasks = "2" #test/1x test/creencias_salud/ #2
   )
   
 
@@ -43,7 +50,7 @@
 # Maintenance -------------------------------------------------------------
 
   # So crayon colors work when using future
-  Sys.setenv(R_CLI_NUM_COLORS = crayon::num_ansi_colors()) 
+  #Sys.setenv(R_CLI_NUM_COLORS = crayon::num_ansi_colors()) 
   
   # target options (packages, errors...)
   tar_option_set(
@@ -57,6 +64,8 @@
   # Restore output to console (in case it was left hanging...)
     suppressWarnings(sink())
     sink(type = "message")
+    Sys.setenv(NO_COLOR = FALSE)
+    # Sys.setenv(crayon.enabled = TRUE)
     
 
 # Targets -----------------------------------------------------------------
@@ -121,6 +130,7 @@ TARGETS =  list(
           links = links_tar$links,
           initial_wait = parameters_monkeys$task_params$initial_wait,
           wait_retry = parameters_monkeys$task_params$wait_retry,
+          forced_random_wait = parameters_monkeys$task_params$forced_random_wait,
           screenshot = parameters_monkeys$debug$screenshot,
           DEBUG = parameters_monkeys$debug$DEBUG,
           console_logs = parameters_monkeys$debug$console_logs,

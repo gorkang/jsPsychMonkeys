@@ -8,7 +8,7 @@
 
   targets::tar_visnetwork(targets_only = TRUE, label = "time", exclude = "parameters_monkeys")
   targets::tar_visnetwork(targets_only = TRUE, label = "time")
-  targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE, label = "time")
+  targets::tar_watch(seconds = 10, outdated = FALSE, targets_only = TRUE, label = "time", exclude = "parameters_monkeys")
 
 
 # CLEAN UP ----------------------------------------------------------------
@@ -24,7 +24,7 @@
   
 # Launch  -----------------------------------------------------------------
 
-  targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE)
+  targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE, exclude = "parameters_monkeys")
   
   system('docker stop $(docker ps -q)') # KILL all docker instances
   targets::tar_destroy()
@@ -33,7 +33,7 @@
 
 # Parallel ----------------------------------------------------------------
 
-  targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE)
+  targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE, exclude = "parameters_monkeys")
   
   system('docker stop $(docker ps -q)') # KILL all docker instances
   targets::tar_destroy()
@@ -44,7 +44,7 @@
 
   # debug_docker(1)
   reconnect_to_VNC()
-  reconnect_to_VNC("container1", DEBUG = TRUE)
+  reconnect_to_VNC("container4", DEBUG = TRUE)
   
 
 # CHECK META --------------------------------------------------------------

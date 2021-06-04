@@ -5,6 +5,7 @@ complete_task <-
            links,
            initial_wait = 2,
            wait_retry = 2,
+           forced_random_wait = FALSE,
            screenshot = FALSE,
            DEBUG = FALSE,
            console_logs = TRUE,
@@ -17,7 +18,7 @@ complete_task <-
     # debug_function("complete_task")
     # targets::tar_load("parameters_monkeys")
     # debug_docker(uid_participant = 2, parameters_debug = parameters_monkeys)
-    
+
     
   # CHECKS --------------------------------------------------------------
   
@@ -51,7 +52,10 @@ complete_task <-
     launch_task <- function(links, wait_retry) {
       if (length(links) != 1) stop("links passed to remDr$navigate are != 1")
       Sys.sleep(wait_retry) 
-      if (DEBUG == TRUE) cat(crayon::yellow("Opening link:", links, "\n"))
+      # if (DEBUG == TRUE) cat(crayon::yellow("Opening link:", links, "\n"))
+      # if (DEBUG == TRUE) cat("Opening linkx:", links, "\n")
+      if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = !parameters_task$debug$debug_file), cat(crayon::yellow("\n\nOpening link:", links, "\n")))
+      
       remDr$navigate(links)
     }
     
@@ -65,6 +69,9 @@ complete_task <-
 
     # Create log for each worker
     if (parameters_task$debug$debug_file == TRUE) {
+      Sys.setenv(NO_COLOR = TRUE)
+      # Sys.setenv(crayon.enabled = FALSE)
+      
       con <- file(paste0("outputs/log/pid_", gsub("/", "_", parameters_task$task$pid), "_uid_", uid, ".log"))
       sink(con, append = TRUE)
       sink(con, append = TRUE, type = "message")
@@ -85,7 +92,10 @@ complete_task <-
     LAUNCH_TASK = launch_task_safely(links[index_links], wait_retry = 1)
     
     # INITIAL WAIT FOR PAGE TO LOAD
-    if (DEBUG == TRUE) cat(crayon::bgGreen(paste0("\n  START OF EXPERIMENT. waiting ", initial_wait, "s")), crayon::yellow("[If it fails, increase wait]  \n"))
+    # if (DEBUG == TRUE) cat(crayon::bgGreen(paste0("\n  START OF EXPERIMENT. waiting ", initial_wait, "s")), crayon::yellow("[If it fails, increase wait]  \n"))
+    if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgGreen(paste0("[[START OF EXPERIMENT]] ", Sys.time(), " Waiting ", initial_wait, "s")), crayon::yellow("[If it fails, increase initial_wait or wait_retry]\n")))
+    
+    
     Sys.sleep(initial_wait)
     
     if (length(LAUNCH_TASK$error) > 0) cat(crayon::bgRed(" ERROR: launching task [launch_task()] \n"), crayon::black(LAUNCH_TASK$error))
@@ -99,14 +109,20 @@ complete_task <-
       console_logs_list = list()
       
       while (continue) {
-      
-        if (DEBUG == TRUE) cat(crayon::bgMagenta("  --- SCREEN: ", index, " ---\n"))
+        
+        # if (DEBUG == TRUE) cat(crayon::bgMagenta("  --- SCREEN: ", index, " ---\n"))
+        #if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgMagenta("  --- SCREEN: ", index, " ---\n")))
+        
+                            
         if (!exists("index")) index = 1
         if (screenshot == TRUE) remDr$screenshot(file = paste0("outputs/screenshots/", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
         
         if (console_logs == TRUE) console_logs_list[[index]] = remDr$log(type = "browser")
         
         ## Get elements of website ----------------------------
+        
+          # If there is an alert, accept
+          check_accept_alert(wait_retry)
         
           list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 1, DEBUG = DEBUG)
           
@@ -121,20 +137,20 @@ complete_task <-
     
           
         # Interact with the elements we found ------------------
-        if (list_get_elements$continue == TRUE) interact_with_element(list_get_elements, DEBUG = DEBUG)
+        if (list_get_elements$continue == TRUE) interact_with_element(list_get_elements, DEBUG = DEBUG, index = index)
         
         
-          
 
         # FORCED WAIT -------------------------------------------------------------
           
-          # if (index == 5) {
-          #   set.seed(index_links)
-          #   time_wait = sample(c(1, 5, 10, 60), 1)
-          #   cat("MONITO esperando", time_wait, "segundos en pantalla", index, "\n")
-          #   Sys.sleep(time_wait)
-          # }
-                  
+          if (forced_random_wait == TRUE) {
+            if (index == 5) {
+              set.seed(index_links)
+              time_wait = sample(c(1, 2, 3), 1)
+              cat("[MONKEY]", paste0("[", index, "]"), "uid", uid,"waiting", time_wait, "seconds... \n")
+              Sys.sleep(time_wait)
+            }
+          }
           
         # Output of while
         continue = list_get_elements$continue
@@ -148,8 +164,8 @@ complete_task <-
         # Store browser console logs
         numbered_console_logs = console_logs_list %>% setNames(seq_along(.))  %>% .[lengths(.) != 0]
         DF_console_logs = console_logs_list %>% bind_rows() %>% mutate(page_number = names(numbered_console_logs))
-        write_csv(DF_console_logs, paste0("outputs/log/", uid, "_console_logs", "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".csv"))
-      }
+        # write_csv(DF_console_logs, paste0("outputs/log/", uid, "_console_logs", "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".csv"))
+        write_csv(DF_console_logs, paste0("outputs/log/", uid, "_console_logs", "_", Sys.time(), ".csv"))}
       
       # links while loop
       index_links = index_links + 1
@@ -167,6 +183,8 @@ complete_task <-
     if (parameters_task$debug$debug_file == TRUE) {
       sink() 
       sink(type = "message")
+      Sys.setenv(NO_COLOR = FALSE)
+      # Sys.setenv(crayon.enabled = TRUE)
     }
 
   return(container_name)

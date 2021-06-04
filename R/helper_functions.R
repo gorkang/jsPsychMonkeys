@@ -41,6 +41,33 @@ check_trialids <- function(local_folder_tasks) {
 }
 
 
+#' check_accept_alert
+#' Safely checks if there in an alert and accepts it
+#'
+#' @return
+#' @export
+#'
+#' @examples
+check_accept_alert <- function(wait_retry) {
+  
+  get_alert <- function(variables) {
+    MESSAGE = remDr$getAlertText()  
+    remDr$acceptAlert()
+    return(MESSAGE)
+  }
+  
+  get_alert_safely = purrr::safely(get_alert)
+  RESP = suppressMessages(get_alert_safely())
+  while (!is.null(RESP$result)) {
+    withr::with_options(list(crayon.enabled = FALSE), cat(crayon::yellow("[Alert] found, waiting", wait_retry, "seconds: ", crayon::silver(RESP[[1]]), "\n")))
+    Sys.sleep(wait_retry)
+    
+    RESP = suppressMessages(get_alert_safely())
+  }
+  
+  
+}
+
 
 #' reconnect_to_VNC
 #'

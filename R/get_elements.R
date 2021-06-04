@@ -170,15 +170,13 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     if (length(list_elements) == 0 & try_number == 1) {
       
       screen_raw_elements = DF_elements_options_raw %>% filter(!is.na(content) & content != "") %>% pull(content) %>% unique(.)  %>% paste(., collapse = "; ")
-      if (DEBUG == TRUE) cat(crayon::bgYellow(" WARNING: No elements extracted on the first try... [get_elements] \n"), "  - RAW content:", crayon::silver(screen_raw_elements))
+      if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgYellow(" WARNING: No elements extracted on the first try... [get_elements] \n"))) #, "  - RAW content:", crayon::silver(screen_raw_elements), "\n"
       stop("No elements found") 
       
     } else if (length(list_elements) == 0 & try_number == 2) {
     
       screen_raw_elements = DF_elements_options_raw %>% filter(!is.na(content) & content != "") %>% pull(content) %>% unique(.) %>% paste(., collapse = "; ")
-      # if (grepl("Usted ya ha completado todas las tareas de este protocolo", screen_raw_elements)) 
-      if (DEBUG == TRUE) cat(crayon::bgYellow(" WARNING: No elements extracted on the second try. END OF EXPERIMENT [get_elements] \n"), "  - RAW content:", crayon::silver(screen_raw_elements))
-      
+      if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgYellow(" WARNING: No elements extracted on the second try... [will end experiment]"), " || RAW content:", crayon::silver(screen_raw_elements)))
       
     }
 
@@ -195,13 +193,15 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
 
     if (length(ID_names) == 1 & all(ID_names == c("jspsych-fullscreen-btn"))) {
       # Initial FULLSCREEN
-      if (DEBUG == TRUE) cat(crayon::bgYellow("\n  START of experiment \n"))
+      # if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgYellow("\n  START of experiment \n")))
+      if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::yellow("[SCREEN]", paste0("[-]"), ":"), crayon::silver(paste0(paste("Fullscreen button")), "\n")))
+      
       DF_elements_options$status = "start"
       continue = TRUE
 
     } else if (length(list_elements) == 0 | length(ID_names) == 0) {
       
-      if (DEBUG == TRUE) cat(crayon::bgGreen("\n  --- END OF EXPERIMENT --- \nNO elements found. CHECK: \n- 'outputs/END.png'\n -'outputs/source/'\n"))
+      if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgGreen("\n[[END OF EXPERIMENT]]\n"))) #NO elements found. CHECK: \n- 'outputs/END.png'\n -'outputs/source/'\n
       # if (DEBUG == TRUE) write_lines(page_source[[1]][1], paste0("outputs/source/end_", index, ".html"))
       # if (DEBUG == TRUE) remDr$screenshot(file = "outputs/screenshots/END-DEBUG-get_elements-good-end.png")
         
@@ -209,7 +209,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     
     } else if (length(ID_names) == 1 & "jspsych-content" %in% DF_elements_options$id & !"button" %in% DF_elements_options$type_extracted) {
       
-      if (DEBUG == TRUE) cat(crayon::bgYellow("\n  END of experiment \n"))
+      if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgYellow("\n[[END OF EXPERIMENT2]]\n")))
       continue = FALSE
 
     } else  {

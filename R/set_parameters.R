@@ -17,6 +17,7 @@
 #' @param server_folder_tasks 
 #' @param initial_wait 
 #' @param wait_retry 
+#' @param forced_random_wait
 #'
 #' @return
 #' @export
@@ -40,7 +41,8 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
                            server_folder_tasks = "",
                            disable_web_security = FALSE,
                            initial_wait = 2,
-                           wait_retry = 2) {
+                           wait_retry = 2,
+                           forced_random_wait = FALSE) {
   
   
   
@@ -81,6 +83,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
     if (!is.null(parameters_input$disable_web_security)) disable_web_security = parameters_input$disable_web_security
     if (!is.null(parameters_input$initial_wait)) initial_wait = parameters_input$initial_wait
     if (!is.null(parameters_input$wait_retry)) wait_retry = parameters_input$wait_retry
+    if (!is.null(parameters_input$forced_random_wait)) forced_random_wait = parameters_input$forced_random_wait
     
 
   # Parameters with dependencies --------------------------------------------
@@ -108,6 +111,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
       if (debug_file == TRUE) DEBUG = TRUE
       if (open_VNC == TRUE) DEBUG = TRUE
   
+      
       
   # Create parameters_monkeys list -------------------------------------------
 
@@ -141,7 +145,8 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
         local_folder_tasks = local_folder_tasks,
         server_folder_tasks = server_folder_tasks,
         initial_wait = initial_wait,
-        wait_retry = wait_retry
+        wait_retry = wait_retry,
+        forced_random_wait = forced_random_wait
       )
     )
       

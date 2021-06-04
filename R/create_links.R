@@ -77,7 +77,7 @@ create_links <-
     
     # Message -----------------------------------------------------------------
     
-    if (DEBUG == TRUE) cat(crayon::underline(crayon::green(uid, "- ", links_tasks), "\n"))
+    if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::underline(crayon::green(uid, "- ", links_tasks), "\n")))
     
     
 
