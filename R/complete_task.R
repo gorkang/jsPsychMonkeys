@@ -13,7 +13,6 @@ complete_task <-
            container_name = NULL,
            remDr = NULL) {
     
-    
   # DEBUG
     # debug_function("complete_task")
     # targets::tar_load("parameters_monkeys")
@@ -58,9 +57,6 @@ complete_task <-
     
     launch_task_safely = safely(launch_task)
     
-    # Get elements
-    get_elements_safely = safely(get_elements)
-    
 
   # START LOG ----------------------------------------------------------------
 
@@ -100,6 +96,10 @@ complete_task <-
       
       while (continue) {
         
+        # If there is an alert, accept
+        check_accept_alert(wait_retry)
+        
+        
         if (!exists("index")) index = 1
         if (screenshot == TRUE) remDr$screenshot(file = paste0("outputs/screenshots/", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
         
@@ -107,29 +107,28 @@ complete_task <-
         
         ## Get elements of website ----------------------------
         
-          # If there is an alert, accept
-          check_accept_alert(wait_retry)
-        
           list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 1, DEBUG = DEBUG)
           
           # If we don't get any elements on out first try, wait wait_retry and try again (important when loading images, htmls, etc.)
-          if (!is.null(list_get_elements$error)) { 
+          if (!is.null(list_get_elements$error)) {
               Sys.sleep(wait_retry)
+              # Make sure there are no alerts before retrying
+              check_accept_alert(wait_retry)
               list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 2, DEBUG = DEBUG)
-              }
+          }
             
           # When there is an error, usually we will have some content here (we "cause" the error with a stop())
           list_get_elements = list_get_elements$result
     
           
         # Interact with the elements we found ------------------
-        if (list_get_elements$continue == TRUE) interact_with_element(list_get_elements, DEBUG = DEBUG, index = index)
+        if (list_get_elements$continue == TRUE) interact_with_element_safely(list_get_elements, DEBUG = DEBUG, index = index) #interact_with_element
 
         # FORCED WAIT ---
           if (forced_random_wait == TRUE) {
             if (index == 5) {
               set.seed(index_links)
-              time_wait = sample(c(1, 2, 3), 1)
+              time_wait = sample(c(1, 2, 3, 5, 10, 20, 30, 30), 1)
               cat("[MONKEY]", paste0("[", index, "]"), "uid", uid,"waiting", time_wait, "seconds... \n")
               Sys.sleep(time_wait)
             }

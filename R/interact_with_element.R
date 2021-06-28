@@ -83,3 +83,6 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
     # return(output_interact)
   
 }
+
+# Interact with elements safely
+interact_with_element_safely = safely(interact_with_element)

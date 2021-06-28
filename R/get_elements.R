@@ -1,6 +1,5 @@
 
 # Get all id's, classes... ------------------------------------------------
-
 get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
   
   # DEBUG -------------------------------------------------------------------
@@ -27,17 +26,26 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
   
   
   # iframes -----------------------------------------------------------------
-  
+  find_elements <- function() {
+    check_accept_alert()
+    remDr$findElements(using = "tag name", "iframe")
+  }
   # If we find an iframe after page 1, enter in it
   if (index > 1) {
-     webElems <- remDr$findElements(using = "tag name", "iframe")
+     webElems <- find_elements() #remDr$findElements(using = "tag name", "iframe")
      iframes = sapply(webElems, function(x){x$getElementAttribute("src")}) %>% unlist(); iframes
      if (length(webElems) > 0) remDr$switchToFrame(webElems[[1]])
   }
 
   # GET source and elements -------------------------------------------------
 
-    page_source = remDr$getPageSource()
+  # Before getting source, make sure there are no alerts
+  get_page_source <- function() {
+    check_accept_alert()
+    remDr$getPageSource()
+  }
+  
+    page_source = get_page_source() #remDr$getPageSource()
     page_source_rvest <- read_html(page_source[[1]])
 
 
@@ -229,3 +237,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
   return(list_get_elements)
 
 }
+
+# Get elements safely
+get_elements_safely = safely(get_elements)
+
