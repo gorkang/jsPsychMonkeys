@@ -31,25 +31,27 @@ create_docker <-
     if (parameters_docker$task$local_or_server == "test") folder_downloads = here::here("tests/jspsych-6_3_1/")
     
     
-    
-    # Available RAM
-    available_RAM = as.numeric(system("awk '/MemFree/ {print $2}' /proc/meminfo", intern = TRUE))
-    
-    if (available_RAM < 80000) {
-
-      NUMBER_dockers_LOW = length(reconnect_to_VNC())
-
-      if (!exists("NUMBER_dockers")) NUMBER_dockers = NUMBER_dockers_LOW
-      # cat(crayon::bgRed("\n\n --- LOW RAM --- dockers: ", NUMBER_dockers_LOW, "\n\n"))
-
-      # while (NUMBER_dockers >= NUMBER_dockers_LOW) {
-      if (NUMBER_dockers >= NUMBER_dockers_LOW) {
-        cat(crayon::bgWhite("\n\n --- LOW RAM --- dockers: ", NUMBER_dockers_LOW, "/", NUMBER_dockers, "Pause for 60s...\n\n"))
-        Sys.sleep(60)
-        NUMBER_dockers = length(reconnect_to_VNC())
-
+    if (Sys.info()["sysname"] == "Linux") {
+      
+      # Available RAM
+      available_RAM = as.numeric(system("awk '/MemFree/ {print $2}' /proc/meminfo", intern = TRUE))
+      
+      if (available_RAM < 80000) {
+  
+        NUMBER_dockers_LOW = length(reconnect_to_VNC())
+  
+        if (!exists("NUMBER_dockers")) NUMBER_dockers = NUMBER_dockers_LOW
+        # cat(crayon::bgRed("\n\n --- LOW RAM --- dockers: ", NUMBER_dockers_LOW, "\n\n"))
+  
+        # while (NUMBER_dockers >= NUMBER_dockers_LOW) {
+        if (NUMBER_dockers >= NUMBER_dockers_LOW) {
+          cat(crayon::bgWhite("\n\n --- LOW RAM --- dockers: ", NUMBER_dockers_LOW, "/", NUMBER_dockers, "Pause for 60s...\n\n"))
+          Sys.sleep(60)
+          NUMBER_dockers = length(reconnect_to_VNC())
+  
+        }
+  
       }
-
     }
     
     # Check if exists

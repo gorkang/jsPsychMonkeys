@@ -42,14 +42,17 @@ create_remDr <-
         if (DEBUG == TRUE) cat(crayon::bgRed("Error creating remoteDriver. Retrying after", paste0(time_wait, "s\n")))
         Sys.sleep(time_wait)
       }
+
+      # extraCapabilities for Chrome
+        # See full list: https://peter.sh/experiments/chromium-command-line-switches/ e.g. --incognito or --disable-web-security
+        # http://www.chromium.org/for-testers/enable-logging # "--enable-logging"
+      chrome_extra_arguments = list(args = list("--start-maximized", "--incognito"))
+      if (disable_web_security == TRUE & browserName == "chrome") chrome_extra_arguments$args[[length(chrome_extra_arguments$args) + 1]] = "--disable-web-security"
       
       # Create remote driver
-      if (disable_web_security == TRUE & browserName == "chrome") {
-        remDr <- remoteDriver(remoteServerAddr = "localhost", port = container_port, browserName = browserName, 
-                              extraCapabilities = list(chromeOptions = list(args = list("--disable-web-security"))))#, "--enable-logging"
-      } else {
-        remDr <- remoteDriver(remoteServerAddr = "localhost", port = container_port, browserName = browserName)
-      }
+      remDr <- remoteDriver(remoteServerAddr = "localhost", port = container_port, browserName = browserName, 
+                            extraCapabilities = list(chromeOptions = chrome_extra_arguments))
+
       return(remDr)
     }
     create_remDr_safely = safely(create_remDr)
@@ -88,6 +91,9 @@ create_remDr <-
     
     clean_open_safely = safely(clean_open)
     
+    
+    # Open new browser -------------------------------------------------------
+    
     CLEAN_OPEN_SAFELY = clean_open_safely(time_wait = 1)
     
     if (length(CLEAN_OPEN_SAFELY$error) > 0) {
@@ -95,10 +101,7 @@ create_remDr <-
       CLEAN_OPEN_SAFELY = clean_open_safely(time_wait = 2)
     }
     # remDr$closeall()
-    
-    
-  # Open new browser -------------------------------------------------------
-    
+  
 
 
   # OUTPUT ------------------------------------------------------------------

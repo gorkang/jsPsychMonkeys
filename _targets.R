@@ -6,18 +6,15 @@
   # Minimal parameters for your simulation. 
   # For a complete list of possible parameters, see set_parameters()
   parameters_monkeys_minimal = list(
-    uid = 3,
-    uid_URL = FALSE,
-    keep_alive = TRUE,
-    console_logs = FALSE,
-    screenshot = FALSE,
-    debug_file = FALSE,
+    uid = 1,
+    screenshot = TRUE,
     DEBUG = TRUE,
-    open_VNC = FALSE,
+    open_VNC = TRUE,
     disable_web_security = TRUE,
-    forced_random_wait = TRUE,
-    local_folder_tasks = rep("Downloads/tests/test_prototol", 15) #"Downloads/tests/2/"
-    # server_folder_tasks = "2" #test/1x test/creencias_salud/ #2
+    
+    # PROTOCOL
+    local_folder_tasks =  "Downloads/name_folder/where-protocol-is"
+    # server_folder_tasks = ""
   )
   
 
