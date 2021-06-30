@@ -21,21 +21,22 @@
   
 # Libraries ---------------------------------------------------------------
 
-  suppressMessages(suppressWarnings(library(targets)))
-  suppressMessages(suppressWarnings(library(tarchetypes)))
-  suppressMessages(suppressWarnings(library(future)))
-  suppressMessages(suppressWarnings(library(future.callr)))
-  suppressMessages(suppressWarnings(library(purrr)))
-  suppressMessages(suppressWarnings(library(dplyr)))
-  
+  suppressMessages(suppressWarnings({
+      if (!require('targets')) install.packages('targets'); library('targets')
+      if (!require('tarchetypes')) install.packages('tarchetypes'); library('tarchetypes')
+      if (!require('future')) install.packages('future'); library('future')
+      if (!require('future.callr')) install.packages('future.callr'); library('future.callr')
+      if (!require('dplyr')) install.packages('dplyr'); library('dplyr')
+      if (!require("purrr")) install.packages("purrr"); library("purrr")
+    }))
 
   # List of packages to use
-  packages_to_load = c("targets", "tarchetypes", "dplyr", "glue", "purrr", "readr", "RSelenium", "rvest" ,"XML")
+  packages_to_load = c("targets", "tarchetypes", "dplyr", "future", "future.callr", "glue", "purrr", "readr", "RSelenium", "rvest" ,"XML")
 
   
   # For tar_make_future() [https://github.com/HenrikBengtsson/future/#controlling-how-futures-are-resolved]
-  future::plan(callr)
-  future::tweak(strategy = "multisession")
+    future::plan(callr)
+    future::tweak(strategy = "multisession")
     
     
 # Functions ---------------------------------------------------------------
