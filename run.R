@@ -8,6 +8,18 @@
   # On Ubuntu, install dependencies:
   # system("sudo apt install docker.io libssl-dev libcurl4-openssl-dev libxml2-dev")
 
+  # Install VNC viewer
+  # https://www.realvnc.com/download/file/viewer.files/VNC-Viewer-6.21.406-Linux-x64.deb
+
+  # Make sure docker works:
+    # [In terminal]:
+      # sudo usermod -aG docker ${USER}
+      # sudo chmod 666 /var/run/docker.sock
+      # sudo systemctl restart docker
+    ## logout and login
+      # docker run hello-world
+
+
   # targets::tar_renv()
 
 
