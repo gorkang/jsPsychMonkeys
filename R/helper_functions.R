@@ -15,14 +15,17 @@ check_trialids <- function(local_folder_protocol) {
   
   scripts = dir(path = paste0(local_folder_protocol, "/tasks"), pattern = ".js", recursive = TRUE, full.names = TRUE)
   if (length(scripts) == 0) stop(paste("Can't find anything in ", local_folder_protocol))
-
+  
   find_trialids <- function(file_name) {
     
     script = read_file(file_name) 
     expres = ".*?trialid: '(.*?)'.*?"
     trialid = gsub(expres, "\\1; \n", script) %>% gsub("^(.*; \n).*", "\\1", .) %>% gsub(";", "", .) %>% gsub(" number \n", "", .)
     if (grepl("This document was made with test_maker", trialid)) trialid = ""
-    strsplit(trialid, " \n")[[1]] %>% as_tibble() %>% mutate(file = file_name) %>% rename(trialid = value) %>% filter(!grepl("^Instructions|^Instructions_[0-9]{2}", trialid))
+    strsplit(trialid, " \n")[[1]] %>% as_tibble() %>% 
+      mutate(file = file_name) %>% 
+      rename(trialid = value) %>% 
+      filter(!grepl("^Instructions|^Instructions_[0-9]{2}|^Fullscreen", trialid))
     
   }
   
@@ -38,10 +41,12 @@ check_trialids <- function(local_folder_protocol) {
   
   if (nrow(DF_problematic_trialids) > 0) {
     
-    message(cat(crayon::red(nrow(DF_problematic_trialids), "ISSUES:\n"), 
-                "- experiment:", paste(DF_problematic_trialids %>% pull(experiment), collapse = ", "), "\n",
-                "- trialid:   ", paste(DF_problematic_trialids %>% pull(trialid), collapse = ", "), "\n"))
-
+    cat(crayon::red(nrow(DF_problematic_trialids), "ISSUES:\n"), 
+        "- experiment:", paste(DF_problematic_trialids %>% pull(experiment), collapse = ", "), "\n",
+        "- trialid:   ", paste(DF_problematic_trialids %>% pull(trialid), collapse = ", "), "\n")
+    
+  } else {
+    cat(crayon::green("All trialid's look great!\n"))
   }
 }
 
