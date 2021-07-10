@@ -127,8 +127,9 @@ complete_task <-
         # FORCED WAIT ---
           if (forced_random_wait == TRUE) {
             if (index == 5) {
-              set.seed(index_links)
-              time_wait = sample(c(1, 2, 3, 5, 10, 20, 30, 30), 1)
+              #set.seed(index_links)
+              set.seed(uid)
+              time_wait = sample(c(1, 10, 20, 30, 30), 1)
               cat("[MONKEY]", paste0("[", index, "]"), "uid", uid,"waiting", time_wait, "seconds... \n")
               Sys.sleep(time_wait)
             }
