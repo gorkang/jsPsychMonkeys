@@ -59,8 +59,22 @@ create_links <-
       
       
     } else {
+      
+      # If folder NOT in Downloads, make a copy (Selenium can only access ~/Downloads)
+      if (!grepl("Downloads", parameters_task$task$local_folder_tasks)) {
+        destination_folder = paste0("~/Downloads/JSPSYCH/")
+        cat("", 
+            crayon::yellow("Folder does not exist:"), parameters_task$task$local_folder_tasks, "\n",
+            crayon::green("Copying to:"), paste0(destination_folder, basename(parameters_task$task$local_folder_tasks)), "\n")
+        if (!dir.exists(destination_folder)) dir.create(destination_folder)
+        file.copy(parameters_task$task$local_folder_tasks, destination_folder, recursive=TRUE)
+        
+        # Change to accessible folder
+        parameters_task$task$local_folder_tasks = paste0(gsub("~/", "", destination_folder), basename(parameters_task$task$local_folder_tasks))
+      }
+      
       # By default, use local
-      links_tasks = paste0("file:///home/seluser/", parameters_task$task$local_folder_tasks, "/index.html?pid=", parameters_task$task$pid,uid_string)
+      links_tasks = paste0("file:///home/seluser/", parameters_task$task$local_folder_tasks, "/index.html?pid=", parameters_task$task$pid, uid_string)
       
     }
     
