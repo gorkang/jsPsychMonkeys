@@ -237,7 +237,3 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
   return(list_get_elements)
 
 }
-
-# Get elements safely
-get_elements_safely = safely(get_elements)
-

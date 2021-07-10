@@ -6,17 +6,22 @@
   # Minimal parameters for your simulation. 
   # For a complete list of possible parameters, see set_parameters()
   parameters_monkeys_minimal = list(
-    uid = 1,
-    screenshot = TRUE,
+    uid = 1:2,
+    uid_URL = FALSE,
+    forced_random_wait = FALSE,
+    # screenshot = FALSE,
     DEBUG = TRUE,
+    # debug_file = TRUE,
+    # keep_alive = TRUE,
     open_VNC = TRUE,
     disable_web_security = TRUE,
     
     # PROTOCOL
-    local_folder_tasks =  "Downloads/name_folder/where-protocol-is"
-    # server_folder_tasks = ""
+    # local_folder_tasks =  "" # name_folder/where-protocol-is"
+    server_folder_tasks = "999/"
   )
   
+    
 
   
 # Libraries ---------------------------------------------------------------
@@ -44,6 +49,9 @@
   # Source all /R files
   lapply(list.files("./R", full.names = TRUE, pattern = ".R"), source)
   
+  # Safely functions
+  source("R/.safely_helper_functions.R")
+
 
 # Maintenance -------------------------------------------------------------
 
@@ -152,8 +160,6 @@ TARGETS =  list(
     )
   )
 
-    
-    
 
   # Change priorities  ------------------------------------------------------
     # We assign priorities so the target's progress is row-wise 
