@@ -41,7 +41,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
                            server_folder_tasks = "",
                            disable_web_security = FALSE,
                            initial_wait = 2,
-                           wait_retry = 2,
+                           wait_retry = 5,
                            forced_random_wait = FALSE) {
   
   # DEBUG

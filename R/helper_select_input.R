@@ -145,10 +145,39 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
     
   } else if (any(selected_input$type_extracted %in% c("radio"))) {
     
-    input_text = selected_input_name
+    # Click 1
+    # input_text = selected_input_name
+    # list_get_elements$list_elements[[selected_input_name]]$clickElement()
+    # 
+    # # CLick 2
+    # selected_input = list_get_elements$name_inputs[sample(1:nrow(list_get_elements$name_inputs), 1),]
+    # selected_input_name = selected_input$id
+    # input_text = selected_input_name
+    # list_get_elements$list_elements[[selected_input_name]]$clickElement()
     
+    
+  
+    
+    radio_groups = unique(list_get_elements$name_inputs$name)
+    # list_get_elements$name_inputs
+    
+    1:length(radio_groups) %>% 
+      walk( ~ {
+        temp_list_get_elements = list_get_elements$name_inputs %>% filter(name == radio_groups[.x])
+        
+        selected_input = temp_list_get_elements[sample(1:nrow(temp_list_get_elements), 1),]
+        selected_input_name = selected_input$id
+        input_text = selected_input_name
+        list_get_elements$list_elements[[selected_input_name]]$clickElement()
+        
+      })
+    
+    
+    input_text = selected_input_name
     list_get_elements$list_elements[[selected_input_name]]$clickElement()
     
+    
+
     
   # number ------------------------------------------------------------------
     

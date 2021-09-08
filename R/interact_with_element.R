@@ -9,6 +9,7 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
     # debug_docker(1)
     # list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_elements
     # list_get_elements = list_get_elements$result
+  # reconnect_to_VNC(container_name = "container1")
   
   
 
@@ -51,6 +52,12 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
         } else if (all(list_get_elements$name_buttons$id == c("jspsych-instructions-back", "jspsych-instructions-next"))) {
           
           selected_button_name = c("jspsych-instructions-next")
+          list_get_elements$list_elements[[selected_button_name]]$clickElement()
+         
+          # If we are in BART, make it more likely to push inflate
+        } else if (all(list_get_elements$name_buttons$id == c("inflate_button", "collect_button"))) {
+          
+          selected_button_name = sample(c("inflate_button", "collect_button"), size = 1, prob = c(.95, .1))
           list_get_elements$list_elements[[selected_button_name]]$clickElement()
           
         } else {
