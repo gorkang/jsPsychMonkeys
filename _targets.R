@@ -2,24 +2,35 @@
   
   # Number of workers is defined in run.R: targets::tar_make_future(workers = future::availableCores() - 2)
 
+# Canonical protocol
+# IF TESTING Canonical protocol:
+# - forced_seed = 11
+# - REMEMBER to use debug_mode = true; in config.js
+parameters_monkeys_minimal = list(uid = 1:5, uid_URL = TRUE, server_folder_tasks = "999", forced_seed = 11,
+                                  big_container = TRUE, debug_file = TRUE, console_logs = TRUE, debug = TRUE, open_VNC = FALSE, keep_alive = FALSE)
+
+
+# parameters_monkeys_minimal = list(uid = 1, local_folder_tasks = "Downloads/TEST/canonical_protocol_DEV/", debug_file = TRUE, debug = TRUE, forced_seed = 11, open_VNC = TRUE, keep_alive = TRUE, console_logs = TRUE, disable_web_security = TRUE)
+
 
   # Minimal parameters for your simulation. 
   # For a complete list of possible parameters, see set_parameters()
-  parameters_monkeys_minimal = list(
-    uid = 1:2,
-    uid_URL = FALSE,
-    forced_random_wait = FALSE,
-    # screenshot = FALSE,
-    DEBUG = TRUE,
-    # debug_file = TRUE,
-    # keep_alive = TRUE,
-    open_VNC = TRUE,
-    disable_web_security = TRUE,
-    
-    # PROTOCOL
-    # local_folder_tasks =  "" # name_folder/where-protocol-is"
-    server_folder_tasks = "999/"
-  )
+  # parameters_monkeys_minimal = list(
+  #   uid = 1:49,
+  #   uid_URL = TRUE,
+  #   forced_random_wait = FALSE,
+  #   # screenshot = TRUE,
+  #   DEBUG = FALSE,
+  #   debug_file = FALSE,
+  #   console_logs = FALSE,
+  #   keep_alive = FALSE,
+  #   open_VNC = FALSE,
+  #   disable_web_security = FALSE,
+  #   
+  #   # PROTOCOL
+  #   # local_folder_tasks =  "/home/emrys/gorkang@gmail.com/DOCENCIA/UAI/2021/2021-1 Seminario metodologico R/SHARED_Experimentos_doctorado/Alejandro" # name_folder/where-protocol-is"
+  #   server_folder_tasks = "12"
+  # )
   
     
 
@@ -139,6 +150,7 @@ TARGETS =  list(
           initial_wait = parameters_monkeys$task_params$initial_wait,
           wait_retry = parameters_monkeys$task_params$wait_retry,
           forced_random_wait = parameters_monkeys$task_params$forced_random_wait,
+          forced_seed = parameters_monkeys$task_params$forced_seed,
           screenshot = parameters_monkeys$debug$screenshot,
           DEBUG = parameters_monkeys$debug$DEBUG,
           console_logs = parameters_monkeys$debug$console_logs,

@@ -4,8 +4,9 @@ complete_task <-
            uid,
            links,
            initial_wait = 2,
-           wait_retry = 2,
+           wait_retry = 5,
            forced_random_wait = FALSE,
+           forced_seed = NULL,
            screenshot = FALSE,
            DEBUG = FALSE,
            console_logs = TRUE,
@@ -16,9 +17,10 @@ complete_task <-
   # DEBUG
     # debug_function("complete_task")
     # targets::tar_load("parameters_monkeys")
-    # debug_docker(uid_participant = 2, parameters_debug = parameters_monkeys)
-
+    # debug_docker(uid_participant = 5, parameters_debug = parameters_monkeys)
+    # reconnect_to_VNC(container_name = "container5")
     
+
   # CHECKS --------------------------------------------------------------
   
     # If Docker container does not exist, stop execution.
@@ -92,18 +94,23 @@ complete_task <-
       # Condition to stop while
       continue = TRUE
       index = 1
+      index_task = 1
+      
       console_logs_list = list()
       
       while (continue) {
+        
+        # Which screen inside the task
+        
         
         # If there is an alert, accept
         check_accept_alert(wait_retry)
         
         
-        if (!exists("index")) index = 1
+        # if (!exists("index")) index = 1
         if (screenshot == TRUE) remDr$screenshot(file = paste0("outputs/screenshots/", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
-        
         if (console_logs == TRUE) console_logs_list[[index]] = remDr$log(type = "browser")
+        
         
         ## Get elements of website ----------------------------
         
@@ -122,14 +129,41 @@ complete_task <-
     
           
         # Interact with the elements we found ------------------
-        if (list_get_elements$continue == TRUE) interact_with_element_safely(list_get_elements, DEBUG = DEBUG, index = index) #interact_with_element
+          # seed = (forced_seed_final + index) is critical so there is some variation in case a specific response is needed to continue (e.g. BART)
+        
+            # SEED ---------
+          
+            # Restart seed numbering in each INSTRUCTIONS page
+            if (length(list_get_elements$name_buttons$id) == 1 & all(list_get_elements$name_buttons$id == "jspsych-instructions-next")) {
+              
+              index_task = 1
+              
+              # We can force a seed based on forced_seed + uid
+              if (!is.null(forced_seed) & is.numeric(uid)) {
+                forced_seed_final = forced_seed + uid
+                # set.seed(forced_seed_final)
+              } else if (is.numeric(uid)) {
+                forced_seed_final = uid
+                # set.seed(forced_seed_final)
+              } else {
+                forced_seed_final = 1
+                # set.seed(forced_seed_final)
+              }
+              
+            } else {
+              
+              if(!exists("forced_seed_final")) forced_seed_final = 1
+              
+            } 
+            # If we are in consent form, reset forced_seed_final to 1  
+            # if (grepl("Consentimiento informado", list_get_elements$name_contents$content)) forced_seed_final = 1
+            
+        if (list_get_elements$continue == TRUE) interact_with_element_safely(list_get_elements, DEBUG = DEBUG, index = index, seed = (forced_seed_final + index_task)) #interact_with_element
 
         # FORCED WAIT ---
           if (forced_random_wait == TRUE) {
-            if (index == 5) {
-              #set.seed(index_links)
-              set.seed(uid)
-              time_wait = sample(c(1, 10, 20, 30, 30), 1)
+            if (index == 4) {
+              time_wait = sample(c(.2, 1, 15, 20), 1)
               cat("[MONKEY]", paste0("[", index, "]"), "uid", uid,"waiting", time_wait, "seconds... \n")
               Sys.sleep(time_wait)
             }
@@ -139,6 +173,7 @@ complete_task <-
         # Output of while
         continue = list_get_elements$continue
         index = index + 1
+        index_task = index_task + 1
         
       }
       ## END of while task items

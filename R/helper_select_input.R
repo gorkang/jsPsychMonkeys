@@ -1,4 +1,4 @@
-select_input <- function(list_get_elements, DEBUG = FALSE) {
+select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
   
   # DEBUG
     # remDr$screenshot(display = TRUE)
@@ -10,6 +10,12 @@ select_input <- function(list_get_elements, DEBUG = FALSE) {
     # list_get_elements = get_elements_safely(remDr = remDr, DEBUG = DEBUG, try_number = 2); list_get_elements
     # list_get_elements$result
     
+  # SET SEED ----------------------------------------------------------------
+  
+    set.seed(seed)
+    cat(crayon::bgRed("\n seed - select_input: ", seed, "\n"))
+  
+  
   # SELECTED ----------------------------------------------------------------
   
     # Randomly select one of the inputs

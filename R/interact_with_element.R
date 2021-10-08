@@ -1,5 +1,5 @@
-interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL) {
-  
+interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL, seed = 1) {
+
   # DEBUG
     # remDr$screenshot(display = TRUE)
   
@@ -12,13 +12,17 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
   # reconnect_to_VNC(container_name = "container1")
   
   
+  # SET SEED ----------------------------------------------------------------
 
+    set.seed(seed)
+    cat(crayon::bgGreen("\n seed - interact: ", seed, "\n"))
+  
   # INPUTS ------------------------------------------------------------------
   
     if (length(list_get_elements$name_inputs$id) > 0) {
     
       # source("R/helper_select_input.R")  
-      output_select_input = select_input(list_get_elements, DEBUG = DEBUG)
+      output_select_input = select_input(list_get_elements, DEBUG = DEBUG, seed = seed)
   
     } else {
       
@@ -57,7 +61,7 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
           # If we are in BART, make it more likely to push inflate
         } else if (all(list_get_elements$name_buttons$id == c("inflate_button", "collect_button"))) {
           
-          selected_button_name = sample(c("inflate_button", "collect_button"), size = 1, prob = c(.95, .1))
+          selected_button_name = sample(c("inflate_button", "collect_button"), size = 1, prob = c(.8, .2))
           list_get_elements$list_elements[[selected_button_name]]$clickElement()
           
         } else {

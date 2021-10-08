@@ -18,6 +18,7 @@
 #' @param initial_wait 
 #' @param wait_retry 
 #' @param forced_random_wait
+#' @param forced_seed
 #'
 #' @return
 #' @export
@@ -42,7 +43,8 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
                            disable_web_security = FALSE,
                            initial_wait = 2,
                            wait_retry = 5,
-                           forced_random_wait = FALSE) {
+                           forced_random_wait = FALSE,
+                           forced_seed = NULL) {
   
   # DEBUG
   # parameters_input = parameters_monkeys_minimal
@@ -82,6 +84,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
     if (!is.null(parameters_input$initial_wait)) initial_wait = parameters_input$initial_wait
     if (!is.null(parameters_input$wait_retry)) wait_retry = parameters_input$wait_retry
     if (!is.null(parameters_input$forced_random_wait)) forced_random_wait = parameters_input$forced_random_wait
+    if (!is.null(parameters_input$forced_seed)) forced_seed = parameters_input$forced_seed
     
 
   # Parameters with dependencies --------------------------------------------
@@ -144,7 +147,8 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
         server_folder_tasks = server_folder_tasks,
         initial_wait = initial_wait,
         wait_retry = wait_retry,
-        forced_random_wait = forced_random_wait
+        forced_random_wait = forced_random_wait,
+        forced_seed = forced_seed
       )
     )
       
