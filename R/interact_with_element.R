@@ -5,6 +5,7 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
   
     ## CONTROL + P
     # DEBUG = TRUE
+    # seed = 11
     # targets::tar_load("parameters_monkeys")
     # debug_docker(1)
     # list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_elements
@@ -46,12 +47,18 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
       
     } else if (length(list_get_elements$name_buttons$id) > 1) {
       
-        # IF WE ARE IN CONSENT: always start
+        # IF WE ARE IN consentHTML: always start
         if (all(list_get_elements$name_buttons$id == c("start", "end"))) {
-
           selected_button_name = c("start")
           list_get_elements$list_elements[[selected_button_name]]$clickElement()
           
+        # IF WE ARE IN consentJS: always start
+        } else if (all(list_get_elements$name_buttons$content == c("acepto participar", "rechazo participar"))) {
+            selected_button_name = c("jspsych-btn1")
+            list_get_elements$list_elements[[selected_button_name]]$clickElement()
+            
+            # If we are in instructions with Back/Forward buttons, always Forward
+
         # If we are in instructions with Back/Forward buttons, always Forward
         } else if (all(list_get_elements$name_buttons$id == c("jspsych-instructions-back", "jspsych-instructions-next"))) {
           
