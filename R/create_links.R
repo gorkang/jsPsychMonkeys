@@ -62,15 +62,21 @@ create_links <-
       
       # If folder NOT in Downloads, make a copy (Selenium can only access ~/Downloads)
       if (!grepl("Downloads", parameters_task$task$local_folder_tasks)) {
+        source_folder = parameters_task$task$local_folder_tasks
         destination_folder = paste0("~/Downloads/JSPSYCH/")
-        cat("", 
-            crayon::yellow("Folder does not exist:"), parameters_task$task$local_folder_tasks, "\n",
-            crayon::green("Copying to:"), paste0(destination_folder, basename(parameters_task$task$local_folder_tasks)), "\n")
-        if (!dir.exists(destination_folder)) dir.create(destination_folder)
-        file.copy(parameters_task$task$local_folder_tasks, destination_folder, recursive=TRUE)
         
-        # Change to accessible folder
-        parameters_task$task$local_folder_tasks = paste0(gsub("~/", "", destination_folder), basename(parameters_task$task$local_folder_tasks))
+        # CHECK: if can't find given folder, try as if it is an absolute path
+        if (length(dir(source_folder)) == 0) source_folder = paste0("/", source_folder)
+        
+        final_complete_folder = paste0(gsub("~/", "", destination_folder), basename(source_folder), "/")
+        cat("", 
+            crayon::yellow("Folder does not exist or is not accesible:"), source_folder, "\n",
+            crayon::green("Copying to:"), final_complete_folder, "\n")
+        if (!dir.exists(destination_folder)) dir.create(destination_folder)
+        file.copy(source_folder, destination_folder, recursive=TRUE, copy.mode = TRUE)
+        
+        # Change local_folder_tasks parameter to accessible folder
+        parameters_task$task$local_folder_tasks = final_complete_folder
       }
       
       # By default, use local
