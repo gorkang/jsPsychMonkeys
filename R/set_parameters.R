@@ -44,6 +44,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
                            initial_wait = 2,
                            wait_retry = 5,
                            forced_random_wait = FALSE,
+                           forced_refresh = NULL,
                            forced_seed = NULL) {
   
   # DEBUG
@@ -84,6 +85,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
     if (!is.null(parameters_input$initial_wait)) initial_wait = parameters_input$initial_wait
     if (!is.null(parameters_input$wait_retry)) wait_retry = parameters_input$wait_retry
     if (!is.null(parameters_input$forced_random_wait)) forced_random_wait = parameters_input$forced_random_wait
+    if (!is.null(parameters_input$forced_refresh)) forced_refresh = parameters_input$forced_refresh
     if (!is.null(parameters_input$forced_seed)) forced_seed = parameters_input$forced_seed
     
 
@@ -148,6 +150,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
         initial_wait = initial_wait,
         wait_retry = wait_retry,
         forced_random_wait = forced_random_wait,
+        forced_refresh = forced_refresh,
         forced_seed = forced_seed
       )
     )

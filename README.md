@@ -116,3 +116,8 @@ There are a few parameters that can be useful:
 
 - `console_logs = TRUE` Store the browser's console logs. Only works with chrome.
 
+- `forced_random_wait = TRUE` Will wait a randomly sampled number of seconds on page 4
+
+- `forced_seed = 11` Set a random seed so the Monkeys' behavior will be fully reproducible
+
+- `forced_refresh = 20` Refresh browser in page 20 (if TRUE is given, it will refresh in a randomly sampled page)

@@ -6,6 +6,7 @@ complete_task <-
            initial_wait = 2,
            wait_retry = 5,
            forced_random_wait = FALSE,
+           forced_refresh = NULL,
            forced_seed = NULL,
            screenshot = FALSE,
            DEBUG = FALSE,
@@ -102,7 +103,6 @@ complete_task <-
         
         # Which screen inside the task
         
-        
         # If there is an alert, accept
         check_accept_alert(wait_retry)
         
@@ -169,6 +169,19 @@ complete_task <-
             }
           }
           
+        # FORCED REFRESH ---
+          # forced_refresh = TRUE
+          if (!is.null(forced_refresh)) {
+            if (forced_refresh == TRUE) forced_refresh = sample(c(10, 15, 20, 25, 30), 1)
+            if (index == forced_refresh) {
+              cat("\n[MONKEY]", paste0("[", index, "]"), "uid", uid,"REFRESHING PAGE... \n")
+              remDr$refresh()
+              Sys.sleep(5)
+            }
+          }
+          
+          
+          
           
         # Output of while
         continue = list_get_elements$continue
@@ -179,11 +192,14 @@ complete_task <-
       ## END of while task items
       
       # Store console logs of browser
-      if (console_logs == TRUE) {
+      if (console_logs == TRUE & length(console_logs_list) > 0) {
+        
         # Store browser console logs
-        numbered_console_logs = console_logs_list %>% setNames(seq_along(.))  %>% .[lengths(.) != 0]
-        DF_console_logs = console_logs_list %>% bind_rows() %>% mutate(page_number = names(numbered_console_logs))
-        write_csv(DF_console_logs, paste0("outputs/log/", uid, "_console_logs", "_", Sys.time(), ".csv"))}
+        # write_lines(console_logs_list, paste0("outputs/log/", uid, "_console_logs", "_", index - 1, "_", Sys.time(), ".txt"))
+        numbered_console_logs = console_logs_list %>% setNames(seq_along(.))
+        DF_console_logs = 1:length(numbered_console_logs) %>% map_df(~ numbered_console_logs[[.x]] %>% bind_rows %>% mutate(page_number = .x)) %>% tidyr::drop_na(message)
+        write_csv(DF_console_logs, paste0("outputs/log/", uid, "_console_logs", "_", Sys.time(), ".csv"))
+        }
       
       # links while loop
       index_links = index_links + 1
