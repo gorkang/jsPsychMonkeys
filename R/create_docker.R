@@ -4,7 +4,7 @@ create_docker <-
            DEBUG = FALSE,
            big_container = FALSE,
            folder_downloads = "~/Downloads",
-           parameters_docker) {
+           parameters_docker = NULL) {
     
     
     # DEBUG
@@ -26,6 +26,7 @@ create_docker <-
     
     # CHECKS ------------------------------------------------------------------
     if (!browserName %in% c("chrome", "firefox")) message("Use 'firefox' or 'chrome' as browserName parameter")
+    if (is.null(parameters_docker)) parameters_docker = list(task = list(local_or_server = "server"))
 
     # If we are in testing mode, use the test/ folder in the project
     if (parameters_docker$task$local_or_server == "test") folder_downloads = here::here("tests/jspsych-6_3_1/")
