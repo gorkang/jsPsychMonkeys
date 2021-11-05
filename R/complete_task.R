@@ -162,8 +162,9 @@ complete_task <-
 
         # FORCED WAIT ---
           if (forced_random_wait == TRUE) {
-            if (index == 4) {
-              time_wait = sample(c(.2, 1, 15, 20), 1)
+            if (index == 30) {
+              # time_wait = sample(c(.2, 1, 15, 20), 1)
+              time_wait = sample(c(1, 10, 100, 200, 400, 500), 1)
               cat("[MONKEY]", paste0("[", index, "]"), "uid", uid,"waiting", time_wait, "seconds... \n")
               Sys.sleep(time_wait)
             }
@@ -172,7 +173,7 @@ complete_task <-
         # FORCED REFRESH ---
           # forced_refresh = TRUE
           if (!is.null(forced_refresh)) {
-            if (forced_refresh == TRUE) forced_refresh = sample(c(10, 15, 20, 25, 30), 1)
+            if (forced_refresh == TRUE) forced_refresh = sample(c(20, 30, 200, 500, 1000, 10000, 20000), 1)
             if (index == forced_refresh) {
               cat("\n[MONKEY]", paste0("[", index, "]"), "uid", uid,"REFRESHING PAGE... \n")
               remDr$refresh()
