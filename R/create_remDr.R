@@ -7,6 +7,8 @@ create_remDr <-
     
   # DEBUG
     # debug_function("create_remDr")
+    # targets::tar_load_globals()
+    # DEBUG = TRUE
     # targets::tar_load("parameters_monkeys")
     # debug_docker(uid_participant = 2, parameters_debug = parameters_monkeys)
     
@@ -18,14 +20,14 @@ create_remDr <-
   
 
   # CHECK -------------------------------------------------------------------
-  
+    
   # If Docker container does not exist, stop execution.
-  if (length(reconnect_to_VNC(container_name = container_name, just_check = TRUE)) == 0) {
-    cat(crayon::bgRed("NO DOCKER IMAGE available.\n"), crayon::silver("Maybe need to do:\n targets::tar_destroy() & targets::tar_make()\n\n"))
-    targets::tar_invalidate(paste0("container_", parameters_task$participants$uid))
-    cat(crayon::bgYellow("Invalidated ", container_name, " to restart process\n\n"))
-    stop()
-  }
+  # if (length(reconnect_to_VNC(container_name = container_name, just_check = TRUE)) == 0) {
+  #   cat(crayon::bgRed("NO DOCKER IMAGE available.\n"), crayon::silver("Maybe need to do:\n targets::tar_destroy() & targets::tar_make()\n\n"))
+  #   targets::tar_invalidate(paste0("container_", parameters_task$participants$uid))
+  #   cat(crayon::bgYellow("Invalidated ", container_name, " to restart process\n\n"))
+  #   stop()
+  # }
   
   
     
@@ -80,6 +82,8 @@ create_remDr <-
       # Wait for driver to be created
       Sys.sleep(time_wait)
       
+      # REMEMBER: if open_VNC == FALSE, THIS FAILS. NO IDEA WHY
+      # https://github.com/gorkang/jsPsychMonkeys/issues/8
       remDr$closeall()
       
       if (DEBUG == TRUE) cat(crayon::yellow("\n-About to open a browser... \n"))
@@ -99,6 +103,10 @@ create_remDr <-
     if (length(CLEAN_OPEN_SAFELY$error) > 0) {
       cat(crayon::bgRed("ERROR: creating closing browsers [create_remDr()]\n"))
       CLEAN_OPEN_SAFELY = clean_open_safely(time_wait = 2)
+      if (length(CLEAN_OPEN_SAFELY$error) > 0) {
+        cat(crayon::bgRed("ERROR2: creating closing browsers [create_remDr()]\n"))
+        stop()
+      }
     }
     # remDr$closeall()
   

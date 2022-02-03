@@ -13,8 +13,9 @@ create_links <-
     
     
     # DEBUG
+    # debug_function("create_links")
     # targets::tar_load("parameters_monkeys")
-    # debug_docker(uid_participant = 2, parameters_debug = parameters_monkeys)
+    # debug_docker(uid_participant = 1, parameters_debug = parameters_monkeys)
 
     
     # CHECKS -----------------------------------------------------------------

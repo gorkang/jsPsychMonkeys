@@ -16,10 +16,11 @@ complete_task <-
            remDr = NULL) {
     
   # DEBUG
+    # targets::tar_load_globals()
     # debug_function("complete_task")
     # targets::tar_load("parameters_monkeys")
-    # debug_docker(uid_participant = 5, parameters_debug = parameters_monkeys)
-    # reconnect_to_VNC(container_name = "container5")
+    # debug_docker(uid_participant = 101, parameters_debug = parameters_monkeys)
+    # reconnect_to_VNC(container_name = "container100")
     
 
   # CHECKS --------------------------------------------------------------
@@ -127,7 +128,6 @@ complete_task <-
           # When there is an error, usually we will have some content here (we "cause" the error with a stop())
           list_get_elements = list_get_elements$result
     
-          
         # Interact with the elements we found ------------------
           # seed = (forced_seed_final + index) is critical so there is some variation in case a specific response is needed to continue (e.g. BART)
         
