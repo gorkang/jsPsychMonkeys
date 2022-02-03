@@ -8,7 +8,7 @@ create_docker <-
     
     
     # DEBUG
-    # debug_function(only_docker)
+    # debug_function(create_docker)
     
     # container_name = "container1"
     # browserName = "chrome"
@@ -87,7 +87,8 @@ create_docker <-
     if (DEBUG == TRUE) {
       debug_label = '-debug'
     } else {
-      debug_label = ''
+      # BAD workaround for https://github.com/gorkang/jsPsychMonkeys/issues/8
+      debug_label = '-debug'
     }
     
     
