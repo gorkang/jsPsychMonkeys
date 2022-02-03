@@ -7,9 +7,15 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
     # DEBUG = TRUE
     # debug_docker(24000)
     # source("R/complete_task.R")
+  
+  # list_get_elementsXXX = list_get_elements
+  
     # list_get_elements = get_elements_safely(remDr = remDr, DEBUG = DEBUG, try_number = 2); list_get_elements
-    # list_get_elements$result
-    
+  
+    # list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_elements
+    # list_get_elements = list_get_elements$result
+    # list_get_elements$name_inputs %>% View
+  
   # SET SEED ----------------------------------------------------------------
   
     set.seed(seed)
@@ -49,10 +55,38 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
 
   # TYPES OF INPUTS ------------------------------------------------------------
     
-
+  if (any(selected_input$type_extracted %in% c("list"))) {
+      
+    if (!is.na(selected_input$pattern)) {
+      
+      validated_inputs = gsub("\\^\\(|\\)\\$", "", selected_input$pattern) %>% strsplit(split = "\\|") %>% unlist()
+      input_text = sample(x = validated_inputs, size = 1)
+      list_get_elements$list_elements[[selected_input_name]]$clearElement()
+      list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
+      
+    } else {
+      
+      # SAME AS IN text
+      
+      # Default characters limits
+      min_chars = 0
+      max_chars = 100
+      
+      # If minlength and maxlength exist, replace default limits
+      if (!is.na(list_get_elements$name_inputs$minlength)) min_chars = as.numeric(list_get_elements$name_inputs$minlength)
+      if (!is.na(list_get_elements$name_inputs$maxlength)) max_chars = as.numeric(list_get_elements$name_inputs$maxlength)
+      
+      input_text = as.character(stringi::stri_rand_strings(n = 1, length = sample(min_chars:max_chars, 1)))
+      
+      list_get_elements$list_elements[[selected_input_name]]$clearElement()
+      list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
+      
+    }
+      
+    
   # checkbox -------------------------------------------------------------------
   
-  if (any(selected_input$type_extracted %in% c("checkbox"))) {
+  } else if (any(selected_input$type_extracted %in% c("checkbox"))) {
     
     input_text = selected_input_name
     
@@ -273,6 +307,22 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
     1:length(selected_checkboxes) %>% 
       walk(~ list_get_elements$list_elements[[selected_checkboxes[.x]]]$clickElement())
     
+   
+  } else if (any(selected_input$type_extracted %in% c("keyboard_response"))) {
+    
+    content_responses = list_get_elements$name_inputs$content
+    response_options = stringr::str_extract_all(content_responses, '\\"[:alnum:]\\"')[[1]] %>% gsub('\\"', "", .)
+    
+    selected_response = tolower(sample(response_options, 1))
+    
+    # list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(sendKeys = as.list(selected_response))
+    
+    webElem <- remDr$findElement("css", "html")
+    webElem$sendKeysToElement(sendKeys = as.list(selected_response))
+  
+    
+    # remDr$screenshot(display = TRUE)
+    # sendsendKeysToActiveElement(as.list(selected_response))
     
   } else {
     

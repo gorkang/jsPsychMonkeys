@@ -7,10 +7,12 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
     # DEBUG = TRUE
     # seed = 11
     # targets::tar_load("parameters_monkeys")
-    # debug_docker(1)
+    # targets::tar_load_globals()
+    # reconnect_to_VNC()
+    # reconnect_to_VNC(container_name = "container99")
+    # debug_docker(99)
     # list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_elements
     # list_get_elements = list_get_elements$result
-  # reconnect_to_VNC(container_name = "container1")
   
   
   # SET SEED ----------------------------------------------------------------

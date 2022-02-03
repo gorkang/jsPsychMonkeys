@@ -54,6 +54,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     # Gets html elements for div's, buttons, etc.
     page = page_source_rvest %>% html_elements("p")
     inputs = page_source_rvest %>% html_elements("input")
+    textarea = page_source_rvest %>% html_elements("textarea") # Added to find textarea in jspsych-survey-html-form
     buttons = page_source_rvest %>% html_elements("button")
     div = page_source_rvest %>% html_elements("div")
     
@@ -75,12 +76,26 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
       bind_rows(if (length(page) > 0) {1:length(page) %>% map_df(~ page[[.x]] %>%  html_attrs()  %>% bind_rows()%>% mutate(tag_name = "p", content = page[[.x]] %>% html_text2()))}) %>%
       bind_rows(if (length(div) > 0) {1:length(div) %>% map_df(~ div[[.x]] %>%  html_attrs()  %>% bind_rows() %>% mutate(tag_name = "div", content = div[[.x]] %>% html_text2()))}) %>%
       bind_rows(if (length(inputs) > 0) {1:length(inputs) %>% map_df(~ inputs[[.x]] %>%  html_attrs()  %>% bind_rows()%>% mutate(tag_name = "input", content = inputs[[.x]] %>% html_text2()))}) %>% 
+      bind_rows(if (length(textarea) > 0) {1:length(textarea) %>% map_df(~ textarea[[.x]] %>%  html_attrs()  %>% bind_rows()%>% mutate(tag_name = "input", content = textarea[[.x]] %>% html_text2()))}) %>% 
       bind_rows(if (length(buttons) > 0) {1:length(buttons) %>% map_df(~ buttons[[.x]] %>%  html_attrs()  %>% bind_rows() %>% mutate(tag_name = "button", content = buttons[[.x]] %>% html_text2()))})
 
     # DF_elements_options_raw #%>% select(id, tag_name, class, content)
     
+    # Columns that we don't have in all the items but that are used in the case_when() below
+    cols <- c(list = NA_character_)
+    
+    
     DF_elements_options = 
       DF_elements_options_raw %>% 
+      
+      # If columns in cols do not exist, create them. Avoids warnings in case_when() below
+      tibble::add_column(., !!!cols[setdiff(names(cols), names(.))]) %>% 
+    
+      mutate(tag_name = 
+               case_when(
+                 id == "jspsych-html-keyboard-response-stimulus" ~ "input",
+                 TRUE ~ tag_name
+               )) %>% 
       
       # FILTERING
       filter(tag_name %in% c("input", "button") | class == "jspsych-content") %>%
@@ -108,6 +123,9 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
       mutate(type_extracted = 
                case_when(
                  
+                 # No buttons or inputs, needs an keyboard input 
+                 id == "jspsych-html-keyboard-response-stimulus" ~ "keyboard_response",
+                 
                  # CONTENT
                  class == "jspsych-content" ~ "content",
                  
@@ -119,6 +137,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
                  type == "radio" ~ "radio",
                  type == "range" ~ "slider",
                  type == "text" ~ "text",
+                 !is.na(list) ~ "list",
                  
                  # CLASS
                  grepl("jspsych-btn$|jspsych-btn ", class) ~ "button",
@@ -191,7 +210,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     
     # Filter inputs, buttons and status to end up with a clean list of known names we know how to interact with.
     name_contents = DF_elements_options %>% filter(type_extracted %in% c("content"))
-    name_inputs = DF_elements_options %>% filter(tag_name == "input" & type_extracted %in% c("checkbox", "date", "email", "html-form", "multi-select", "text", "number", "radio", "slider", "ALL"))
+    name_inputs = DF_elements_options %>% filter(tag_name == "input" & type_extracted %in% c("checkbox", "date", "email", "html-form", "keyboard_response", "list", "multi-select", "text", "number", "radio", "slider", "ALL"))
     name_buttons = DF_elements_options %>% filter(tag_name == "button" | type_extracted %in% c("button"))
     
     
@@ -212,7 +231,10 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
       # if (DEBUG == TRUE) remDr$screenshot(file = "outputs/screenshots/END-DEBUG-get_elements-good-end.png")
         
         continue = FALSE
-    
+  
+    } else if (length(ID_names) == 1 & "jspsych-html-keyboard-response-stimulus" %in% DF_elements_options$id & !"button" %in% DF_elements_options$type_extracted) {
+      # No button, need to press a specific key
+      continue = TRUE
     } else if (length(ID_names) == 1 & "jspsych-content" %in% DF_elements_options$id & !"button" %in% DF_elements_options$type_extracted) {
       
       if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgYellow("\n[[END OF EXPERIMENT2]]\n")))
