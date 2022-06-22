@@ -19,7 +19,7 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
   # SET SEED ----------------------------------------------------------------
   
     set.seed(seed)
-    cat(crayon::bgRed("\n seed - select_input: ", seed, "\n"))
+    # cat(crayon::bgRed("\n seed - select_input: ", seed, "\n"))
   
   
   # SELECTED ----------------------------------------------------------------

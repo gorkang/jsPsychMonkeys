@@ -158,7 +158,7 @@ complete_task <-
             # If we are in consent form, reset forced_seed_final to 1  
             # if (grepl("Consentimiento informado", list_get_elements$name_contents$content)) forced_seed_final = 1
             
-        if (list_get_elements$continue == TRUE) interact_with_element_safely(list_get_elements, DEBUG = DEBUG, index = index, seed = (forced_seed_final + index_task)) #interact_with_element
+        if (list_get_elements$continue == TRUE) interact_with_element_safely(list_get_elements, DEBUG = DEBUG, index = index, seed = (forced_seed_final + index_task + index)) #interact_with_element
 
         # FORCED WAIT ---
           if (forced_random_wait == TRUE) {

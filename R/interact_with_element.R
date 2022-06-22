@@ -18,7 +18,7 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
   # SET SEED ----------------------------------------------------------------
 
     set.seed(seed)
-    cat(crayon::bgGreen("\n seed - interact: ", seed, "\n"))
+    # cat(crayon::bgGreen("\n seed - interact: ", seed, "\n"))
   
   # INPUTS ------------------------------------------------------------------
   

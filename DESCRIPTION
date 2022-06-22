@@ -1,0 +1,9 @@
+Package: jsPsychMonkeys
+Title: Release monkeys to a jsPsych experiment using the R package {targets}, docker and {RSelenium}.
+Version: 0.2.0
+Date: 2021-10-20
+Authors@R: c(person("Gorka", "Navarrete", email = "gorkang@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7678-8656")))
+Maintainer: Gorka Navarrete <gorkang@gmail.com>
+License: MIT + file LICENSE
+URL: https://github.com/gorkang/jsPsychMonkeys
+BugReports: https://github.com/gorkang/jsPsychMonkeys/issues
