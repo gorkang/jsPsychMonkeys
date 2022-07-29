@@ -18,8 +18,9 @@ complete_task <-
   # DEBUG
     # targets::tar_load_globals()
     # debug_function("complete_task")
+    
     # targets::tar_load("parameters_monkeys")
-    # debug_docker(uid_participant = 101, parameters_debug = parameters_monkeys)
+    # debug_docker(uid_participant = 1, parameters_debug = parameters_monkeys)
     # reconnect_to_VNC(container_name = "container100")
     
 
@@ -163,8 +164,8 @@ complete_task <-
         # FORCED WAIT ---
           if (forced_random_wait == TRUE) {
             if (index == 30) {
-              # time_wait = sample(c(.2, 1, 15, 20), 1)
-              time_wait = sample(c(1, 10, 100, 200, 400, 500), 1)
+              time_wait = sample(c(.2, 1, 5, 10), 1)
+              # time_wait = sample(c(1, 10, 100, 200, 400, 500), 1)
               cat("[MONKEY]", paste0("[", index, "]"), "uid", uid,"waiting", time_wait, "seconds... \n")
               Sys.sleep(time_wait)
             }

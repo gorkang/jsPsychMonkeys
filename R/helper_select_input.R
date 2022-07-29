@@ -28,6 +28,10 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
     selected_input = list_get_elements$name_inputs[sample(1:nrow(list_get_elements$name_inputs), 1),]
     selected_input_name = selected_input$id
     
+    # Add columns if they don't exist
+    cols <- c(pattern = NA_character_)
+    selected_input = selected_input %>% tibble::add_column(!!!cols[!names(cols) %in% names(.)]) 
+    
     # if (DEBUG == TRUE) cat(crayon::yellow("Selected", selected_input_name, "from", nrow(list_get_elements$name_inputs), "elements \n"))
     
 
