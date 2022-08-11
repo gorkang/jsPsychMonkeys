@@ -91,9 +91,12 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
       # If columns in cols do not exist, create them. Avoids warnings in case_when() below
       tibble::add_column(., !!!cols[setdiff(names(cols), names(.))]) %>% 
     
+      # Some hand-made plugins are missing the tag_name. ADD HERE
       mutate(tag_name = 
                case_when(
                  id == "jspsych-html-keyboard-response-stimulus" ~ "input",
+                 id == "jspsych-audio-button-response-button-0" ~ "input",
+                 
                  TRUE ~ tag_name
                )) %>% 
       
@@ -161,6 +164,10 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
       
       mutate(type_extracted = 
                case_when(
+                 # If they are record buttons, are inputs, not buttons
+                 class == "jspsych-btn start-recording-button" ~ "input_button",
+                 class == "jspsych-btn stop-recording-button" ~ "input_button",
+                 
                  # Maybe we should implement a way to try ALL the type_extracted when we have an imput we don't recognize (WITH A WARNING)
                  is.na(type_extracted) & tag_name == "input" & required == FALSE ~ "ALL",
                  TRUE ~ type_extracted
@@ -210,7 +217,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     
     # Filter inputs, buttons and status to end up with a clean list of known names we know how to interact with.
     name_contents = DF_elements_options %>% filter(type_extracted %in% c("content"))
-    name_inputs = DF_elements_options %>% filter(tag_name == "input" & type_extracted %in% c("checkbox", "date", "email", "html-form", "keyboard_response", "list", "multi-select", "text", "number", "radio", "slider", "ALL"))
+    name_inputs = DF_elements_options %>% filter(tag_name == "input" & type_extracted %in% c("checkbox", "date", "email", "html-form", "keyboard_response", "input_button", "list", "multi-select", "text", "number", "radio", "slider", "ALL"))
     name_buttons = DF_elements_options %>% filter(tag_name == "button" | type_extracted %in% c("button"))
     
     
