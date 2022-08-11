@@ -43,7 +43,7 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
   
     # CATCH ALL condition: When we can't extract an input type, try everything (?)
     # TODO: CREATE SAFE ClearElement helper function to be able to include ALL types in the ALL
-    if (list_get_elements$name_inputs %>% filter(id == selected_input_name) %>% pull(type_extracted) == "ALL") {
+    if (all(list_get_elements$name_inputs %>% filter(id == selected_input_name) %>% pull(type_extracted) == "ALL")) {
       
       cat(crayon::bgYellow(" WARNING: Unknown type of input· Trying ALL\n"))
       
@@ -227,6 +227,8 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
     
   } else if (any(selected_input$type_extracted %in% c("number"))) {
     
+    number_textboxes = length(list_get_elements$name_inputs$name)
+    
     # Default Limits
     min_num = 0
     max_num = 100
@@ -238,36 +240,51 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
       min_num = 100000000
       max_num = 999999999
     }
-
     
     # If max and min exist, replace default limits
-    if (!is.na(list_get_elements$name_inputs$min)) min_num = as.numeric(list_get_elements$name_inputs$min)
-    if (!is.na(list_get_elements$name_inputs$max)) max_num = as.numeric(list_get_elements$name_inputs$max)
+    if (all(!is.na(list_get_elements$name_inputs$min))) min_num = as.numeric(list_get_elements$name_inputs$min)
+    if (all(!is.na(list_get_elements$name_inputs$max))) max_num = as.numeric(list_get_elements$name_inputs$max)
     
-    # Create random number
-    input_text = as.character(sample(min_num:max_num, 1))
+    input_text = as.character(sample(min_num:max_num, number_textboxes))
     
-    list_get_elements$list_elements[[selected_input_name]]$clearElement()
-    list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
+    #   list_get_elements$list_elements[[selected_input_name]]$clearElement()
+    #   list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
     
-    
+    1:number_textboxes %>%
+      purrr::walk(~ {
+        # .x = 1
+        selected_input_name = list_get_elements$name_inputs$name[.x]
+        list_get_elements$list_elements[[selected_input_name]]$clearElement()
+        list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text[.x]))
+      })
+
+
   # text --------------------------------------------------------------------
     
   } else if (any(selected_input$type_extracted %in% c("text"))) {
+    
+    number_textboxes = length(list_get_elements$name_inputs$name)
     
     # Default characters limits
     min_chars = 0
     max_chars = 100
     
     # If minlength and maxlength exist, replace default limits
-    if (!is.na(list_get_elements$name_inputs$minlength)) min_chars = as.numeric(list_get_elements$name_inputs$minlength)
-    if (!is.na(list_get_elements$name_inputs$maxlength)) max_chars = as.numeric(list_get_elements$name_inputs$maxlength)
+    if (all(!is.na(list_get_elements$name_inputs$minlength))) min_chars = as.numeric(list_get_elements$name_inputs$minlength)
+    if (all(!is.na(list_get_elements$name_inputs$maxlength))) max_chars = as.numeric(list_get_elements$name_inputs$maxlength)
     
-    input_text = as.character(stringi::stri_rand_strings(n = 1, length = sample(min_chars:max_chars, 1)))
+    input_text = as.character(stringi::stri_rand_strings(n = number_textboxes, length = sample(min_chars:max_chars, number_textboxes)))
     
-    list_get_elements$list_elements[[selected_input_name]]$clearElement()
-    list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
+    # list_get_elements$list_elements[[selected_input_name]]$clearElement()
+    # list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
     
+    1:number_textboxes %>%
+      purrr::walk(~ {
+        # .x = 1
+        selected_input_name = list_get_elements$name_inputs$name[.x]
+        list_get_elements$list_elements[[selected_input_name]]$clearElement()
+        list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text[.x]))
+      })
     
     
   # slider ------------------------------------------------------------------
@@ -312,6 +329,9 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
       walk(~ list_get_elements$list_elements[[selected_checkboxes[.x]]]$clickElement())
     
    
+
+    # keyboard_response -------------------------------------------------------
+    
   } else if (any(selected_input$type_extracted %in% c("keyboard_response"))) {
     
     content_responses = list_get_elements$name_inputs$content
@@ -327,6 +347,17 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
     
     # remDr$screenshot(display = TRUE)
     # sendsendKeysToActiveElement(as.list(selected_response))
+    
+
+    # input_button ------------------------------------------------------------
+
+  } else if (any(selected_input$type_extracted %in% c("input_button"))) {
+
+    # NOT FOUND
+    cli::cli_alert_danger("Can't access mic in Docker container... See Console in Chrome:(")
+    list_get_elements$list_elements[[1]]$highlightElement()
+    list_get_elements$list_elements[[1]]$clickElement()
+    
     
   } else {
     
