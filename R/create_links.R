@@ -59,6 +59,7 @@ create_links <-
       links_tasks = paste0("file:///home/seluser/Downloads/", path_tests[1], "?uid=", uid, "&pid=", parameters_task$task$pid)
       
       
+    # LOCAL
     } else {
       
       # If folder NOT in Downloads, make a copy (Selenium can only access ~/Downloads)
@@ -80,9 +81,13 @@ create_links <-
         parameters_task$task$local_folder_tasks = final_complete_folder
       }
       
+      # Get folder inside downloads
+      post_downloads_folder = gsub(".*Downloads(.*)", "\\1", parameters_task$task$local_folder_tasks)
       # By default, use local
-      links_tasks = paste0("file:///home/seluser/", parameters_task$task$local_folder_tasks, "/index.html?pid=", parameters_task$task$pid, uid_string)
+      # links_tasks = paste0("file:///home/seluser/", parameters_task$task$local_folder_tasks, "/index.html?pid=", parameters_task$task$pid, uid_string)
+      links_tasks = paste0("file:///home/seluser/Downloads/", post_downloads_folder, "/index.html?pid=", parameters_task$task$pid, uid_string)
       
+      # paste0(gsub("~/", "", destination_folder), basename(source_folder), "/")
     }
     
     
