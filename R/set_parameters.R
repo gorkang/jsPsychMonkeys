@@ -137,21 +137,12 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
     # If pid not explicit, get from protocol folder
     if (is.null(pid)) {
       
-      cli::cli_h1(parameters_input$local_folder_tasks)
-      cli::cli_h1(parameters_input$server_folder_tasks)
-      
       if (!is.null(parameters_input$local_folder_tasks)) {
-        cli::cli_h1(local_folder_tasks)
         FOLDER = parameters_input$local_folder_tasks
       } else if (!is.null(parameters_input$server_folder_tasks)) {
-        cli::cli_h1(server_folder_tasks)
         FOLDER = parameters_input$server_folder_tasks
       }
-      # FOLDER = "999"
-      # FOLDER = "test/protocols_DEV/22/"
-      cli::cli_h1(FOLDER)
       pid = stringr::str_extract_all(FOLDER, pattern = "[0-9]{1,10}", simplify = TRUE) |> last()
-      cli::cli_h1(pid)
     }  
       
   # Create parameters_monkeys list -------------------------------------------
