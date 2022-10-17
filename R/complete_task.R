@@ -110,7 +110,12 @@ complete_task <-
         
         
         # if (!exists("index")) index = 1
-        if (screenshot == TRUE) remDr$screenshot(file = paste0("outputs/screenshots/", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
+        if (screenshot == TRUE) {
+          output_folder = paste0("outputs/screenshots/", parameters_task$task$pid, "/", uid, "/")
+          if (!dir.exists(output_folder)) dir.create(output_folder, recursive = TRUE, showWarnings = FALSE)
+          remDr$screenshot(file = paste0(output_folder, parameters_task$task$pid, "_", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
+          # remDr$screenshot(file = paste0("outputs/screenshots/", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
+        }
         if (console_logs == TRUE) console_logs_list[[index]] = remDr$log(type = "browser")
         
         
