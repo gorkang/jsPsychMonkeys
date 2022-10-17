@@ -35,7 +35,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
                            debug_file = FALSE,
                            console_logs = FALSE,
                            open_VNC = FALSE, 
-                           pid = 999,
+                           pid = NULL,
                            uid_URL = TRUE,
                            local_or_server = "test", # ["local", "server", "test"]
                            local_folder_tasks = "", # ["Downloads/tests/test_prototol", "Downloads/tests/2"]
@@ -65,6 +65,20 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
   # disable_web_security = FALSE
   # initial_wait = 2
   # wait_retry = 2
+  
+
+  
+# CHECK all folders exist -------------------------------------------------
+
+  necessary_folders = c(".vault", "outputs/DF", "outputs/log", "outputs/screenshots", "outputs/source")
+  if (all(necessary_folders %in% dir(recursive = TRUE, include.dirs = TRUE, all.files = TRUE))) {
+    cat(crayon::green("All the necessary folders are present\n"))
+  } else {
+    cat(crayon::yellow("Creating necessary folders: "), paste(necessary_folders, collapse = ", "), "\n")
+    invisible(purrr::map(necessary_folders, dir.create, recursive = TRUE, showWarnings = FALSE))
+  }
+  
+    
 
   # Check which parameters were entered -------------------------------------
 
@@ -115,6 +129,30 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
       if (open_VNC == TRUE) DEBUG = TRUE
   
       
+      
+      
+      
+    # CHECK pid ---------------------------------------------------------------
+    
+    # If pid not explicit, get from protocol folder
+    if (is.null(pid)) {
+      
+      cli::cli_h1(parameters_input$local_folder_tasks)
+      cli::cli_h1(parameters_input$server_folder_tasks)
+      
+      if (!is.null(parameters_input$local_folder_tasks)) {
+        cli::cli_h1(local_folder_tasks)
+        FOLDER = parameters_input$local_folder_tasks
+      } else if (!is.null(parameters_input$server_folder_tasks)) {
+        cli::cli_h1(server_folder_tasks)
+        FOLDER = parameters_input$server_folder_tasks
+      }
+      # FOLDER = "999"
+      # FOLDER = "test/protocols_DEV/22/"
+      cli::cli_h1(FOLDER)
+      pid = stringr::str_extract_all(FOLDER, pattern = "[0-9]{1,10}", simplify = TRUE) |> last()
+      cli::cli_h1(pid)
+    }  
       
   # Create parameters_monkeys list -------------------------------------------
 
