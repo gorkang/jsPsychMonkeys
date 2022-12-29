@@ -56,11 +56,17 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
           
         # IF WE ARE IN consentJS: always start
         } else if (all(list_get_elements$name_buttons$content == c("acepto participar", "rechazo participar"))) {
-            selected_button_name = c("jspsych-btn1")
-            list_get_elements$list_elements[[selected_button_name]]$clickElement()
-            
-            # If we are in instructions with Back/Forward buttons, always Forward
-
+          selected_button_name = c("jspsych-btn1")
+          list_get_elements$list_elements[[selected_button_name]]$clickElement()
+          
+          # If we are in instructions with Back/Forward buttons, always Forward
+          
+        } else if (all(list_get_elements$name_buttons$content == c("I agree to participate", "I refuse to participate"))) {
+          selected_button_name = c("jspsych-btn1")
+          list_get_elements$list_elements[[selected_button_name]]$clickElement()
+          
+          # If we are in instructions with Back/Forward buttons, always Forward
+          
         # If we are in instructions with Back/Forward buttons, always Forward
         } else if (all(list_get_elements$name_buttons$id == c("jspsych-instructions-back", "jspsych-instructions-next"))) {
           
