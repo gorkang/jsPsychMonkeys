@@ -90,7 +90,7 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
     
   # checkbox -------------------------------------------------------------------
   
-  } else if (any(selected_input$type_extracted %in% c("checkbox"))) {
+  } else if (any(selected_input$type_extracted %in% c("checkbox")) & !grepl("multi-select", selected_input$id)) {
     
     input_text = selected_input_name
     
@@ -241,6 +241,12 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
       max_num = 999999999
     }
     
+    if (grepl("How old are you|edad", content_text)) {
+      min_num = 11
+      max_num = 90
+    }
+    
+    
     # If max and min exist, replace default limits
     if (all(!is.na(list_get_elements$name_inputs$min))) min_num = as.numeric(list_get_elements$name_inputs$min)
     if (all(!is.na(list_get_elements$name_inputs$max))) max_num = as.numeric(list_get_elements$name_inputs$max)
@@ -317,7 +323,7 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
     
     # multi-select ------------------------------------------------------------
     
-  } else if (any(selected_input$type_extracted %in% c("multi-select"))) {
+  } else if (any(selected_input$type_extracted %in% c("multi-select")) | grepl("multi-select", selected_input$id)) {
     
     all_checkboxers = list_get_elements$name_inputs$id
     n_selected = sample(1:length(list_get_elements$name_inputs$name), 1)
