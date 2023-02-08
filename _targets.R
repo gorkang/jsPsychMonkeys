@@ -1,21 +1,31 @@
-# Parameters ----- [EDIT ONLY THIS SECTION] --------------------------------
+# [EDIT ONLY THIS SECTION] ---------------------------------------------------
 
-  # For a complete list of possible parameters, see set_parameters()  
-  # Number of workers is defined in run.R: targets::tar_make_future(workers = future::availableCores() - 2)
-
-# Canonical protocol
-  # IF TESTING Canonical protocol:
-  # - forced_seed = 11
-  # - REMEMBER to use debug_mode = true; in config.js
+  # Parameters ---------------------------------------------------------------
+  
+    # For a complete list of possible parameters, see set_parameters()  
+    # Number of workers is defined in run.R: targets::tar_make_future(workers = future::availableCores() - 2)
+  
+  
+  parameters_monkeys_minimal = list(uid = 1:5, uid_URL = TRUE, forced_seed = 11,
+                                    local_folder_tasks = "~/Downloads/protocol999",
+                                    # server_folder_tasks = "999",
+                                    forced_refresh = FALSE, # Want monkeys to close and reopen their browsers?
+                                    big_container = TRUE, debug_file = TRUE, console_logs = TRUE, debug = TRUE, keep_alive = FALSE,
+                                    open_VNC = TRUE # FALSE if don't want VNC to open
+                                    )
   
 
-parameters_monkeys_minimal = list(uid = 1:5, uid_URL = TRUE, forced_seed = 11,
-                                  server_folder_tasks = "test/canonical_protocol_DEV",
-                                  # server_folder_tasks = "999",
-                                  big_container = TRUE, debug_file = TRUE, console_logs = TRUE, debug = TRUE, open_VNC = TRUE, keep_alive = FALSE)
 
-# WITH RESTART
-parameters_monkeys_minimal = c(parameters_monkeys_minimal, forced_refresh = TRUE)
+# [DO NOT EDIT BELOW] -----------------------------------------------------
+
+
+
+# Canonical protocol --------------------------------------------------------
+
+# IF TESTING Canonical protocol:
+# - forced_seed = 11
+# - REMEMBER to use debug_mode = true; in config.js
+# source("dev/TEST_canonical/TEST_canonical.R")
 
 
   
@@ -27,8 +37,11 @@ parameters_monkeys_minimal = c(parameters_monkeys_minimal, forced_refresh = TRUE
       if (!require('future')) install.packages('future'); library('future')
       if (!require('future.callr')) install.packages('future.callr'); library('future.callr')
       if (!require('dplyr')) install.packages('dplyr'); library('dplyr')
+      if (!require("glue")) install.packages("glue"); library("glue")
       if (!require("purrr")) install.packages("purrr"); library("purrr")
-    }))
+      if (!require("assertthat")) install.packages("assertthat"); library("assertthat")
+      if (!require("RSelenium")) install.packages("RSelenium", dependencies = TRUE); library("RSelenium")
+  }))
 
   # List of packages to use
   packages_to_load = c("targets", "tarchetypes", "dplyr", "future", "future.callr", "glue", "purrr", "readr", "RSelenium", "rvest" ,"XML")
