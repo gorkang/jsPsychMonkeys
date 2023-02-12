@@ -23,6 +23,39 @@ create_docker <-
     suppressMessages(suppressWarnings(library(dplyr)))
     suppressMessages(suppressWarnings(library(purrr)))
     
+
+# FOLDER -----------------------------------------------------
+
+   # Operative system detection
+    OS = Sys.info()["sysname"]
+
+    if (OS == "Linux") {
+      
+      # folder_downloads = folder_downloads
+
+    } else if (OS == "Windows") {
+
+      folder_downloads = paste0(normalizePath(parameters_docker$task_params$local_folder_tasks), "")
+      # if (!dir.exists(folder_downloads)) dir.create(folder_downloads)
+      folder_downloads = gsub("C:", "c", paste0("//",folder_downloads)) %>% dirname() %>% gsub("\\\\", "/", .)
+      
+
+    } else if (OS == "Darwin" | OS == "macOS") {
+
+            # folder_downloads = folder_downloads
+
+    } else {
+      stop("Not sure about your operative system.")
+    }
+
+
+
+
+
+
+
+
+
     
     # CHECKS ------------------------------------------------------------------
     if (!browserName %in% c("chrome", "firefox")) message("Use 'firefox' or 'chrome' as browserName parameter")
@@ -107,12 +140,27 @@ create_docker <-
       
       if (DEBUG == TRUE) cat(crayon::yellow("Docker image", container_name, " not running. Launching...\n"))
       
+      #if (folder_downloads == "") {
+      #  # REVIEW: https://docs.docker.com/engine/reference/run/ || -e "ENABLE_CORS=true" 
+      #  system(paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label)) # Not mapping local folder
+      #} else {
+      #  system(paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v ', folder_downloads, ':/home/seluser/Downloads -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label)) # Mapping local folder
+      #}
+
       if (folder_downloads == "") {
         # REVIEW: https://docs.docker.com/engine/reference/run/ || -e "ENABLE_CORS=true" 
-        system(paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label)) # Not mapping local folder
+        DOCKER_run = paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label) # Not mapping local folder
       } else {
-        system(paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v ', folder_downloads, ':/home/seluser/Downloads -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label)) # Mapping local folder
+        DOCKER_run = paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v ', folder_downloads, ':/home/seluser/Downloads -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label) # Mapping local folder
       }
+      
+      cli::cli_h1("Running DOCKER")
+      cli::cli_alert(DOCKER_run)
+      
+      system(DOCKER_run)
+
+
+
     } else {
       if (DEBUG == TRUE) cat(crayon::green("Docker image", container_name, " already running.\n"))
     } 

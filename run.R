@@ -55,6 +55,8 @@
 
   targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE) #, exclude = "parameters_monkeys"
   
+  # WINDOWS (delete all docker containers): 
+    # FOR /f "tokens=*" %i IN ('docker ps -q') DO docker stop %i
   system('docker stop $(docker ps -q)') # KILL all docker instances
   targets::tar_destroy(ask = FALSE)
   targets::tar_make()
