@@ -48,7 +48,9 @@ create_remDr <-
       # extraCapabilities for Chrome
         # See full list: https://peter.sh/experiments/chromium-command-line-switches/ e.g. --incognito or --disable-web-security
         # http://www.chromium.org/for-testers/enable-logging # "--enable-logging"
-      chrome_extra_arguments = list(args = list("--start-maximized", "--incognito"))
+      chrome_extra_arguments = list(args = list("--start-maximized", "--incognito, --disable-extensions, --disable-gpu, --disable-dev-shm-usage, --no-sandbox, --user-data-dir"))
+      
+      
       if (disable_web_security == TRUE & browserName == "chrome") chrome_extra_arguments$args[[length(chrome_extra_arguments$args) + 1]] = "--disable-web-security"
       
       # Create remote driver
