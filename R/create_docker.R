@@ -32,28 +32,43 @@ create_docker <-
     if (OS == "Linux") {
       
       # folder_downloads = folder_downloads
-
+      
+      # folder_protocol_local   folder_protocol_docker
+      # # -v ~/Downloads/protocol999:/home/seluser/protocol999 
+      
+      # folder_protocol_local = paste0(folder_downloads, "/", basename(parameters_docker$task_params$local_folder_tasks))
+      folder_protocol_local = parameters_docker$task_params$local_folder_tasks
+      
+                                      
     } else if (OS == "Windows") {
 
-      folder_downloads = paste0(normalizePath(parameters_docker$task_params$local_folder_tasks), "")
-      # if (!dir.exists(folder_downloads)) dir.create(folder_downloads)
-      folder_downloads = gsub("C:", "c", paste0("//",folder_downloads)) %>% dirname() %>% gsub("\\\\", "/", .)
+      # DEBUG
+      # parameters_docker$task_params$local_folder_tasks = "C:\\\\Users\\\\emrys\\\\Downloads\\\\protocol999"
+      
+      # OLD Working
+      folder_downloads_temp = paste0(normalizePath(parameters_docker$task_params$local_folder_tasks), "")
+      # # if (!dir.exists(folder_downloads)) dir.create(folder_downloads)
+      folder_downloads = gsub("C:", "c", paste0("//",folder_downloads_temp)) %>% dirname() %>% gsub("\\\\", "/", .)
+
+      # folder_downloads = paste0(normalizePath(parameters_docker$task_params$local_folder_tasks), "")
+      # folder_protocol_local = gsub("C:", "c", paste0("//",folder_downloads))  %>% gsub("\\\\", "/", .)
+      
+      folder_protocol_local = basename(parameters_docker$task_params$local_folder_tasks) %>% gsub("C:", "c", paste0("//",folder_downloads))  %>% gsub("\\\\", "/", .)
+
+      
       
 
     } else if (OS == "Darwin" | OS == "macOS") {
 
-            # folder_downloads = folder_downloads
-
+      # folder_downloads = folder_downloads
+      folder_protocol_local = paste0(folder_downloads, "/", basename(parameters_docker$task_params$local_folder_tasks))
+      
     } else {
       stop("Not sure about your operative system.")
     }
 
-
-
-
-
-
-
+    # Common to all OS
+    folder_protocol_docker = paste0("/home/seluser/", basename(parameters_docker$task_params$local_folder_tasks))
 
 
     
@@ -125,34 +140,65 @@ create_docker <-
     }
     
     
-    # REVIEW: Look for the "latest" version of the docker container 
+
+    # Get docker images -------------------------------------------------------
+
+    # REVIEW: Look for the "latest" version of the docker image 
     if (system(paste0('docker images -a |  grep "', browserName, debug_label, '"'), intern = TRUE) %>% grepl("latest", .) %>% any(.) == FALSE) {
       if (DEBUG == TRUE) cat(crayon::silver("Pulling docker for ", paste0(browserName, debug_label), " as we don't have the latest\n"))
-      system(paste0('docker pull --quiet selenium/standalone-', browserName, debug_label))
+      
+      DOCKER_image = paste0('docker pull --quiet selenium/standalone-', browserName, debug_label)
+      
+      cli::cli_h1("Pulling docker image")
+      cli::cli_alert(DOCKER_image)
+      
+      system(DOCKER_image)
+      
+      
       Sys.sleep(5)
     } else {
       if (DEBUG == TRUE) cat(crayon::silver("Not pulling docker for ", paste0(browserName, debug_label), ", already have it\n"))
     }
     
+
+    # Run docker container ----------------------------------------------------
+
     
     # Run docker session. Map home directory to download docker container
     if (container_name %in% system('docker ps -a --format "{{.Names}}"', intern = TRUE) == FALSE) {
       
       if (DEBUG == TRUE) cat(crayon::yellow("Docker image", container_name, " not running. Launching...\n"))
       
-      #if (folder_downloads == "") {
-      #  # REVIEW: https://docs.docker.com/engine/reference/run/ || -e "ENABLE_CORS=true" 
-      #  system(paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label)) # Not mapping local folder
-      #} else {
-      #  system(paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v ', folder_downloads, ':/home/seluser/Downloads -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label)) # Mapping local folder
-      #}
-
       if (folder_downloads == "") {
         # REVIEW: https://docs.docker.com/engine/reference/run/ || -e "ENABLE_CORS=true" 
         DOCKER_run = paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label) # Not mapping local folder
       } else {
-        DOCKER_run = paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v ', folder_downloads, ':/home/seluser/Downloads -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label) # Mapping local folder
+        
+        
+        DOCKER_run = paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name,
+                            ' -v ', folder_downloads, ':/home/seluser/Downloads',
+                            ' -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label) # Mapping local folder
+        
+        # THIS WORKS, BUT ~/Downloads/protocol999/data NEEDS write permissions 777
+        # folder_protocol_local   folder_protocol_docker
+        # # -v ~/Downloads/protocol999:/home/seluser/protocol999 
+        # Downloads
+        # # -v ~/Downloads/protocol999/data:/home/seluser/Downloads 
+        
+        # DOCKER_run = paste0(
+        #   'docker run --rm -t -d ', big_container_str,' --name ', container_name,
+        #   ' -v ', folder_protocol_local, '/data:/home/seluser/Downloads', # Downloads
+        #   ' -v ', folder_protocol_local, ':', folder_protocol_docker, # Protocol
+        #   ' -v /dev/shm:/dev/shm',
+        #   ' -P selenium/standalone-', browserName, debug_label # Mapping local folder
+        #   )
+        
+  
+
+        
+        
       }
+      
       
       cli::cli_h1("Running DOCKER")
       cli::cli_alert(DOCKER_run)

@@ -56,7 +56,8 @@ create_links <-
     } else if (parameters_task$task$local_or_server == "test") {
       
       path_tests = gsub("tests/jspsych-6_3_1/", "", dir(path = "tests/jspsych-6_3_1/examples", pattern = "jspsych.*.html", full.names = TRUE))
-      links_tasks = paste0("file:///home/seluser/Downloads/", path_tests[1], "?uid=", uid, "&pid=", parameters_task$task$pid)
+      # links_tasks = paste0("file:///home/seluser/Downloads/", path_tests[1], "?uid=", uid, "&pid=", parameters_task$task$pid)
+      links_tasks = paste0("file:///home/seluser/", path_tests[1], "?uid=", uid, "&pid=", parameters_task$task$pid)
       
       
     # LOCAL
@@ -84,8 +85,18 @@ create_links <-
       # Get folder inside downloads
       post_downloads_folder = gsub(".*Downloads(.*)", "\\1", parameters_task$task$local_folder_tasks)
       # By default, use local
-      # links_tasks = paste0("file:///home/seluser/", parameters_task$task$local_folder_tasks, "/index.html?pid=", parameters_task$task$pid, uid_string)
+      # OLD: links_tasks = paste0("file:///home/seluser/", parameters_task$task$local_folder_tasks, "/index.html?pid=", parameters_task$task$pid, uid_string)
+      
+      # Working
       links_tasks = paste0("file:///home/seluser/Downloads/", post_downloads_folder, "/index.html?pid=", parameters_task$task$pid, uid_string)
+      
+      # Trying to implement (see create_docker)
+        # folder_protocol_local   folder_protocol_docker
+        # # -v ~/Downloads/protocol999:/home/seluser/protocol999 
+        # Downloads
+        # # -v ~/Downloads/protocol999/data:/home/seluser/Downloads 
+        
+      # links_tasks = paste0("file:///home/seluser/", post_downloads_folder, "/index.html?pid=", parameters_task$task$pid, uid_string)
       
       # paste0(gsub("~/", "", destination_folder), basename(source_folder), "/")
     }

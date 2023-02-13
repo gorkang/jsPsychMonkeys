@@ -5,15 +5,14 @@
     # For a complete list of possible parameters, see set_parameters()  
     # Number of workers is defined in run.R: targets::tar_make_future(workers = future::availableCores() - 2)
   
-  
   parameters_monkeys_minimal = list(uid = 1:5, uid_URL = TRUE, forced_seed = 11,
-                                    local_folder_tasks = "~/Downloads/protocol999",
-                                    # server_folder_tasks = "999",
-                                    forced_refresh = FALSE, # Want monkeys to close and reopen their browsers?
-                                    big_container = TRUE, debug_file = TRUE, console_logs = TRUE, debug = TRUE, keep_alive = FALSE,
-                                    open_VNC = TRUE # FALSE if don't want VNC to open
-                                    )
-  
+                                      local_folder_tasks = "~/Downloads/protocol999",
+                                      # server_folder_tasks = "999",
+                                      forced_refresh = FALSE, # Want monkeys to close and reopen their browsers?
+                                      big_container = TRUE, debug_file = TRUE, console_logs = TRUE, debug = TRUE, keep_alive = TRUE,
+                                      open_VNC = TRUE # FALSE if don't want VNC to open
+                                      )
+    
 
 
 # [DO NOT EDIT BELOW] -----------------------------------------------------
@@ -94,6 +93,7 @@ TARGETS =  list(
     priority = 1
   ),
   
+    # Creates as many branches as uid's
     tarchetypes::tar_map(
       # values = parameters_monkeys$participants,
       values = list(uid = parameters_monkeys_minimal$uid),
@@ -118,7 +118,9 @@ TARGETS =  list(
           container_port = container$container_port,
           browserName = container$browserName,
           container_name = container$container_name,
-          disable_web_security = parameters_monkeys$remDr_params$disable_web_security
+          disable_web_security = parameters_monkeys$remDr_params$disable_web_security,
+          parameters_monkeys = parameters_monkeys,
+          DEBUG = FALSE #parameters_monkeys$debug$DEBUG
         ), priority = .5
       ),
       
@@ -134,6 +136,16 @@ TARGETS =  list(
           container_name = remoteDriver$container_name,
           remDr = remoteDriver$remDr
         ), priority = .5
+      ),
+      
+      
+      # For local protocols, check the csv in downloads
+      tar_target(
+        existing_CSVs,
+        check_Downloads(
+          parameters_monkeys = parameters_monkeys,
+          links_tar = links_tar
+          ), priority = .5
       ),
       
       
@@ -155,6 +167,16 @@ TARGETS =  list(
           open_VNC = parameters_monkeys$debug$open_VNC,
           container_name = remoteDriver$container_name,
           remDr = remoteDriver$remDr
+        ), priority = .5
+      ),
+      
+      # Copy newly downloaded csv's to the protocols data folder
+      tar_target(
+        data_moved,
+        copy_files_to_data(pre_existing_CSV = existing_CSVs, 
+                           parameters_monkeys = parameters_monkeys, 
+                           uid = uid,
+                           task = task
         ), priority = .5
       ),
       

@@ -10,6 +10,8 @@
   source("setup.R")
   # If it fails, open _targets_packages.R, install all the packages there and rerun setup.R
 
+  # ~/Downloads NEEDS write permissions for all users [NOT SAFE]
+
   # See the jsPsychR-manual for details
   # https://gorkang.github.io/jsPsychR-manual/qmd/02-QuickGuide.html#setup
   

@@ -291,3 +291,68 @@ tar_make_future_rowwise <- function(TARGETS, uids) {
   # TARGETS[[1]]$container[[1]]$settings$priority
   
 }
+
+
+#' Check csv files in a folder
+#'
+#' @param pid 
+#' @param download_folder 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+check_Downloads <- function(parameters_monkeys, uid = "", links_tar = "") {
+
+  pid = parameters_monkeys$task_params$pid
+  download_folder = parameters_monkeys$docker$folder_downloads
+  local_or_server = parameters_monkeys$task_params$local_or_server
+  
+  # Do this only in local protocols
+  if (local_or_server == "local") {
+      
+    # uid is used in copy_files_to_data so only that participant's data is copyied
+    files_downloaded = list.files(download_folder, pattern = paste0("^", pid, ".*", uid, "\\.csv"))
+    
+    return(files_downloaded)
+  }
+  
+}
+
+#' In local protocols, move the Downloaded csv to the data folder of the protocol
+#'
+#' @param pre_existing_CSV 
+#' @param parameters_monkeys 
+#' @param uid 
+#' @param task 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+copy_files_to_data <- function(pre_existing_CSV, parameters_monkeys, uid, task = task) {
+  
+  if (parameters_monkeys$task_params$local_or_server == "local") {
+    
+    # Create data folder
+    local_folder_tasks_data = paste0(parameters_monkeys$task_params$local_folder_tasks, "/data")
+    if(!dir.exists(local_folder_tasks_data)) dir.create(local_folder_tasks_data)
+    
+    # Check final files in data folder
+    final_files = check_Downloads(parameters_monkeys = parameters_monkeys, uid = uid)
+    
+    # Prepare variables
+    final_files_clean = final_files[!final_files %in% pre_existing_CSV]
+    from_files = paste0(parameters_monkeys$docker$folder_downloads, "/", final_files_clean)
+    to_files = paste0(local_folder_tasks_data, "/", final_files_clean)
+    
+    # Rename/Move to final location
+    cli::cli_alert_info("{from_files}, to {to_files}")
+    
+    file.rename(from = from_files,
+                to = to_files)
+    
+    cli::cli_alert_info("{length(final_files_clean)} files moved to {.code {local_folder_tasks_data}}")
+    
+  }
+}
