@@ -10,66 +10,41 @@
   source("setup.R")
   # If it fails, open _targets_packages.R, install all the packages there and rerun setup.R
 
-  # Install docker
-  # https://gorkang.github.io/jsPsychR-manual/qmd/06-jsPsychRadmins.html#install-docker
+  # See the jsPsychR-manual for details
+  # https://gorkang.github.io/jsPsychR-manual/qmd/02-QuickGuide.html#setup
   
-    # On Ubuntu, install dependencies:
-      # system("sudo apt install docker.io libssl-dev libcurl4-openssl-dev libxml2-dev")
-
-    # On windows:
-      # Install docker desktop
-      # Update wsl (in a command prompt): wsl - update
-
-  # Install VNC viewer
-  # https://www.realvnc.com/download/file/viewer.files/VNC-Viewer-6.21.406-Linux-x64.deb
-
-  # Make sure docker works:
-    # [In terminal]:
-      # sudo usermod -aG docker ${USER}
-      # sudo chmod 666 /var/run/docker.sock
-      # sudo systemctl restart docker
-    ## logout and login
-      # docker run hello-world
-
 
 
 # SET PARAMETERS ----------------------------------------------------------
 
-  # Define protocol parameters in _targets.R
+  # Define protocol parameters in _targets.R: 
     rstudioapi::navigateToFile("_targets.R")
-    # IMPORTANT: `local_folder_tasks` # WHERE is the local protocol?
+    # e.g. `local_folder_tasks` = WHERE is the local protocol?
 
-    
-    # The folder .vault needs two files:
-      # + SERVER_PATH.R
-      #     server_path = "http://YOUR SERVER DOMAIN/SUBFOLDER/WHERE/PROTOCOLS/ARE/"
-      # + .credentials file
-          # list(user = "SERVER_USERNAME",
-          #  password = "SERVER_PASSWORD")
-    
-    
-    
+
+# Clean up ----------------------------------------------------------------
+
+  # Stop all docker containers, etc.
+  system('docker stop $(docker ps -q)') # KILL all docker instances
+  system('docker ps -aq | xargs docker stop | xargs docker rm') # Alternative for Windows?
+  system("docker system prune -f") # Cleans up system (stopped containers, etc.)
+  # WINDOWS (delete all docker containers): 
+  # FOR /f "tokens=*" %i IN ('docker ps -q') DO docker stop %i
+  
+  # Delete targets cache
+  targets::tar_destroy(ask = FALSE)
+
 
 
 # Launch  -----------------------------------------------------------------
 
+  targets::tar_make() # Single CPU
+  
+  targets::tar_make_future(workers = future::availableCores() - 2) # Parallel. All minus 2 CPU's available
+
+  
+# Watch -------------------------------------------------------------------
+  
   targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE) #, exclude = "parameters_monkeys"
   
-  # WINDOWS (delete all docker containers): 
-    # FOR /f "tokens=*" %i IN ('docker ps -q') DO docker stop %i
-  system('docker stop $(docker ps -q)') # KILL all docker instances
-  targets::tar_destroy(ask = FALSE)
-  targets::tar_make()
-  
-
-# Parallel ----------------------------------------------------------------
-
-  # If you want monkeys to work in parallel, use this
-  
-  targets::tar_watch(seconds = 5, outdated = FALSE, targets_only = TRUE, exclude = "parameters_monkeys")
-  
-  system('docker stop $(docker ps -q)') # KILL all docker instances
-  targets::tar_destroy(ask = FALSE)
-  # targets::tar_make_future(workers = 4) # When testing the discarding / assigning / re-assigning process
-  targets::tar_make_future(workers = future::availableCores() - 2)
   
