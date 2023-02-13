@@ -29,6 +29,11 @@ create_docker <-
    # Operative system detection
     OS = Sys.info()["sysname"]
 
+    # The way we build the folder_downloads depends on the OS
+    # With folder_protocol_local I am testing a way to separate the protocol folder mount from the data mount in the docker container
+    # It works, but encounter permission issues, as the local Download folder need to have 777
+    # A simpler way to do this can be seen in create_remDr(), where we set the Download folder in Chrome.
+    # We encounter the same permission issues, as the local Download folder need to have 777
     if (OS == "Linux") {
       
       # folder_downloads = folder_downloads
@@ -54,9 +59,6 @@ create_docker <-
       # folder_protocol_local = gsub("C:", "c", paste0("//",folder_downloads))  %>% gsub("\\\\", "/", .)
       
       folder_protocol_local = basename(parameters_docker$task_params$local_folder_tasks) %>% gsub("C:", "c", paste0("//",folder_downloads))  %>% gsub("\\\\", "/", .)
-
-      
-      
 
     } else if (OS == "Darwin" | OS == "macOS") {
 

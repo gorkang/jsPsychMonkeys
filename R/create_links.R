@@ -90,7 +90,7 @@ create_links <-
       # Working
       links_tasks = paste0("file:///home/seluser/Downloads/", post_downloads_folder, "/index.html?pid=", parameters_task$task$pid, uid_string)
       
-      # Trying to implement (see create_docker)
+      # Trying to implement (see create_docker(), and also create_remDr()
         # folder_protocol_local   folder_protocol_docker
         # # -v ~/Downloads/protocol999:/home/seluser/protocol999 
         # Downloads
@@ -117,8 +117,6 @@ create_links <-
     if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::underline(crayon::green(uid, "- ", links_tasks), "\n")))
     
     
-
-    
     # END LOG -----------------------------------------------------------------
     
     # Restore output to console
@@ -128,9 +126,7 @@ create_links <-
     }
     
     
-    
     # OUTPUT ------------------------------------------------------------------
-    
     
     output_list = list(remDr = remDr,
                        container_name = container_name,
