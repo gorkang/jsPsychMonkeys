@@ -40,6 +40,7 @@
       if (!require("glue")) install.packages("glue"); library("glue")
       if (!require("purrr")) install.packages("purrr"); library("purrr")
       if (!require("assertthat")) install.packages("assertthat"); library("assertthat")
+      if (!require('tidyr')) install.packages('tidyr'); library('tidyr')
       if (!require("RSelenium")) install.packages("RSelenium", dependencies = TRUE); library("RSelenium")
   }))
 
@@ -145,7 +146,7 @@ TARGETS =  list(
         existing_CSVs,
         check_Downloads(
           parameters_monkeys = parameters_monkeys,
-          links_tar = links_tar
+          links_tar = remoteDriver # This is so this runs before task
           ), priority = .5
       ),
       

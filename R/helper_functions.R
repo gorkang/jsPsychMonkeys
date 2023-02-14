@@ -324,6 +324,7 @@ check_Downloads <- function(parameters_monkeys, uid = "", links_tar = "") {
   if (local_or_server == "local") {
       
     # uid is used in copy_files_to_data so only that participant's data is copyied
+    cli::cli_alert_info(paste0("Looking for files for pid = {pid} and uid = {uid}"))
     files_downloaded = list.files(download_folder, pattern = paste0("^", pid, ".*", uid, "\\.csv"))
     
     return(files_downloaded)

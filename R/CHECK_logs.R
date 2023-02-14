@@ -9,7 +9,7 @@ library(tidyverse)
 
 FILES = list.files(FOLDER, pattern = "csv", full.names = TRUE)
 DF_raw = purrr::map_dfr(FILES %>% set_names(basename(.)), data.table::fread, .id = "filename", colClasses = 'character', encoding = 'UTF-8', nThread = 1) %>% as_tibble() %>% 
-  separate(filename, into = c("uid"), sep = "_", extra = "drop", remove = FALSE) %>% 
+  tidyr::separate(filename, into = c("uid"), sep = "_", extra = "drop", remove = FALSE) %>% 
   select(-level, -source, -timestamp) %>% 
   mutate(message = gsub(" [0-9]{3}:[0-9]{2} ", "", message))
 

@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 .Ruserdata
-.vault
+.vault/.credentials
+.vault/SERVER_PATH.R
 dev/
 TODO.Rmd
