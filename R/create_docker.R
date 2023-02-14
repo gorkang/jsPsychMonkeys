@@ -53,14 +53,17 @@ create_docker <-
       # parameters_docker$task_params$local_folder_tasks = "C:\\\\Users\\\\emrys\\\\Downloads\\\\protocol999"
       
       # OLD Working
-      folder_downloads_temp = paste0(normalizePath(parameters_docker$task_params$local_folder_tasks), "")
-      # # if (!dir.exists(folder_downloads)) dir.create(folder_downloads)
-      folder_downloads = gsub("C:", "c", paste0("//",folder_downloads_temp)) %>% dirname() %>% gsub("\\\\", "/", .)
-
+      if (parameters_docker$task_params$local_or_server == "local") {
+        folder_downloads_temp = paste0(normalizePath(parameters_docker$task_params$local_folder_tasks), "")
+        # # if (!dir.exists(folder_downloads)) dir.create(folder_downloads)
+        if (grepl("C:", folder_downloads_temp)) folder_downloads = gsub("C:", "c", paste0("//",folder_downloads_temp)) %>% dirname() %>% gsub("\\\\", "/", .)
+        if (grepl("D:", folder_downloads_temp)) folder_downloads = gsub("D:", "d", paste0("//",folder_downloads_temp)) %>% dirname() %>% gsub("\\\\", "/", .)
+        folder_protocol_local = basename(parameters_docker$task_params$local_folder_tasks) %>% gsub("C:", "c", paste0("//",folder_downloads))  %>% gsub("\\\\", "/", .)
+        
+      }
       # folder_downloads = paste0(normalizePath(parameters_docker$task_params$local_folder_tasks), "")
       # folder_protocol_local = gsub("C:", "c", paste0("//",folder_downloads))  %>% gsub("\\\\", "/", .)
       
-      folder_protocol_local = basename(parameters_docker$task_params$local_folder_tasks) %>% gsub("C:", "c", paste0("//",folder_downloads))  %>% gsub("\\\\", "/", .)
 
     } else if (OS == "Darwin" | OS == "macOS") {
 
@@ -182,7 +185,8 @@ create_docker <-
       
       if (DEBUG == TRUE) cat(crayon::yellow("Docker image", container_name, " not running. Launching...\n"))
       
-      if (folder_downloads == "") {
+      if (parameters_docker$task_params$local_or_server == "server") {
+        
         # REVIEW: https://docs.docker.com/engine/reference/run/ || -e "ENABLE_CORS=true" 
         DOCKER_run = paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label) # Not mapping local folder
       } else {

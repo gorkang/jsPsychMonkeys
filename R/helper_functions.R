@@ -151,7 +151,7 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
         cat(crayon::yellow(paste0("\nOpen VNC | localhost:", container_port, " | pwd: secret\n"), crayon::black(vnc_command, "\n")))
         if (DEBUG == TRUE) cat(crayon::silver(" DEBUG:", container_port_raw), "\n\n")
         
-        if (Sys.info()["sysname"] != "Windows") callr::r_bg(func = system(paste0(vnc_command, end_command)))
+        # if (Sys.info()["sysname"] != "Windows") callr::r_bg(func = system(paste0(vnc_command, end_command)))
         
         
       } else {

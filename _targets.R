@@ -5,11 +5,12 @@
     # For a complete list of possible parameters, see set_parameters()  
     # Number of workers is defined in run.R: targets::tar_make_future(workers = future::availableCores() - 2)
   
-  parameters_monkeys_minimal = list(uid = 1:5, uid_URL = TRUE, forced_seed = 11,
-                                      local_folder_tasks = "~/Downloads/protocol999",
-                                      # server_folder_tasks = "999",
+  parameters_monkeys_minimal = list(uid = 888, uid_URL = TRUE, forced_seed = 11,
+                                      # local_folder_tasks = "~/Downloads/protocol999",
+                                      server_folder_tasks = "test/protocols_DEV/29",
+                                      screenshot = FALSE,
                                       forced_refresh = FALSE, # Want monkeys to close and reopen their browsers?
-                                      big_container = TRUE, debug_file = TRUE, console_logs = TRUE, debug = TRUE, keep_alive = TRUE,
+                                      big_container = TRUE, debug_file = FALSE, console_logs = TRUE, debug = TRUE, keep_alive = TRUE,
                                       open_VNC = TRUE # FALSE if don't want VNC to open
                                       )
     
