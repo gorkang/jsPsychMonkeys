@@ -28,7 +28,7 @@
 
   # Stop all docker containers, etc.
   active_containers = system('docker ps -q', intern = TRUE)
-  system(paste0('docker stop ', active_containers)) # KILL all docker instances
+  active_containers |> purrr::walk(~system(paste0('docker stop ', .x)))
   # system("docker system prune -f") # Cleans up system (stopped containers, etc.)
   
   # Delete targets cache
