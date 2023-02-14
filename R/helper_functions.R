@@ -356,6 +356,15 @@ copy_files_to_data <- function(pre_existing_CSV, parameters_monkeys, uid, task =
     
     # Prepare variables
     final_files_clean = final_files[!final_files %in% pre_existing_CSV]
+    
+    if (length(final_files_clean) == 0) {
+      
+      cli::cli_alert_warning("NO files to copy:
+                             - pid is {parameters_monkeys$task_params$pid}
+                             - uid is {uid}
+                             - local folder is: {parameters_monkeys$task_params$local_folder_tasks}")
+    }
+    
     from_files = paste0(parameters_monkeys$docker$folder_downloads, "/", final_files_clean)
     to_files = paste0(local_folder_tasks_data, "/", final_files_clean)
     

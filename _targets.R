@@ -6,13 +6,15 @@
     # Number of workers is defined in run.R: targets::tar_make_future(workers = future::availableCores() - 2)
   
   parameters_monkeys_minimal = list(uid = 888, uid_URL = TRUE, forced_seed = 11,
-                                      # local_folder_tasks = "~/Downloads/protocol999",
-                                      server_folder_tasks = "test/protocols_DEV/29",
-                                      screenshot = FALSE,
-                                      forced_refresh = FALSE, # Want monkeys to close and reopen their browsers?
-                                      big_container = TRUE, debug_file = FALSE, console_logs = TRUE, debug = TRUE, keep_alive = TRUE,
-                                      open_VNC = TRUE # FALSE if don't want VNC to open
-                                      )
+                                    # If using Windows: "C:/Users/myusername/Downloads/protocol999"
+                                    local_folder_tasks = "~/Downloads/protocol999", 
+                                    # server_folder_tasks = "test/protocols_DEV/998",
+                                    screenshot = FALSE,
+                                    forced_refresh = FALSE, # Want monkeys to close and reopen their browsers?
+                                    big_container = TRUE, 
+                                    debug = TRUE, debug_file = FALSE, console_logs = FALSE, keep_alive = FALSE,
+                                    open_VNC = TRUE # FALSE if don't want VNC to open
+                                    )
     
 
 
