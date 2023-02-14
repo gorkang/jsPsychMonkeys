@@ -138,10 +138,11 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
         # Open VNC, using second port in container_port, the password is 'secret'
         if (Sys.info()["sysname"] == "Windows") {
           vnc_program = '"C:/Program Files/RealVNC/VNC Viewer/vncviewer.exe"'
-          end_command = " &"
+          end_command = ""
         } else {
           vnc_program = "vncviewer"  
-          end_command = ""
+          end_command = " &"
+          
         }
         
         vnc_command = paste0(vnc_program, ' 127.0.0.1:', container_port)
@@ -150,7 +151,8 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
         cat(crayon::yellow(paste0("\nOpen VNC | localhost:", container_port, " | pwd: secret\n"), crayon::black(vnc_command, "\n")))
         if (DEBUG == TRUE) cat(crayon::silver(" DEBUG:", container_port_raw), "\n\n")
         
-        system(paste0(vnc_command, end_command))
+        if (Sys.info()["sysname"] != "Windows") callr::r_bg(func = system(paste0(vnc_command, end_command)))
+        
         
       } else {
         

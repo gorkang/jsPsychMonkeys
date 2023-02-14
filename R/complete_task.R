@@ -205,7 +205,7 @@ complete_task <-
         # write_lines(console_logs_list, paste0("outputs/log/", uid, "_console_logs", "_", index - 1, "_", Sys.time(), ".txt"))
         numbered_console_logs = console_logs_list %>% setNames(seq_along(.))
         DF_console_logs = 1:length(numbered_console_logs) %>% map_df(~ numbered_console_logs[[.x]] %>% bind_rows %>% mutate(page_number = .x)) %>% tidyr::drop_na(message)
-        write_csv(DF_console_logs, paste0("outputs/log/", uid, "_console_logs", "_", Sys.time(), ".csv"))
+        write_csv(DF_console_logs, paste0("outputs/log/", uid, "_console_logs", "_", gsub(":", "-", Sys.time()), ".csv"))
         }
       
       # links while loop
