@@ -27,11 +27,9 @@
 # Clean up ----------------------------------------------------------------
 
   # Stop all docker containers, etc.
-  system('docker stop $(docker ps -q)') # KILL all docker instances
-  system('docker ps -aq | xargs docker stop | xargs docker rm') # Alternative for Windows?
-  system("docker system prune -f") # Cleans up system (stopped containers, etc.)
-  # WINDOWS (delete all docker containers): 
-  # FOR /f "tokens=*" %i IN ('docker ps -q') DO docker stop %i
+  active_containers = system('docker ps -q', intern = TRUE)
+  system(paste0('docker stop ', active_containers)) # KILL all docker instances
+  # system("docker system prune -f") # Cleans up system (stopped containers, etc.)
   
   # Delete targets cache
   targets::tar_destroy(ask = FALSE)

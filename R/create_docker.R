@@ -36,6 +36,7 @@ create_docker <-
     # We encounter the same permission issues, as the local Download folder need to have 777
     if (OS == "Linux") {
       
+      grep_command = "grep"
       # folder_downloads = folder_downloads
       
       # folder_protocol_local   folder_protocol_docker
@@ -47,6 +48,7 @@ create_docker <-
                                       
     } else if (OS == "Windows") {
 
+      grep_command = "findstr"
       # DEBUG
       # parameters_docker$task_params$local_folder_tasks = "C:\\\\Users\\\\emrys\\\\Downloads\\\\protocol999"
       
@@ -62,6 +64,8 @@ create_docker <-
 
     } else if (OS == "Darwin" | OS == "macOS") {
 
+      grep_command = "grep"
+      
       # folder_downloads = folder_downloads
       folder_protocol_local = paste0(folder_downloads, "/", basename(parameters_docker$task_params$local_folder_tasks))
       
@@ -144,9 +148,16 @@ create_docker <-
     
 
     # Get docker images -------------------------------------------------------
-
+    # browserName = "chrome"
+    # debug_label = "-debug"
+    DOCKER_images = system("docker images -a", intern = TRUE) |> tibble::as_tibble()
+    LATEST_image = DOCKER_images |> 
+      dplyr::filter(grepl(paste0(browserName, debug_label), value)) |> 
+      dplyr::filter(grepl("latest", value))
+    
     # REVIEW: Look for the "latest" version of the docker image 
-    if (system(paste0('docker images -a |  grep "', browserName, debug_label, '"'), intern = TRUE) %>% grepl("latest", .) %>% any(.) == FALSE) {
+    # if (system(paste0('docker images -a |  ', grep_command, ' "', browserName, debug_label, '"'), intern = TRUE) %>% grepl("latest", .) %>% any(.) == FALSE) {
+    if (nrow(LATEST_image == 0)) {
       if (DEBUG == TRUE) cat(crayon::silver("Pulling docker for ", paste0(browserName, debug_label), " as we don't have the latest\n"))
       
       DOCKER_image = paste0('docker pull --quiet selenium/standalone-', browserName, debug_label)

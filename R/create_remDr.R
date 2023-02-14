@@ -61,7 +61,7 @@ create_remDr <-
       # extraCapabilities for Chrome
         # See full list: https://peter.sh/experiments/chromium-command-line-switches/ e.g. --incognito or --disable-web-security
         # http://www.chromium.org/for-testers/enable-logging # "--enable-logging"
-      chrome_extra_arguments = list(args = list("--start-maximized", "--incognito, --disable-extensions, --disable-gpu, --disable-dev-shm-usage, --no-sandbox, --user-data-dir") #,
+      chrome_extra_arguments = list(args = list("--start-maximized", "--incognito", "--disable-extensions", "--disable-gpu", "--disable-dev-shm-usage", "--no-sandbox") #, --user-data-dir"
                                     
                                     # Works to choose a different Download folder.
                                     # But that folder needs 777 permissions in the local computer
