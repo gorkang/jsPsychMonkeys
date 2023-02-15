@@ -90,12 +90,7 @@ create_links <-
       # Working
       links_tasks = paste0("file:///home/seluser/Downloads/", post_downloads_folder, "/index.html?pid=", parameters_task$task$pid, uid_string)
       
-      # Trying to implement (see create_docker(), and also create_remDr()
-        # folder_protocol_local   folder_protocol_docker
-        # # -v ~/Downloads/protocol999:/home/seluser/protocol999 
-        # Downloads
-        # # -v ~/Downloads/protocol999/data:/home/seluser/Downloads 
-        
+      # Trying to implement (see create_docker(), and also create_remDr())
       # links_tasks = paste0("file:///home/seluser/", post_downloads_folder, "/index.html?pid=", parameters_task$task$pid, uid_string)
       
       # paste0(gsub("~/", "", destination_folder), basename(source_folder), "/")

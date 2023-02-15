@@ -348,7 +348,7 @@ copy_files_to_data <- function(pre_existing_CSV, parameters_monkeys, uid, task =
   if (parameters_monkeys$task_params$local_or_server == "local") {
     
     # Create data folder
-    local_folder_tasks_data = paste0(parameters_monkeys$task_params$local_folder_tasks, "/data")
+    local_folder_tasks_data = paste0(parameters_monkeys$task_params$local_folder_tasks, "/.data")
     if(!dir.exists(local_folder_tasks_data)) dir.create(local_folder_tasks_data)
     
     # Check final files in data folder

@@ -22,8 +22,8 @@ create_remDr <-
   # Create destination folder in local computer when running a local protocol
   if (parameters_monkeys$task_params$local_or_server == "local") {
     
-    local_download_folder = paste0(parameters_monkeys$task_params$local_folder_tasks, "/data")
-    chrome_download_folder = paste0("/home/seluser/Downloads/", basename(parameters_monkeys$task_params$local_folder_tasks), "/data")
+    local_download_folder = paste0(parameters_monkeys$task_params$local_folder_tasks, "/.data")
+    chrome_download_folder = paste0("/home/seluser/Downloads/", basename(parameters_monkeys$task_params$local_folder_tasks), "/.data")
     
     if (!dir.exists(local_download_folder)) dir.create(local_download_folder, mode =  "777", showWarnings = TRUE)
     Sys.chmod(local_download_folder, mode = "0777", use_umask = TRUE)
@@ -68,7 +68,7 @@ create_remDr <-
                                     # prefs = list(
                                     #   "profile.default_content_settings.popups" = 0L,
                                     #   "download.prompt_for_download" = FALSE,
-                                    #   "download.default_directory" = chrome_download_folder #"/home/seluser/Downloads/protocol999/data"
+                                    #   "download.default_directory" = chrome_download_folder #"/home/seluser/Downloads/protocol999/.data"
                                     # )
                                     )
       

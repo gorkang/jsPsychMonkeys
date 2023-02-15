@@ -196,15 +196,15 @@ create_docker <-
                             ' -v ', folder_downloads, ':/home/seluser/Downloads',
                             ' -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label) # Mapping local folder
         
-        # THIS WORKS, BUT ~/Downloads/protocol999/data NEEDS write permissions 777
+        # THIS WORKS, BUT ~/Downloads/protocol999/.data NEEDS write permissions 777
         # folder_protocol_local   folder_protocol_docker
         # # -v ~/Downloads/protocol999:/home/seluser/protocol999 
         # Downloads
-        # # -v ~/Downloads/protocol999/data:/home/seluser/Downloads 
+        # # -v ~/Downloads/protocol999/.data:/home/seluser/Downloads 
         
         # DOCKER_run = paste0(
         #   'docker run --rm -t -d ', big_container_str,' --name ', container_name,
-        #   ' -v ', folder_protocol_local, '/data:/home/seluser/Downloads', # Downloads
+        #   ' -v ', folder_protocol_local, '/.data:/home/seluser/Downloads', # Downloads
         #   ' -v ', folder_protocol_local, ':', folder_protocol_docker, # Protocol
         #   ' -v /dev/shm:/dev/shm',
         #   ' -P selenium/standalone-', browserName, debug_label # Mapping local folder
