@@ -1,8 +1,22 @@
+#' Cleans up docker container
+#'
+#' @param container_name 
+#' @param parameters_monkeys 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 clean_up_docker <-
   function(container_name = "test",
-           keep_alive = FALSE,
-           DEBUG = FALSE) {
+           parameters_monkeys = parameters_monkeys
+           ) {
   
+    
+  # Check which parameters were entered in parameters_monkeys -----------------
+    
+    # If the parameter was entered in the parameters_monkeys list, use it
+    source("R/main_parameters.R", local = TRUE)
     
 
   # CHECK -------------------------------------------------------------------

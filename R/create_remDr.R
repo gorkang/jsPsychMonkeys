@@ -1,14 +1,23 @@
+#' Creates remote driver in docker container (opens browser)
+#'
+#' @param container_port port of container
+#' @param browserName c("chrome", "firefox")
+#' @param container_name name of container
+#' @param parameters_monkeys parameters_monkeys list of parameters 
+#'
+#' @return A remDr object
+#' @export
 create_remDr <-
   function(container_port,
            browserName,
            container_name = NULL,
-           disable_web_security = FALSE,
-           parameters_monkeys = parameters_monkeys,
-           DEBUG = FALSE) {
+           parameters_monkeys = parameters_monkeys
+           ) {
     
   # DEBUG
-    # debug_function("create_remDr")
     # targets::tar_load_globals()
+    # debug_function("create_remDr")
+    
     # DEBUG = TRUE
     # targets::tar_load("parameters_monkeys")
     # debug_docker(uid_participant = 2, parameters_debug = parameters_monkeys)
@@ -19,14 +28,24 @@ create_remDr <-
   # container_port = container_24001$container_port
   # DEBUG = parameters_monkeys$debug$DEBUG
 
+    
+  # Check which parameters were entered in parameters_monkeys -----------------
+    
+    # If the parameter was entered in the parameters_monkeys list, use it
+    source("R/main_parameters.R", local = TRUE)
+    
+    
+    
   # Create destination folder in local computer when running a local protocol
   if (parameters_monkeys$task_params$local_or_server == "local") {
     
-    local_download_folder = paste0(parameters_monkeys$task_params$local_folder_tasks, "/.data")
-    chrome_download_folder = paste0("/home/seluser/Downloads/", basename(parameters_monkeys$task_params$local_folder_tasks), "/.data")
+    # Attempt to directly download the csv's to a .data folder inside the project's folder
+    # local_download_folder = paste0(parameters_monkeys$task_params$local_folder_tasks, "/.data")
+    # chrome_download_folder = paste0("/home/seluser/Downloads/", basename(parameters_monkeys$task_params$local_folder_tasks), "/.data")
+    # 
+    # if (!dir.exists(local_download_folder)) dir.create(local_download_folder, mode =  "777", showWarnings = TRUE)
+    # Sys.chmod(local_download_folder, mode = "0777", use_umask = TRUE)
     
-    if (!dir.exists(local_download_folder)) dir.create(local_download_folder, mode =  "777", showWarnings = TRUE)
-    Sys.chmod(local_download_folder, mode = "0777", use_umask = TRUE)
     # system("ls -la ~/Downloads/protocol999/") 
     # unlink(local_download_folder, force = TRUE, recursive = TRUE)
     

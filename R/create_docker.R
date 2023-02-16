@@ -1,27 +1,36 @@
+#' Creates a docker container
+#'
+#' @param container_name Container name
+#' @param parameters_monkeys parameters_monkeys list of parameters 
+#'
+#' @return A list with the parameters of the newly created docker container
+#' @export
 create_docker <-
-  function(container_name = "test",
-           browserName = "chrome",
-           DEBUG = FALSE,
-           big_container = FALSE,
-           folder_downloads = "~/Downloads",
-           parameters_docker = NULL) {
-    
+  function(uid = "test",
+           parameters_monkeys = NULL) {
     
     # DEBUG
-    # debug_function(create_docker)
-    
-    # container_name = "container1"
-    # browserName = "chrome"
-    # DEBUG = TRUE
-    # big_container = FALSE
-    # folder_downloads = "~/Downloads/"
-    # parameters_docker = parameters_monkeys
+    # targets::tar_load_globals()
+    # debug_function("create_docker")
     
     
-    # Packages -------------------------------------------------------------
-    suppressMessages(suppressWarnings(library(RSelenium)))
-    suppressMessages(suppressWarnings(library(dplyr)))
-    suppressMessages(suppressWarnings(library(purrr)))
+    
+# Packages -------------------------------------------------------------
+  suppressMessages(suppressWarnings(library(RSelenium)))
+  suppressMessages(suppressWarnings(library(dplyr)))
+  suppressMessages(suppressWarnings(library(purrr)))
+    
+        
+    
+# Check which parameters were entered in parameters_monkeys -----------------
+    
+  # If the parameter was entered in the parameters_monkeys list, use it
+  source("R/main_parameters.R", local = TRUE)
+    
+  # VARS
+  container_name = paste0("container", uid)
+    
+    
     
 
 # FOLDER -----------------------------------------------------
@@ -42,26 +51,26 @@ create_docker <-
       # folder_protocol_local   folder_protocol_docker
       # # -v ~/Downloads/protocol999:/home/seluser/protocol999 
       
-      # folder_protocol_local = paste0(folder_downloads, "/", basename(parameters_docker$task_params$local_folder_tasks))
-      folder_protocol_local = parameters_docker$task_params$local_folder_tasks
+      # folder_protocol_local = paste0(folder_downloads, "/", basename(parameters_monkeys$task_params$local_folder_tasks))
+      folder_protocol_local = parameters_monkeys$task_params$local_folder_tasks
       
                                       
     } else if (OS == "Windows") {
 
       grep_command = "findstr"
       # DEBUG
-      # parameters_docker$task_params$local_folder_tasks = "C:\\\\Users\\\\emrys\\\\Downloads\\\\protocol999"
+      # parameters_monkeys$task_params$local_folder_tasks = "C:\\\\Users\\\\emrys\\\\Downloads\\\\protocol999"
       
       # OLD Working
-      if (parameters_docker$task_params$local_or_server == "local") {
-        folder_downloads_temp = paste0(normalizePath(parameters_docker$task_params$local_folder_tasks), "")
+      if (parameters_monkeys$task_params$local_or_server == "local") {
+        folder_downloads_temp = paste0(normalizePath(parameters_monkeys$task_params$local_folder_tasks), "")
         # # if (!dir.exists(folder_downloads)) dir.create(folder_downloads)
         if (grepl("C:", folder_downloads_temp)) folder_downloads = gsub("C:", "c", paste0("//",folder_downloads_temp)) %>% dirname() %>% gsub("\\\\", "/", .)
         if (grepl("D:", folder_downloads_temp)) folder_downloads = gsub("D:", "d", paste0("//",folder_downloads_temp)) %>% dirname() %>% gsub("\\\\", "/", .)
-        folder_protocol_local = basename(parameters_docker$task_params$local_folder_tasks) %>% gsub("C:", "c", paste0("//",folder_downloads))  %>% gsub("\\\\", "/", .)
+        folder_protocol_local = basename(parameters_monkeys$task_params$local_folder_tasks) %>% gsub("C:", "c", paste0("//",folder_downloads))  %>% gsub("\\\\", "/", .)
         
       }
-      # folder_downloads = paste0(normalizePath(parameters_docker$task_params$local_folder_tasks), "")
+      # folder_downloads = paste0(normalizePath(parameters_monkeys$task_params$local_folder_tasks), "")
       # folder_protocol_local = gsub("C:", "c", paste0("//",folder_downloads))  %>% gsub("\\\\", "/", .)
       
 
@@ -70,23 +79,23 @@ create_docker <-
       grep_command = "grep"
       
       # folder_downloads = folder_downloads
-      folder_protocol_local = paste0(folder_downloads, "/", basename(parameters_docker$task_params$local_folder_tasks))
+      folder_protocol_local = paste0(folder_downloads, "/", basename(parameters_monkeys$task_params$local_folder_tasks))
       
     } else {
       stop("Not sure about your operative system.")
     }
 
     # Common to all OS
-    folder_protocol_docker = paste0("/home/seluser/", basename(parameters_docker$task_params$local_folder_tasks))
+    # folder_protocol_docker = paste0("/home/seluser/", basename(parameters_monkeys$task_params$local_folder_tasks))
 
 
     
     # CHECKS ------------------------------------------------------------------
     if (!browserName %in% c("chrome", "firefox")) message("Use 'firefox' or 'chrome' as browserName parameter")
-    if (is.null(parameters_docker)) parameters_docker = list(task = list(local_or_server = "server"))
+    if (is.null(parameters_monkeys)) parameters_monkeys = list(task = list(local_or_server = "server"))
 
     # If we are in testing mode, use the test/ folder in the project
-    if (parameters_docker$task$local_or_server == "test") folder_downloads = here::here("tests/jspsych-6_3_1/")
+    if (parameters_monkeys$task$local_or_server == "test") folder_downloads = here::here("tests/jspsych-6_3_1/")
     
     
     if (Sys.info()["sysname"] == "Linux") {
@@ -101,20 +110,16 @@ create_docker <-
         if (!exists("NUMBER_dockers")) NUMBER_dockers = NUMBER_dockers_LOW
         # cat(crayon::bgRed("\n\n --- LOW RAM --- dockers: ", NUMBER_dockers_LOW, "\n\n"))
   
-        # while (NUMBER_dockers >= NUMBER_dockers_LOW) {
         if (NUMBER_dockers >= NUMBER_dockers_LOW) {
           cat(crayon::bgWhite("\n\n --- LOW RAM --- dockers: ", NUMBER_dockers_LOW, "/", NUMBER_dockers, "Pause for 60s...\n\n"))
           Sys.sleep(60)
           NUMBER_dockers = length(reconnect_to_VNC())
   
         }
-  
       }
     }
     
     # Check if exists
-    # if (is_empty(system(sprintf('docker ps -q -f name=%s', container_name), intern = TRUE))) { # WITH THIS SINTAX, container1 == container10
-      
     if (container_name %in% system('docker ps -a --format "{{.Names}}"', intern = TRUE) == FALSE) {
       
       # Container does not exist
@@ -151,17 +156,15 @@ create_docker <-
     
 
     # Get docker images -------------------------------------------------------
-    # browserName = "chrome"
-    # debug_label = "-debug"
+  
     DOCKER_images = system("docker images -a", intern = TRUE) |> tibble::as_tibble()
     LATEST_image = DOCKER_images |> 
       dplyr::filter(grepl(paste0(browserName, debug_label), value)) |> 
       dplyr::filter(grepl("latest", value))
     
-    # REVIEW: Look for the "latest" version of the docker image 
-    # if (system(paste0('docker images -a |  ', grep_command, ' "', browserName, debug_label, '"'), intern = TRUE) %>% grepl("latest", .) %>% any(.) == FALSE) {
-    if (nrow(LATEST_image == 0)) {
-      if (DEBUG == TRUE) cat(crayon::silver("Pulling docker for ", paste0(browserName, debug_label), " as we don't have the latest\n"))
+    # Look for the "latest" version of the docker image 
+    if (nrow(LATEST_image) == 0) {
+      if (DEBUG == TRUE) cli::cli_alert_info("Pulling docker image for {.code {paste0(browserName, debug_label)}} as we don't have the latest\n")
       
       DOCKER_image = paste0('docker pull --quiet selenium/standalone-', browserName, debug_label)
       
@@ -170,10 +173,10 @@ create_docker <-
       
       system(DOCKER_image)
       
-      
       Sys.sleep(5)
+      
     } else {
-      if (DEBUG == TRUE) cat(crayon::silver("Not pulling docker for ", paste0(browserName, debug_label), ", already have it\n"))
+      if (DEBUG == TRUE) cli::cli_alert_info("Not pulling docker image for {.code {paste0(browserName, debug_label)}}, already have it")
     }
     
 
@@ -183,9 +186,9 @@ create_docker <-
     # Run docker session. Map home directory to download docker container
     if (container_name %in% system('docker ps -a --format "{{.Names}}"', intern = TRUE) == FALSE) {
       
-      if (DEBUG == TRUE) cat(crayon::yellow("Docker image", container_name, " not running. Launching...\n"))
+      if (DEBUG == TRUE) cli::cli_alert_info("Docker container {.code {container_name}} not running. Launching...")
       
-      if (parameters_docker$task_params$local_or_server == "server") {
+      if (parameters_monkeys$task_params$local_or_server == "server") {
         
         # REVIEW: https://docs.docker.com/engine/reference/run/ || -e "ENABLE_CORS=true" 
         DOCKER_run = paste0('docker run --rm -t -d ', big_container_str,' --name ', container_name, ' -v /dev/shm:/dev/shm -P selenium/standalone-', browserName, debug_label) # Not mapping local folder
@@ -209,13 +212,7 @@ create_docker <-
         #   ' -v /dev/shm:/dev/shm',
         #   ' -P selenium/standalone-', browserName, debug_label # Mapping local folder
         #   )
-        
-  
-
-        
-        
       }
-      
       
       cli::cli_h1("Running DOCKER")
       cli::cli_alert(DOCKER_run)
@@ -223,9 +220,8 @@ create_docker <-
       system(DOCKER_run)
 
 
-
     } else {
-      if (DEBUG == TRUE) cat(crayon::green("Docker image", container_name, " already running.\n"))
+      if (DEBUG == TRUE) cat(crayon::green("Docker container", container_name, " already running.\n"))
     } 
     
 
@@ -234,8 +230,8 @@ create_docker <-
     container_port_raw <- system(sprintf('docker port %s', container_name), intern = TRUE)
     container_port <- max(as.integer(gsub('.*:(.*)$', '\\1', container_port_raw)))
     if (is.na(container_port)) cat(crayon::red("Port not found?"))
-    
-    
+
+
 
   # OUTPUT ------------------------------------------------------------------
 
@@ -243,6 +239,5 @@ create_docker <-
          container_port = container_port, # THIS REVIEW
          browserName = browserName
          )
-    
-    
+
     }

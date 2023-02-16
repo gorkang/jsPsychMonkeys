@@ -173,24 +173,27 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
 #' @export
 #'
 #' @examples debug_docker(24000)
-debug_docker <- function(uid_participant, parameters_debug = parameters_monkeys) {
+debug_docker <- function(uid_participant) {
   
   # DEBUG
-  # uid_participant = 24000
-  # parameters_debug = parameters_monkeys
+  # uid_participant = 888
+  # parameters_monkeys = parameters_monkeys
   
   suppressMessages(source(shrtcts::locate_shortcuts_source()))
   suppressMessages(source(here::here("_targets.R")))
 
+  targets::tar_load(parameters_monkeys)
+  source("R/main_parameters.R")
+  
   # Extract parameters from parameters_monkeys
-  DEBUG <<- parameters_debug$debug$DEBUG
-  screenshot <<- parameters_debug$debug$screenshot
-  debug_file <<- parameters_debug$debug$debug_file
-  open_VNC <<- parameters_debug$debug$open_VNC
-  parameters_task <<- parameters_debug
+  # DEBUG <<- parameters_debug$debug$DEBUG
+  # screenshot <<- parameters_debug$debug$screenshot
+  # debug_file <<- parameters_debug$debug$debug_file
+  # open_VNC <<- parameters_debug$debug$open_VNC
+  # parameters_task <<- parameters_debug
+  # uid <<- uid_participant
   
   
-  uid <<- uid_participant
   container_name_tar <- paste0("container_", uid)
   container_name <<- paste0("container", uid)
   driver_name <<- paste0("remoteDriver_", uid)
@@ -198,7 +201,7 @@ debug_docker <- function(uid_participant, parameters_debug = parameters_monkeys)
   targets::tar_load(eval(driver_name))
   remDr <<- get(driver_name)$remDr
   
-  cat(crayon::green(glue("Loaded {container_name_tar} \n")))
+  cli::cli_alert_info("Loaded {container_name_tar}")
   
 }
 
@@ -217,16 +220,57 @@ debug_docker <- function(uid_participant, parameters_debug = parameters_monkeys)
 debug_function <- function(name_function) {
   
   # DEBUG
-  # name_function = "launch_task"
-  # name_function = "set_parameters"
+  # name_function = "create_docker"
   
   # Function to tar_load or assign the parameters
   load_parameters <- function(parameters_function_separated, NUM) {
-    if (length(parameters_function_separated[[NUM]]) == 1) {
-      targets::tar_load(parameters_function_separated[[NUM]], envir = .GlobalEnv)
-    } else if (length(parameters_function_separated[[NUM]]) == 2) {
+    
+    # NUM = 2
+    parameter = parameters_function_separated[[NUM]]
+    parameter_1 = gsub("\\n", "", parameter[1])
+    parameter_2 = gsub("\\n", "", parameter[2])
+    
+    if (is.na(parameter_2)) {
+      cli::cli_alert_info("processing {.code {parameter}}")
+    } else {
+      cli::cli_alert_info("processing {.code {parameter_1} = {parameter_2}}")
+    }
+
+    
+    # A single parameter e.g. parameters_monkeys
+    if (length(parameter) == 1) {
+      
+      targets::tar_load(parameter, envir = .GlobalEnv)
+      
+    # A parameter with "=" e.g: pid = 999
+    } else if (length(parameter) == 2) {
+      
+      # If parameter_2 is an existing object, load
+      existing_object = parameter_2[parameter_2 %in% tar_objects()]
+      
+      # If it's in tar_objects(), load
+      if (length(existing_object) == 1) {
+        
+        targets::tar_load(all_of(existing_object), envir = .GlobalEnv)
+        
+      } else {
+        
       # assign(parameters_function_separated[[NUM]][1], parameters_function_separated[[NUM]][2], envir = .GlobalEnv)
-      assign(parameters_function_separated[[NUM]][1], eval(parse(text = parameters_function_separated[[NUM]][2])), envir = .GlobalEnv)
+
+      # If the variable contains $, it is a list, so load the actual value stored      
+      if (grepl("\\$", parameter_2)) {
+        
+        assign(parameter_1, eval(parse(text = parameter_2)), envir = .GlobalEnv)
+        
+      # Else, just assign it
+      } else {
+        
+        assign(parameter_1, parameter_2, inherits = TRUE, envir = .GlobalEnv)
+      
+      }
+      
+      
+      }
     }
   }
   
@@ -248,17 +292,23 @@ debug_function <- function(name_function) {
     
     # parameters_function_separated = strsplit(parameters_function_raw, ",") %>% unlist() %>% strsplit(., "=")
     
-  DF_function = tar_manifest() %>% filter(grepl(name_function, command)) %>% pull(command) %>% last()
+  DF_function = targets::tar_manifest() %>% filter(grepl(name_function, command)) %>% pull(command) %>% last()
+  
   if (!is.na(DF_function)) {
   
     string_function = gsub(name_function, "", DF_function) %>% gsub(" |\\\\n|\\(|\\)", "", .)
     LOADME = stringr::str_extract_all(string_function, "=.*?[,\\$]", simplify = TRUE) %>% gsub("\\$|,|=", "", .) %>% as.vector() %>% unique()
-    tar_load(all_of(LOADME))
+    existing_objects = LOADME[LOADME %in% tar_objects()]
+    if (length(existing_objects) > 0) tar_load(all_of(existing_objects))
 
     parameters_function_separated = strsplit(string_function, ",") %>% unlist() %>% strsplit(., "=")
     
     # For each of the parameters, applies the load_parameters() function
-    seq_along(parameters_function_separated) %>% walk(~ load_parameters(parameters_function_separated, NUM = .x))
+    seq_along(parameters_function_separated) %>% 
+      walk(~ 
+             load_parameters(parameters_function_separated, NUM = .x)
+           )
+    
     cat(crayon::green("Loaded: "), gsub(",", ", ", name_function), "\n")
     
   } else {
@@ -369,7 +419,7 @@ copy_files_to_data <- function(pre_existing_CSV, parameters_monkeys, uid, task =
     to_files = paste0(local_folder_tasks_data, "/", final_files_clean)
     
     # Rename/Move to final location
-    cli::cli_alert_info("{from_files}, to {to_files}")
+    # cli::cli_alert_info("{from_files}, to {to_files}")
     
     file.rename(from = from_files,
                 to = to_files)

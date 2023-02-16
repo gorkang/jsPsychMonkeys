@@ -1,27 +1,39 @@
-# Function to complete a task
+#' Completes a jsPsychMaker task
+#'
+#' @param parameters_monkeys 
+#' @param uid 
+#' @param links 
+#' @param remoteDriver 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 complete_task <-
-  function(parameters_task,
+  function(parameters_monkeys,
            uid,
            links,
-           initial_wait = 2,
-           wait_retry = 5,
-           forced_random_wait = FALSE,
-           forced_refresh = NULL,
-           forced_seed = NULL,
-           screenshot = FALSE,
-           DEBUG = FALSE,
-           console_logs = TRUE,
-           open_VNC = FALSE,
-           container_name = NULL,
-           remDr = NULL) {
+           # container_name = NULL,
+           remoteDriver = NULL) {
     
   # DEBUG
     # targets::tar_load_globals()
     # debug_function("complete_task")
+    # debug_docker(uid_participant = uid)
+    # reconnect_to_VNC(container_name = container_name)
     
-    # targets::tar_load("parameters_monkeys")
-    # debug_docker(uid_participant = 1, parameters_debug = parameters_monkeys)
-    # reconnect_to_VNC(container_name = "container100")
+    # If No browser opened:
+    # remoteDriver = create_remDr(container_port = container_port, browserName = browserName, container_name = container_name, parameters_monkeys = parameters_monkeys)
+    # remDr = remoteDriver$remDr
+    
+    
+  # Check which parameters were entered in parameters_monkeys -----------------
+    
+    # If the parameter was entered in the parameters_monkeys list, use it
+    source("R/main_parameters.R", local = TRUE)
+  
+    container_name = remoteDriver$container_name
+    remDr = remoteDriver$remDr
     
 
   # CHECKS --------------------------------------------------------------
@@ -29,7 +41,7 @@ complete_task <-
     # If Docker container does not exist, stop execution.
     if (length(reconnect_to_VNC(container_name = container_name, just_check = TRUE)) == 0) {
       cat(crayon::bgRed("NO DOCKER IMAGE available.\n"), crayon::silver("Maybe need to do:\n targets::tar_destroy() & targets::tar_make()\n\n"))
-      targets::tar_invalidate(paste0("container_", parameters_task$participants$uid))
+      targets::tar_invalidate(paste0("container_", parameters_monkeys$participants$uid))
       cat(crayon::bgYellow("Invalidated ", container_name, " to restart process\n\n"))
       stop()
       
@@ -47,7 +59,7 @@ complete_task <-
     
     
     # Maybe necessary (?)
-    remDr <<- remDr
+    remDr <<- remoteDriver$remDr
     
     
   # SAFER functions ---------------------------------------------------------
@@ -56,7 +68,7 @@ complete_task <-
     launch_task <- function(links, wait_retry) {
       if (length(links) != 1) stop("links passed to remDr$navigate are != 1")
       Sys.sleep(wait_retry) 
-      if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = !parameters_task$debug$debug_file), cat(crayon::yellow("\n\nOpening link:", links, "\n")))
+      if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = !parameters_monkeys$debug$debug_file), cat(crayon::yellow("\n\nOpening link:", links, "\n")))
       remDr$navigate(links)
     }
     
@@ -66,8 +78,8 @@ complete_task <-
   # START LOG ----------------------------------------------------------------
 
     # Create log for each worker
-    if (parameters_task$debug$debug_file == TRUE) {
-      con <- file(paste0("outputs/log/pid_", gsub("/", "_", parameters_task$task$pid), "_uid_", uid, ".log"))
+    if (parameters_monkeys$debug$debug_file == TRUE) {
+      con <- file(paste0("outputs/log/pid_", gsub("/", "_", parameters_monkeys$task$pid), "_uid_", uid, ".log"))
       sink(con, append = TRUE)
       sink(con, append = TRUE, type = "message")
     }
@@ -111,9 +123,9 @@ complete_task <-
         
         # if (!exists("index")) index = 1
         if (screenshot == TRUE) {
-          output_folder = paste0("outputs/screenshots/", parameters_task$task$pid, "/", uid, "/")
+          output_folder = paste0("outputs/screenshots/", parameters_monkeys$task$pid, "/", uid, "/")
           if (!dir.exists(output_folder)) dir.create(output_folder, recursive = TRUE, showWarnings = FALSE)
-          remDr$screenshot(file = paste0(output_folder, parameters_task$task$pid, "_", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
+          remDr$screenshot(file = paste0(output_folder, parameters_monkeys$task$pid, "_", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
           # remDr$screenshot(file = paste0("outputs/screenshots/", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
         }
         if (console_logs == TRUE) console_logs_list[[index]] = remDr$log(type = "browser")
@@ -221,7 +233,7 @@ complete_task <-
   # END LOG -----------------------------------------------------------------
 
     # Restore output to console
-    if (parameters_task$debug$debug_file == TRUE) {
+    if (parameters_monkeys$debug$debug_file == TRUE) {
       sink() 
       sink(type = "message")
     }

@@ -1,35 +1,55 @@
-#' set_parameters
-#'
 #'Process the parameters_monkeys_minimal parameters so a minimal set of input parameters can be used. Also, tries to take into account dependencies between parameters.
-#' @param parameters_input 
-#' @param uid 
-#' @param browserName 
-#' @param big_container 
-#' @param keep_alive 
-#' @param folder_downloads 
-#' @param DEBUG 
-#' @param screenshot 
-#' @param debug_file 
-#' @param open_VNC 
-#' @param pid 
-#' @param local_or_server 
-#' @param local_folder_tasks 
-#' @param server_folder_tasks 
-#' @param initial_wait 
-#' @param wait_retry 
-#' @param forced_random_wait
-#' @param forced_seed
 #'
-#' @return
+#' @param parameters_monkeys_minimal A list with the main input parameters. See parameters_monkeys_minimal in _targets.R.
+#' If the parameter is entered in this list, use it. You can also enter the parameter directly
+#' @param uid User id for the monkey
+#' @param browserName In which browser should the monkey run the protocol? c("chrome", "firefox")
+#' @param big_container Big containers are needed for big protocols: FALSE / TRUE
+#' @param keep_alive Keep the docker container alive after finishing the protocol? 
+#' This is useful to debug.
+#' @param folder_downloads Local folder where csv's will be downloaded:
+#' - On linux, can be something like ~/Download
+#' - On windows, can be something like: C:/Users/myusername/Downloads/protocol999
+#' If Monkeys are running OK but no csv's are donwloaded, make sure the docker username has write access to the folder
+#' @param DEBUG Show debug messages: FALSE / TRUE
+#' @param screenshot Should the monkey's take screenshots of each screen they see?
+#' - The images will be in outputs/screenshots
+#' @param debug_file Store the debug info in a file in outputs/debug
+#' @param open_VNC Show the info to open VNC viewer to see what the monkey's are up to
+#' @param pid Protocol id
+#' @param local_or_server Run the protocol locally or on server c("local", "server) 
+#' This variable will be inferred from whichever of local_folder_tasks or server_folder_tasks 
+#' has information.
+#' See https://gorkang.github.io/jsPsychR-manual/qmd/04-jsPsychMonkeys.html#launch-monkeys-on-a-server for more information
+#' @param local_folder_tasks Local folder where the protocol is stored
+#' @param server_folder_tasks Location of the protocol in the server
+#' @param initial_wait Initial wait (in seconds) after entering the main protol page, before 
+#' the monkeys start to complete the protocol. If the protocol has lots of images to pre-load
+#' should be a number big enough for them to download.
+#' @param wait_retry How many seconds to wait before retrying, after no elements are found in a page.
+#' @param forced_random_wait At some random point in the protocol, the monkey should wait for a random period of time? FALSE / TRUE
+#' @param forced_seed Random seed
+#' @param console_logs Store console logs of browser? Logs are stored in outputs/logs
+#' @param uid_URL Include user id in the protocol URL? If true, the uid are predefined
+#' @param disable_web_security Run with CORS disabled? Needed for local protocols that load videos: FALSE / TRUE
+#' @param forced_refresh Force a full refresh for some of the monkeys? 
+#' This is useful to test if the monkey's can continue a protocol after they exit.
+#'
+#' @return a list of parameters for the rest of the jsPsychMonkeys functions
 #' @export
 #'
 #' @examples
-set_parameters <- function(parameters_input = parameters_monkeys_minimal,
+#' 
+#' set_parameters(parameters_monkeys = list(uid = 888, uid_URL = TRUE, forced_seed = 11, 
+#'                                        local_folder_tasks = "~/Downloads/protocol999", 
+#'                                        screenshot = FALSE, forced_refresh = FALSE, 
+#'                                        debug = TRUE, open_VNC = TRUE))
+set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minimal,
                            uid = 1, 
                            browserName = "chrome", 
                            big_container = FALSE, 
                            keep_alive = FALSE, 
-                           folder_downloads = dirname(local_folder_tasks),
+                           folder_downloads = NULL,
                            DEBUG = FALSE, 
                            screenshot = FALSE,
                            debug_file = FALSE,
@@ -37,9 +57,9 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
                            open_VNC = FALSE, 
                            pid = NULL,
                            uid_URL = TRUE,
-                           local_or_server = "test", # ["local", "server", "test"]
-                           local_folder_tasks = "", # ["Downloads/tests/test_prototol", "Downloads/tests/2"]
-                           server_folder_tasks = "",
+                           local_or_server = NULL, # ["local", "server", "test"]
+                           local_folder_tasks = NULL, # ["Downloads/tests/test_prototol", "Downloads/tests/2"]
+                           server_folder_tasks = NULL,
                            disable_web_security = FALSE,
                            initial_wait = 2,
                            wait_retry = 5,
@@ -48,7 +68,7 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
                            forced_seed = NULL) {
   
   # DEBUG
-  # parameters_input = parameters_monkeys_minimal
+  # parameters_monkeys = parameters_monkeys_minimal
   # uid = 1
   # browserName = "chrome"
   # big_container = FALSE
@@ -60,8 +80,8 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
   # open_VNC = FALSE
   # pid = 999
   # local_or_server = "test"
-  # local_folder_tasks = ""
-  # server_folder_tasks = ""
+  # local_folder_tasks = NULL
+  # server_folder_tasks = NULL
   # disable_web_security = FALSE
   # initial_wait = 2
   # wait_retry = 2
@@ -80,44 +100,29 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
   
     
 
-  # Check which parameters were entered -------------------------------------
+  # Check which parameters were entered in parameters_monkeys -----------------
+  
+  # If the parameter was entered in the parameters_monkeys list, use it
+   source("R/main_parameters.R", local = TRUE)
 
-    # If we give the input in parameters_monkeys_minimal, use that, else the function's default should be fine
-    if (!is.null(parameters_input$uid)) uid = parameters_input$uid
-    if (!is.null(parameters_input$browserName)) browserName = parameters_input$browserName
-    if (!is.null(parameters_input$big_container)) big_container = parameters_input$big_container
-    if (!is.null(parameters_input$keep_alive)) keep_alive = parameters_input$keep_alive
-    if (!is.null(parameters_input$folder_downloads)) folder_downloads = parameters_input$folder_downloads
-    if (!is.null(parameters_input$DEBUG)) DEBUG = parameters_input$DEBUG
-    if (!is.null(parameters_input$screenshot)) screenshot = parameters_input$screenshot
-    if (!is.null(parameters_input$debug_file)) debug_file = parameters_input$debug_file
-    if (!is.null(parameters_input$console_logs)) console_logs = parameters_input$console_logs
-    if (!is.null(parameters_input$open_VNC)) open_VNC = parameters_input$open_VNC
-    if (!is.null(parameters_input$pid)) pid = parameters_input$pid
-    if (!is.null(parameters_input$uid_URL)) uid_URL = parameters_input$uid_URL
-    if (!is.null(parameters_input$disable_web_security)) disable_web_security = parameters_input$disable_web_security
-    if (!is.null(parameters_input$initial_wait)) initial_wait = parameters_input$initial_wait
-    if (!is.null(parameters_input$wait_retry)) wait_retry = parameters_input$wait_retry
-    if (!is.null(parameters_input$forced_random_wait)) forced_random_wait = parameters_input$forced_random_wait
-    if (!is.null(parameters_input$forced_refresh)) forced_refresh = parameters_input$forced_refresh
-    if (!is.null(parameters_input$forced_seed)) forced_seed = parameters_input$forced_seed
-    
-
+  
   # Parameters with dependencies --------------------------------------------
   
     # local_folder_tasks, server_folder_tasks, local_or_server
-    
-      if (!is.null(parameters_input$local_folder_tasks)) {
-        parameters_input$local_or_server = "local"
-      } else if (!is.null(parameters_input$server_folder_tasks)) {
-        parameters_input$local_or_server = "server"
+    if (!is.null(local_folder_tasks) & !is.null(server_folder_tasks)) cli::cli_abort("Only one of 'local_folder_tasks' or 'server_folder_tasks' must be set in parameters_monkeys_minimal \n")
+  
+      if (!is.null(local_folder_tasks)) {
+        local_or_server = "local"
+        if (is.null(folder_downloads)) folder_downloads = dirname(local_folder_tasks)
+      } else if (!is.null(server_folder_tasks)) {
+        local_or_server = "server"
       } else {
-        cat(crayon::bgRed(" ERROR: you need to set either 'local_folder_tasks' or 'server_folder_tasks' in parameters_monkeys_minimal \n"))
+        cli::cli_abort("You need to set either 'local_folder_tasks' or 'server_folder_tasks' in parameters_monkeys_minimal \n")
       }
       
-      if (!is.null(parameters_input$local_folder_tasks)) local_folder_tasks = parameters_input$local_folder_tasks
-      if (!is.null(parameters_input$server_folder_tasks)) server_folder_tasks = parameters_input$server_folder_tasks
-      if (!is.null(parameters_input$local_or_server)) local_or_server = parameters_input$local_or_server
+      # if (!is.null(parameters_monkeys$local_folder_tasks)) local_folder_tasks = parameters_monkeys$local_folder_tasks
+      # if (!is.null(parameters_monkeys$server_folder_tasks)) server_folder_tasks = parameters_monkeys$server_folder_tasks
+      # if (!is.null(parameters_monkeys$local_or_server)) local_or_server = parameters_monkeys$local_or_server
       
       # Disable parameters not compatible with non-chrome browsers
       if (browserName != "chrome") console_logs = FALSE
@@ -137,10 +142,10 @@ set_parameters <- function(parameters_input = parameters_monkeys_minimal,
     # If pid not explicit, get from protocol folder
     if (is.null(pid)) {
       
-      if (!is.null(parameters_input$local_folder_tasks)) {
-        FOLDER = parameters_input$local_folder_tasks
-      } else if (!is.null(parameters_input$server_folder_tasks)) {
-        FOLDER = parameters_input$server_folder_tasks
+      if (!is.null(local_folder_tasks)) {
+        FOLDER = local_folder_tasks
+      } else if (!is.null(server_folder_tasks)) {
+        FOLDER = server_folder_tasks
       }
       pid = stringr::str_extract_all(FOLDER, pattern = "[0-9]{1,10}", simplify = TRUE) |> last()
     }  
