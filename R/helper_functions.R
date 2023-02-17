@@ -58,7 +58,7 @@ check_trialids <- function(local_folder_protocol) {
 #' @export
 #'
 #' @examples
-check_accept_alert <- function(wait_retry) {
+check_accept_alert <- function(wait_retry, remDr) {
   
   get_alert <- function(variables) {
     MESSAGE = remDr$getAlertText()  
@@ -92,7 +92,9 @@ check_accept_alert <- function(wait_retry) {
 reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = NULL, DEBUG = FALSE) {
   
   # DEBUG
-  # container_name = "container1"
+  # targets::tar_load_globals()
+  # debug_function("complete_task")
+  # container_name = paste0("container", uid)
   # just_check = TRUE
   # port = NULL
   # DEBUG = TRUE
@@ -119,9 +121,9 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
       
     } else {
       # Connect to container
+      # If container is a debug container, we can connect
       if (any(grepl("debug", system('docker ps -a --format "{{.Image}}"', intern = TRUE)))) {
-        # CHECK if it is a debug container      
-        
+
         if (!is.null(port)) {
           
           container_port = port
@@ -130,7 +132,11 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
           
           # Get container port
           container_port_raw <- system(sprintf('docker port %s', container_name), intern = TRUE)
-          container_port <- min(as.integer(gsub('.*:(.*)$', '\\1', container_port_raw)))
+          container_port_raw_clean = container_port_raw[grepl(".*0.0.0.0:([0-9]{5})$", container_port_raw)]
+          
+          container_ports_found = as.integer(gsub('.*:(.*)$', '\\1', container_port_raw_clean))
+          if (length(container_ports_found) > 2) cli::cli_alert_warning("Multiple ports found: {container_ports_found}. \n - If the VNC command suplied below does not work, try the other ports.")
+          container_port <- min(container_ports_found)
           if (is.na(container_port[1])) cat(crayon::red("Port not found?"))
           
         }
@@ -148,11 +154,17 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
         vnc_command = paste0(vnc_program, ' 127.0.0.1:', container_port)
         
         
-        cat(crayon::yellow(paste0("\nOpen VNC | localhost:", container_port, " | pwd: secret\n"), crayon::black(vnc_command, "\n")))
-        if (DEBUG == TRUE) cat(crayon::silver(" DEBUG:", container_port_raw), "\n\n")
+        # cat(crayon::yellow(paste0("\nOpen VNC | localhost:", container_port, " | pwd: secret\n"), crayon::black(vnc_command, "\n")))
+        cli::cli_alert_info("Open VNC | localhost: {container_port} | pwd: secret")
+        cli::cli_alert_info("In a terminal: {.code {vnc_command}}")
         
-        # if (Sys.info()["sysname"] != "Windows") callr::r_bg(func = system(paste0(vnc_command, end_command)))
+        # if (DEBUG == TRUE) cat(crayon::silver(" \nDEBUG:", container_port_raw), "\n\n")
+        if (DEBUG == TRUE) cli::cli_alert_info("DEBUG: {paste(container_port_raw, sep = '\n')}")
         
+        # If Using callr::r_bg() or callr::r() ERROR in task target
+        # TODO: This could run with Windows if VNCviewer is installed
+        if (Sys.info()["sysname"] != "Windows") system(paste0(vnc_command, end_command))
+
         
       } else {
         
@@ -428,3 +440,55 @@ copy_files_to_data <- function(pre_existing_CSV, parameters_monkeys, uid, task =
     
   }
 }
+
+
+
+#' Parse website elements to extract and tabulate all the properties
+#'
+#' @param what a html tag such as c("p", "textarea", "input", "div", ...)
+#'
+#' @return
+#' @export
+#'
+#' @examples
+parse_elements <- function(what, page_source_rvest) {
+  # what = "p"
+  page_source_temp = page_source_rvest |> rvest::html_elements(what)
+  
+  if (what == "textarea") what = "input" # We consider textarea a type of input
+  
+  if (length(page_source_temp) > 0) {
+    
+    1:length(page_source_temp)  |>  
+      map_df(~ page_source_temp[[.x]]  |>   
+               html_attrs() |> 
+               bind_rows() |> 
+               mutate(tag_name = what, 
+                      content = page_source_temp[[.x]] |> rvest::html_text2()))      
+    
+    
+  } else {
+    # cli::cli_alert_info("No {.code {what}} found")
+    NULL
+  }
+  
+}
+
+
+
+
+
+
+# Navigate to link
+launch_task <- function(links, wait_retry, remDr, DEBUG) {
+  if (length(links) != 1) stop("links passed to remDr$navigate are != 1")
+  Sys.sleep(wait_retry) 
+  remDr$navigate(links)
+}
+
+
+# SAFER functions ---------------------------------------------------------
+
+launch_task_safely = safely(launch_task)
+
+

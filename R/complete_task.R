@@ -1,9 +1,9 @@
 #' Completes a jsPsychMaker task
 #'
-#' @param parameters_monkeys 
-#' @param uid 
-#' @param links 
-#' @param remoteDriver 
+#' @param parameters_monkeys The parameters_monkeys list
+#' @param uid User id
+#' @param links Links to complete
+#' @param remoteDriver remoteDriver output
 #'
 #' @return
 #' @export
@@ -27,6 +27,8 @@ complete_task <-
     # remDr = remoteDriver$remDr
     
     
+  cli::cli_h1("Completing tasks")
+    
   # Check which parameters were entered in parameters_monkeys -----------------
     
     # If the parameter was entered in the parameters_monkeys list, use it
@@ -48,7 +50,7 @@ complete_task <-
     } else {
       
       if (DEBUG == TRUE & open_VNC == TRUE) {
-        cat(crayon::bgWhite("\n\nVNC launching\n\n"))
+        cli::cli_h1("Launching VNC")
         reconnect_to_VNC(container_name, DEBUG = TRUE)
       }
     }
@@ -59,20 +61,8 @@ complete_task <-
     
     
     # Maybe necessary (?)
-    remDr <<- remoteDriver$remDr
-    
-    
-  # SAFER functions ---------------------------------------------------------
+    remDr <- remoteDriver$remDr
 
-    # Launch task
-    launch_task <- function(links, wait_retry) {
-      if (length(links) != 1) stop("links passed to remDr$navigate are != 1")
-      Sys.sleep(wait_retry) 
-      if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = !parameters_monkeys$debug$debug_file), cat(crayon::yellow("\n\nOpening link:", links, "\n")))
-      remDr$navigate(links)
-    }
-    
-    launch_task_safely = safely(launch_task)
     
 
   # START LOG ----------------------------------------------------------------
@@ -95,16 +85,17 @@ complete_task <-
     
     # Go to task --------------------------------------------------------------
     
-    LAUNCH_TASK = launch_task_safely(links[index_links], wait_retry = 1)
+    if (DEBUG == TRUE) cli::cli_alert_info("Opening link: {links}")
+    LAUNCH_TASK = launch_task_safely(links[index_links], wait_retry = wait_retry, remDr = remDr, DEBUG = DEBUG)
     
     # INITIAL WAIT FOR PAGE TO LOAD
     if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgGreen(paste0("[[START OF EXPERIMENT]] ", Sys.time(), " Waiting ", initial_wait, "s")), crayon::yellow("[If it fails, increase initial_wait or wait_retry]\n")))
     Sys.sleep(initial_wait)
     
-    if (length(LAUNCH_TASK$error) > 0) cat(crayon::bgRed(" ERROR: launching task [launch_task()] \n"), crayon::black(LAUNCH_TASK$error))
+    if (length(LAUNCH_TASK$error) > 0) cat(crayon::bgRed(" ERROR: opening link [launch_task()] \n"), crayon::black(LAUNCH_TASK$error))
     
     
-    # Loop through items of a task --------------------------------------------
+    ## Loop through items of a task --------------------------------------------
       
       # Condition to stop while
       continue = TRUE
@@ -118,20 +109,21 @@ complete_task <-
         # Which screen inside the task
         
         # If there is an alert, accept
-        check_accept_alert(wait_retry)
+        check_accept_alert(wait_retry, remDr)
         
         
         # if (!exists("index")) index = 1
+        # Take screenshots
         if (screenshot == TRUE) {
           output_folder = paste0("outputs/screenshots/", parameters_monkeys$task$pid, "/", uid, "/")
           if (!dir.exists(output_folder)) dir.create(output_folder, recursive = TRUE, showWarnings = FALSE)
           remDr$screenshot(file = paste0(output_folder, parameters_monkeys$task$pid, "_", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
-          # remDr$screenshot(file = paste0("outputs/screenshots/", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
         }
+        
         if (console_logs == TRUE) console_logs_list[[index]] = remDr$log(type = "browser")
         
         
-        ## Get elements of website ----------------------------
+        ### Get elements of website ----------------------------
         
           list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 1, DEBUG = DEBUG)
           
@@ -146,7 +138,8 @@ complete_task <-
           # When there is an error, usually we will have some content here (we "cause" the error with a stop())
           list_get_elements = list_get_elements$result
     
-        # Interact with the elements we found ------------------
+        ### Interact with the elements we found ------------------
+          
           # seed = (forced_seed_final + index) is critical so there is some variation in case a specific response is needed to continue (e.g. BART)
         
             # SEED ---------

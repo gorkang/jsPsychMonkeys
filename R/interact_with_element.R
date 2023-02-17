@@ -25,7 +25,7 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
     if (length(list_get_elements$name_inputs$id) > 0) {
     
       # source("R/helper_select_input.R")  
-      output_select_input = select_input(list_get_elements, DEBUG = DEBUG, seed = seed)
+      output_select_input = select_input(list_get_elements = list_get_elements, DEBUG = DEBUG, seed = seed)
   
     } else {
       

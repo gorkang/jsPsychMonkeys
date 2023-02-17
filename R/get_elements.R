@@ -46,39 +46,54 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
   }
   
     page_source = get_page_source() #remDr$getPageSource()
-    page_source_rvest <- read_html(page_source[[1]])
+    page_source_rvest <- rvest::read_html(page_source[[1]])
 
 
   # Get html elements -------------------------------------------------------
 
     # Gets html elements for div's, buttons, etc.
-    page = page_source_rvest %>% html_elements("p")
-    inputs = page_source_rvest %>% html_elements("input")
-    textarea = page_source_rvest %>% html_elements("textarea") # Added to find textarea in jspsych-survey-html-form
-    buttons = page_source_rvest %>% html_elements("button")
-    div = page_source_rvest %>% html_elements("div")
-    
-      
-    # CHECK
-    if (DEBUG == TRUE & (length(page) == 0 & length(inputs) == 0 & length(buttons) == 0 & length(div) == 0)) cat(crayon::bgRed(" ERROR: No elements found in source \n"))
-    
-    
-  # Builds table with all attributes of elements -----------------------------
-    
-    # REMEMBER: all input and button elements SHOULD have an id
-    DF_elements_options_raw = 
-      # Elements that should be in the DF (we look for them below)
-      tibble(id = NA_character_, name = NA_character_, class = NA_character_, type = NA_character_, status = NA_character_, 
-             required = NA_character_, hidden = NA_character_, 
-             min = NA_character_, max = NA_character_, minlength = NA_character_, maxlength = NA_character_) %>% 
-      
-      # Bind all types of html elements
-      bind_rows(if (length(page) > 0) {1:length(page) %>% map_df(~ page[[.x]] %>%  html_attrs()  %>% bind_rows()%>% mutate(tag_name = "p", content = page[[.x]] %>% html_text2()))}) %>%
-      bind_rows(if (length(div) > 0) {1:length(div) %>% map_df(~ div[[.x]] %>%  html_attrs()  %>% bind_rows() %>% mutate(tag_name = "div", content = div[[.x]] %>% html_text2()))}) %>%
-      bind_rows(if (length(inputs) > 0) {1:length(inputs) %>% map_df(~ inputs[[.x]] %>%  html_attrs()  %>% bind_rows()%>% mutate(tag_name = "input", content = inputs[[.x]] %>% html_text2()))}) %>% 
-      bind_rows(if (length(textarea) > 0) {1:length(textarea) %>% map_df(~ textarea[[.x]] %>%  html_attrs()  %>% bind_rows()%>% mutate(tag_name = "input", content = textarea[[.x]] %>% html_text2()))}) %>% 
-      bind_rows(if (length(buttons) > 0) {1:length(buttons) %>% map_df(~ buttons[[.x]] %>%  html_attrs()  %>% bind_rows() %>% mutate(tag_name = "button", content = buttons[[.x]] %>% html_text2()))})
+  #   page = page_source_rvest |> rvest::html_elements("p")
+  #   inputs = page_source_rvest |> rvest::html_elements("input")
+  #   textarea = page_source_rvest |> rvest::html_elements("textarea") # Added to find textarea in jspsych-survey-html-form
+  #   buttons = page_source_rvest |> rvest::html_elements("button")
+  #   div = page_source_rvest |> rvest::html_elements("div")
+  # 
+  # 
+  # 
+  #   # CHECK
+  #   if (DEBUG == TRUE & (length(page) == 0 & length(inputs) == 0 & length(buttons) == 0 & length(div) == 0)) cli::cli_alert_danger(" ERROR: No elements found in source")
+  # 
+  # 
+  # # Builds table with all attributes of elements -----------------------------
+  # 
+  #   # REMEMBER: all input and button elements SHOULD have an id
+  #   DF_elements_options_raw =
+  #     # Elements that should be in the DF (we look for them below)
+  #     tibble(id = NA_character_, name = NA_character_, class = NA_character_, type = NA_character_, status = NA_character_,
+  #            required = NA_character_, hidden = NA_character_,
+  #            min = NA_character_, max = NA_character_, minlength = NA_character_, maxlength = NA_character_) %>%
+  # 
+  #     # Bind all types of html elements
+  #     dplyr::bind_rows(if (length(page) > 0) {1:length(page) %>% map_df(~ page[[.x]] %>%  html_attrs()  %>% bind_rows()%>% mutate(tag_name = "p", content = page[[.x]] %>% rvest::html_text2()))}) %>%
+  #     dplyr::bind_rows(if (length(div) > 0) {1:length(div) %>% map_df(~ div[[.x]] %>%  html_attrs()  %>% bind_rows() %>% mutate(tag_name = "div", content = div[[.x]] %>% rvest::html_text2()))}) %>%
+  #     dplyr::bind_rows(if (length(inputs) > 0) {1:length(inputs) %>% map_df(~ inputs[[.x]] %>%  html_attrs()  %>% bind_rows()%>% mutate(tag_name = "input", content = inputs[[.x]] %>% rvest::html_text2()))}) %>%
+  #     dplyr::bind_rows(if (length(textarea) > 0) {1:length(textarea) %>% map_df(~ textarea[[.x]] %>%  html_attrs()  %>% bind_rows()%>% mutate(tag_name = "input", content = textarea[[.x]] %>% rvest::html_text2()))}) %>%
+  #     dplyr::bind_rows(if (length(buttons) > 0) {1:length(buttons) %>% map_df(~ buttons[[.x]] %>%  html_attrs()  %>% bind_rows() %>% mutate(tag_name = "button", content = buttons[[.x]] %>% rvest::html_text2()))})
 
+    # This is much faster and gives the same result
+    DF_elements_options_raw =
+      tibble(id = NA_character_, name = NA_character_, class = NA_character_, type = NA_character_, status = NA_character_,
+             required = NA_character_, hidden = NA_character_,
+             min = NA_character_, max = NA_character_, minlength = NA_character_, maxlength = NA_character_) |>
+      bind_rows(parse_elements("p", page_source_rvest)) |>
+      bind_rows(parse_elements("div", page_source_rvest)) |>
+      bind_rows(parse_elements("input", page_source_rvest)) |>
+      bind_rows(parse_elements("textarea", page_source_rvest)) |>
+      bind_rows(parse_elements("button", page_source_rvest))
+    
+      if (nrow(DF_elements_options_raw) == 0) cli::cli_alert_danger(" ERROR: No elements found in source")
+    
+    
     # DF_elements_options_raw #%>% select(id, tag_name, class, content)
     
     # Columns that we don't have in all the items but that are used in the case_when() below
