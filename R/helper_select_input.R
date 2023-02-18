@@ -262,8 +262,13 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
       purrr::walk(~ {
         # .x = 1
         selected_input_name = list_get_elements$name_inputs$name[.x]
+        
+        # The above is null in the 999new protocol with jsPsych 7.3
+        if (is.null(list_get_elements$list_elements[[selected_input_name]])) selected_input_name = list_get_elements$name_inputs$id[.x]
+        
         list_get_elements$list_elements[[selected_input_name]]$clearElement()
         list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text[.x]))
+        
       })
 
 
