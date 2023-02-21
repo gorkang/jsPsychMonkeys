@@ -3,7 +3,7 @@
 #' @param parameters_monkeys The parameters_monkeys list
 #' @param uid User id
 #' @param links Links to complete
-#' @param remoteDriver remoteDriver output
+#' @param remote_driver remote_driver output
 #'
 #' @return
 #' @export
@@ -14,7 +14,7 @@ complete_task <-
            uid,
            links,
            # container_name = NULL,
-           remoteDriver = NULL) {
+           remote_driver = NULL) {
     
   # DEBUG
     # targets::tar_load_globals()
@@ -23,8 +23,9 @@ complete_task <-
     # reconnect_to_VNC(container_name = container_name)
     
     # If No browser opened:
-    # remoteDriver = create_remDr(container_port = container_port, browserName = browserName, container_name = container_name, parameters_monkeys = parameters_monkeys)
-    # remDr = remoteDriver$remDr
+    # debug_function("create_remDr")
+    # remote_driver = create_remDr(container_port = container_port, browserName = browserName, container_name = container_name, parameters_monkeys = parameters_monkeys)
+    # remDr = remote_driver$remDr
     
     
   cli::cli_h1("Completing tasks")
@@ -34,8 +35,8 @@ complete_task <-
     # If the parameter was entered in the parameters_monkeys list, use it
     source("R/main_parameters.R", local = TRUE)
   
-    container_name = remoteDriver$container_name
-    remDr = remoteDriver$remDr
+    container_name = remote_driver$container_name
+    remDr = remote_driver$remDr
     
 
   # CHECKS --------------------------------------------------------------
@@ -57,12 +58,7 @@ complete_task <-
     
     # Critical variables exist?
     if (!exists("uid")) uid = 0
-    if (!exists("wait_retry")) wait_retry = 1
-    
-    
-    # Maybe necessary (?)
-    remDr <- remoteDriver$remDr
-
+    if (!exists("wait_retry")) wait_retry = 0.5
     
 
   # START LOG ----------------------------------------------------------------
@@ -101,6 +97,8 @@ complete_task <-
       continue = TRUE
       index = 1
       index_task = 1
+      try_number = 1
+      
       
       console_logs_list = list()
       
@@ -125,75 +123,95 @@ complete_task <-
         
         ### Get elements of website ----------------------------
         
+          cli::cli_h2("Getting elements")
+          try_number = 1
+          wait_retry_loop = wait_retry # Reset to initial value
           list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 1, DEBUG = DEBUG)
           
-          # If we don't get any elements on out first try, wait wait_retry and try again (important when loading images, htmls, etc.)
-          if (!is.null(list_get_elements$error)) {
-              Sys.sleep(wait_retry)
-              # Make sure there are no alerts before retrying
-              check_accept_alert(wait_retry)
-              list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 2, DEBUG = DEBUG)
+          while (!is.null(list_get_elements$error)) {
+            try_number = try_number + 1
+            Sys.sleep(wait_retry_loop)
+            # Make sure there are no alerts before retrying
+            check_accept_alert(wait_retry_loop)
+            list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = try_number, DEBUG = DEBUG)
+            
+            wait_retry_loop = wait_retry_loop + (try_number/5)
+            if (try_number == 8) Sys.sleep(wait_retry_loop + 3) # Last chance, take 3 extra seconds to give things time to load
+            if (try_number == 11) {
+              
+              cli::cli_h1("Tried {try_number} times but could not find elements. Stopping")
+              cli::cli_abort("Tried {try_number} times but could not find elements. Stopping")
+            }
           }
             
           # When there is an error, usually we will have some content here (we "cause" the error with a stop())
           list_get_elements = list_get_elements$result
     
-        ### Interact with the elements we found ------------------
+          # If we must continue
+          if (list_get_elements$continue == TRUE) {
+      
+              ### Interact with the elements we found ------------------
+                
+                cli::cli_h2("Interacting with elements")
+                # seed = (forced_seed_final + index) is critical so there is some variation in case a specific response is needed to continue (e.g. BART)
+              
+                  # SEED ---------
+                
+                  # Restart seed numbering in each INSTRUCTIONS page
+                  if (length(list_get_elements$name_buttons$id) == 1 & all(list_get_elements$name_buttons$id == "jspsych-instructions-next")) {
+                    
+                    index_task = 1
+                    
+                    # We can force a seed based on forced_seed + uid
+                    if (!is.null(forced_seed) & is.numeric(uid)) {
+                      forced_seed_final = forced_seed + uid
+                      # set.seed(forced_seed_final)
+                    } else if (is.numeric(uid)) {
+                      forced_seed_final = uid
+                      # set.seed(forced_seed_final)
+                    } else {
+                      forced_seed_final = 1
+                      # set.seed(forced_seed_final)
+                    }
+                    
+                  } else {
+                    
+                    if(!exists("forced_seed_final")) forced_seed_final = 1
+                    
+                  }
+                  # If we are in consent form, reset forced_seed_final to 1  
+                  # if (grepl("Consentimiento informado", list_get_elements$name_contents$content)) forced_seed_final = 1
+                  
+              if (list_get_elements$continue == TRUE) interact_with_element_safely(list_get_elements, DEBUG = DEBUG, index = index, seed = (forced_seed_final + index_task + index)) #interact_with_element
+      
+              # FORCED WAIT ---
+                if (forced_random_wait == TRUE) {
+                  if (index == 30) {
+                    time_wait = sample(c(.2, 1, 5, 10), 1)
+                    # time_wait = sample(c(1, 10, 100, 200, 400, 500), 1)
+                    cat("[MONKEY]", paste0("[", index, "]"), "uid", uid,"waiting", time_wait, "seconds... \n")
+                    Sys.sleep(time_wait)
+                  }
+                }
+                
+              # FORCED REFRESH ---
+                # forced_refresh = TRUE
+                if (!is.null(forced_refresh)) {
+                  if (forced_refresh == TRUE) forced_refresh = sample(c(20, 30, 200, 500, 1000, 10000, 20000), 1)
+                  if (index == forced_refresh) {
+                    cat("\n[MONKEY]", paste0("[", index, "]"), "uid", uid,"REFRESHING PAGE... \n")
+                    remDr$refresh()
+                    Sys.sleep(5)
+                  }
+                }
+                
           
-          # seed = (forced_seed_final + index) is critical so there is some variation in case a specific response is needed to continue (e.g. BART)
-        
-            # SEED ---------
-          
-            # Restart seed numbering in each INSTRUCTIONS page
-            if (length(list_get_elements$name_buttons$id) == 1 & all(list_get_elements$name_buttons$id == "jspsych-instructions-next")) {
-              
-              index_task = 1
-              
-              # We can force a seed based on forced_seed + uid
-              if (!is.null(forced_seed) & is.numeric(uid)) {
-                forced_seed_final = forced_seed + uid
-                # set.seed(forced_seed_final)
-              } else if (is.numeric(uid)) {
-                forced_seed_final = uid
-                # set.seed(forced_seed_final)
-              } else {
-                forced_seed_final = 1
-                # set.seed(forced_seed_final)
-              }
-              
-            } else {
-              
-              if(!exists("forced_seed_final")) forced_seed_final = 1
-              
-            } 
-            # If we are in consent form, reset forced_seed_final to 1  
-            # if (grepl("Consentimiento informado", list_get_elements$name_contents$content)) forced_seed_final = 1
+          } else {
+            already_completed_strings = c("El participante ya completó el protocolo|The participant already completed the protocol")
+            already_completed = any(grepl(already_completed_strings, list_get_elements$DF_elements_options |> as_tibble() |> pull(content)))
+            if (DEBUG == TRUE & already_completed == TRUE) cli::cli_h1(cli::col_green("[[FINISH PROTOCOL]]: {DF_elements_options |> as_tibble() |> pull(content)}"))
             
-        if (list_get_elements$continue == TRUE) interact_with_element_safely(list_get_elements, DEBUG = DEBUG, index = index, seed = (forced_seed_final + index_task + index)) #interact_with_element
-
-        # FORCED WAIT ---
-          if (forced_random_wait == TRUE) {
-            if (index == 30) {
-              time_wait = sample(c(.2, 1, 5, 10), 1)
-              # time_wait = sample(c(1, 10, 100, 200, 400, 500), 1)
-              cat("[MONKEY]", paste0("[", index, "]"), "uid", uid,"waiting", time_wait, "seconds... \n")
-              Sys.sleep(time_wait)
-            }
           }
-          
-        # FORCED REFRESH ---
-          # forced_refresh = TRUE
-          if (!is.null(forced_refresh)) {
-            if (forced_refresh == TRUE) forced_refresh = sample(c(20, 30, 200, 500, 1000, 10000, 20000), 1)
-            if (index == forced_refresh) {
-              cat("\n[MONKEY]", paste0("[", index, "]"), "uid", uid,"REFRESHING PAGE... \n")
-              remDr$refresh()
-              Sys.sleep(5)
-            }
-          }
-          
-          
-          
           
         # Output of while
         continue = list_get_elements$continue

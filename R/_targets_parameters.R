@@ -2,6 +2,7 @@
 # Libraries ---------------------------------------------------------------
 
 suppressMessages(suppressWarnings({
+  if (!require('dtplyr')) install.packages('dtplyr'); library('dtplyr')
   if (!require('targets')) install.packages('targets'); library('targets')
   if (!require('tarchetypes')) install.packages('tarchetypes'); library('tarchetypes')
   if (!require('future')) install.packages('future'); library('future')
@@ -15,8 +16,7 @@ suppressMessages(suppressWarnings({
 }))
 
 # List of packages to use
-packages_to_load = c("targets", "tarchetypes", "dplyr", "future", "future.callr", "glue", "purrr", "readr", "RSelenium", "rvest", "shinyWidgets", "tidyr","XML")
-
+packages_to_load = c("dtplyr", "targets", "tarchetypes", "dplyr", "future", "future.callr", "glue", "purrr", "readr", "RSelenium", "rvest", "shinyWidgets", "tidyr","XML")
 
 # For tar_make_future() [https://github.com/HenrikBengtsson/future/#controlling-how-futures-are-resolved]
 future::plan(callr)

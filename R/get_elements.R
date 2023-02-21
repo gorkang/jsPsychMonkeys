@@ -4,13 +4,15 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
   
   # DEBUG -------------------------------------------------------------------
   
-  # reconnect_to_VNC(container_name = "container2")
-  # remDr$screenshot(display = TRUE)
-  
-  # DEBUG = TRUE
-  # index = 1
-  # try_number = 1
-  # debug_docker(uid_participant = 24000)
+    # targets::tar_load_globals()
+    # debug_function("complete_task")
+    # debug_docker(uid_participant = uid)
+    # reconnect_to_VNC(container_name = container_name)
+    # DEBUG = TRUE
+    # index = 1
+    # try_number = 1
+    # container_name = remote_driver$container_name
+    # remDr = remote_driver$remDr
   
 
   # CHECKS ------------------------------------------------------------------
@@ -45,51 +47,25 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     remDr$getPageSource()
   }
   
-    page_source = get_page_source() #remDr$getPageSource()
+    page_source = get_page_source()
     page_source_rvest <- rvest::read_html(page_source[[1]])
 
 
-  # Get html elements -------------------------------------------------------
-
-    # Gets html elements for div's, buttons, etc.
-  #   page = page_source_rvest |> rvest::html_elements("p")
-  #   inputs = page_source_rvest |> rvest::html_elements("input")
-  #   textarea = page_source_rvest |> rvest::html_elements("textarea") # Added to find textarea in jspsych-survey-html-form
-  #   buttons = page_source_rvest |> rvest::html_elements("button")
-  #   div = page_source_rvest |> rvest::html_elements("div")
-  # 
-  # 
-  # 
-  #   # CHECK
-  #   if (DEBUG == TRUE & (length(page) == 0 & length(inputs) == 0 & length(buttons) == 0 & length(div) == 0)) cli::cli_alert_danger(" ERROR: No elements found in source")
-  # 
-  # 
-  # # Builds table with all attributes of elements -----------------------------
-  # 
-  #   # REMEMBER: all input and button elements SHOULD have an id
-  #   DF_elements_options_raw =
-  #     # Elements that should be in the DF (we look for them below)
-  #     tibble(id = NA_character_, name = NA_character_, class = NA_character_, type = NA_character_, status = NA_character_,
-  #            required = NA_character_, hidden = NA_character_,
-  #            min = NA_character_, max = NA_character_, minlength = NA_character_, maxlength = NA_character_) %>%
-  # 
-  #     # Bind all types of html elements
-  #     dplyr::bind_rows(if (length(page) > 0) {1:length(page) %>% map_df(~ page[[.x]] %>%  html_attrs()  %>% bind_rows()%>% mutate(tag_name = "p", content = page[[.x]] %>% rvest::html_text2()))}) %>%
-  #     dplyr::bind_rows(if (length(div) > 0) {1:length(div) %>% map_df(~ div[[.x]] %>%  html_attrs()  %>% bind_rows() %>% mutate(tag_name = "div", content = div[[.x]] %>% rvest::html_text2()))}) %>%
-  #     dplyr::bind_rows(if (length(inputs) > 0) {1:length(inputs) %>% map_df(~ inputs[[.x]] %>%  html_attrs()  %>% bind_rows()%>% mutate(tag_name = "input", content = inputs[[.x]] %>% rvest::html_text2()))}) %>%
-  #     dplyr::bind_rows(if (length(textarea) > 0) {1:length(textarea) %>% map_df(~ textarea[[.x]] %>%  html_attrs()  %>% bind_rows()%>% mutate(tag_name = "input", content = textarea[[.x]] %>% rvest::html_text2()))}) %>%
-  #     dplyr::bind_rows(if (length(buttons) > 0) {1:length(buttons) %>% map_df(~ buttons[[.x]] %>%  html_attrs()  %>% bind_rows() %>% mutate(tag_name = "button", content = buttons[[.x]] %>% rvest::html_text2()))})
-
-    # This is much faster and gives the same result
+    # Get html elements -------------------------------------------------------
+    
+    # Gets html elements for div's, buttons, etc. using parse_elements() and joins all in a DF
     DF_elements_options_raw =
-      tibble(id = NA_character_, name = NA_character_, class = NA_character_, type = NA_character_, status = NA_character_,
+      tibble::tibble(id = NA_character_, name = NA_character_, class = NA_character_, type = NA_character_, status = NA_character_,
              required = NA_character_, hidden = NA_character_,
              min = NA_character_, max = NA_character_, minlength = NA_character_, maxlength = NA_character_) |>
-      bind_rows(parse_elements("p", page_source_rvest)) |>
-      bind_rows(parse_elements("div", page_source_rvest)) |>
-      bind_rows(parse_elements("input", page_source_rvest)) |>
-      bind_rows(parse_elements("textarea", page_source_rvest)) |>
-      bind_rows(parse_elements("button", page_source_rvest))
+      dplyr::bind_rows(parse_elements("p", page_source_rvest)) |>
+      dplyr::bind_rows(parse_elements("div", page_source_rvest)) |>
+      dplyr::bind_rows(parse_elements("input", page_source_rvest)) |>
+      dplyr::bind_rows(parse_elements("textarea", page_source_rvest)) |>
+      dplyr::bind_rows(parse_elements("button", page_source_rvest)) |> 
+      
+      # Filter out invisible things
+      filter(is.na(style) | style != "display: none;")
     
       if (nrow(DF_elements_options_raw) == 0) cli::cli_alert_danger(" ERROR: No elements found in source")
     
@@ -104,7 +80,10 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
       DF_elements_options_raw %>% 
       
       # If columns in cols do not exist, create them. Avoids warnings in case_when() below
-      tibble::add_column(., !!!cols[setdiff(names(cols), names(.))]) %>% 
+      tibble::add_column(., !!!cols[setdiff(names(cols), names(.))]) %>%
+      
+      # Use data.table to speed up things
+      dtplyr::lazy_dt() %>%
     
       # Some hand-made plugins are missing the tag_name. ADD HERE
       mutate(tag_name = 
@@ -186,7 +165,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
                  # Maybe we should implement a way to try ALL the type_extracted when we have an imput we don't recognize (WITH A WARNING)
                  is.na(type_extracted) & tag_name == "input" & required == FALSE ~ "ALL",
                  TRUE ~ type_extracted
-               ))
+               )) 
       
     # DF_elements_options
     
@@ -199,6 +178,12 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
 
     # Get only IDs of inputs and buttons
     ID_names = DF_elements_options %>% filter(tag_name %in% c("input", "button")) %>% tidyr::drop_na(id) %>% pull(id) 
+    DIV_names = DF_elements_options %>% filter(tag_name %in% c("div")) %>% tidyr::drop_na(id) %>% pull(id) 
+    # Now we are getting id, name and class using DF_elements_options$id. Maybe try to actually use name and class
+    # This could be problematic for Consent, and because of some empty elements, elements with repated id's etc.
+      # Name_names = DF_elements_options %>% filter(tag_name %in% c("input", "button")) %>% tidyr::drop_na(name) %>% pull(name)
+      # Class_names = DF_elements_options %>% filter(tag_name %in% c("input", "button")) %>% tidyr::drop_na(class) %>% pull(class)
+      
     
     # Extract all elements with an id. We look for it in the "id", "name" and "class"
     if (length(ID_names) != 0) list_elements_ids = 1:length(ID_names) %>% map(~ remDr$findElements(using = 'id', value = ID_names[.x])) %>% setNames(ID_names) %>% unlist()
@@ -208,32 +193,71 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     if (any(exists("list_elements_ids") | exists("list_elements_names") | exists("list_elements_class"))) {
       list_elements = c(list_elements_ids, list_elements_names, list_elements_class) 
     } else {
-      list_elements = NULL
+      
+      if (length(DIV_names) == 0) {
+        list_elements = NULL  
+      } else if (length(DIV_names) != 0 & try_number > 6) { # IF nothing but a div, and we tried a few times, then must be an end message
+        cli::cli_alert_info("Only a DIV element found: {.code {DIV_names}}")
+        list_elements = list(remDr$findElements(using = 'id', value = DIV_names[1])) %>% setNames(DIV_names) %>% unlist()
+      } else {
+        list_elements = NULL  
+        
+      }
+      
     }
 
+
+    # Already completed -------------------------------------------------------
+    already_completed_strings = c("El participante ya completó el protocolo|The participant already completed the protocol")
+    already_completed = any(grepl(already_completed_strings, DF_elements_options |> as_tibble() |> pull(content)))
+    if(already_completed){
+      if (DEBUG == TRUE) cli::cli_h1(cli::col_green("[[Protocol already completed]]"))
+      list_elements = NA
+    }
+      
+    
     
     # CHECK if we found any elements. The parameter try_number is set in complete_task.
-      # Right now we try twice, after a 5s pause (needed for form-html pages where it takes a second to load the html).
-    if (length(list_elements) == 0 & try_number == 1) {
+    if (length(list_elements) == 0 & try_number < 11) {
       
-      screen_raw_elements = DF_elements_options_raw %>% filter(!is.na(content) & content != "") %>% pull(content) %>% unique(.)  %>% paste(., collapse = "; ")
-      if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgYellow(" WARNING: No elements extracted on the first try... [get_elements] \n"))) #, "  - RAW content:", crayon::silver(screen_raw_elements), "\n"
-      stop("No elements found") 
+      if (DEBUG == TRUE) cli::cli_alert_warning("WARNING: No elements extracted on try {try_number}...")
+      stop("No elements found") # THIS IS NEEDED because the safe call to get_elements expects an error!!!
       
-    } else if (length(list_elements) == 0 & try_number == 2) {
-    
-      screen_raw_elements = DF_elements_options_raw %>% filter(!is.na(content) & content != "") %>% pull(content) %>% unique(.) %>% paste(., collapse = "; ")
-      if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgYellow(" WARNING: No elements extracted on the second try... [will end experiment]"), " || RAW content:", crayon::silver(screen_raw_elements)))
+    } else if (length(list_elements) == 0) {
+      if (DEBUG == TRUE) cli::cli_alert_warning("Last WARNING: No elements extracted on try {try_number}...")
       
+      # THIS SHOULD MARK THE END OF THE EXPERIMENT? continue = FALSE???
+      # if (DEBUG == TRUE) saveRDS(DF_elements_options_raw, "outputs/errors/no_elements.rds"); cli::cli_alert_warning("WARNING: No elements extracted on try {try_number}... [will end experiment]. See 'outputs/errors/no_elements.csv'")
+      stop("No elements found #2") 
+      
+    } else {
+      if (DEBUG == TRUE) cli::cli_alert_info("{length(list_elements)} elements extracted: {.code {names(list_elements)}}")
     }
 
   
   # Inputs, buttons, status -------------------------------------------------
     
     # Filter inputs, buttons and status to end up with a clean list of known names we know how to interact with.
-    name_contents = DF_elements_options %>% filter(type_extracted %in% c("content"))
-    name_inputs = DF_elements_options %>% filter(tag_name == "input" & type_extracted %in% c("checkbox", "date", "email", "html-form", "keyboard_response", "input_button", "list", "multi-select", "text", "number", "radio", "slider", "ALL"))
-    name_buttons = DF_elements_options %>% filter(tag_name == "button" | type_extracted %in% c("button"))
+    name_contents = DF_elements_options %>% filter(type_extracted %in% c("content")) |> as_tibble()
+    name_inputs = DF_elements_options %>% filter(tag_name == "input" & type_extracted %in% c("checkbox", "date", "email", "html-form", "keyboard_response", "input_button", "list", "multi-select", "text", "number", "radio", "slider", "ALL")) |> as_tibble()
+    name_buttons = DF_elements_options %>% filter(tag_name == "button" | type_extracted %in% c("button")) |> as_tibble()
+    
+    # Back to tibble so we can look inside
+    DF_elements_options = DF_elements_options |> as_tibble()
+    
+    
+  # Detect last screen, already completed -----------------------------------
+
+    finish_study_strings = c("FINALIZAR ESTUDIO|FINISH STUDY")
+    last_screen = any(grepl(finish_study_strings, name_buttons$content))
+    if(length(last_screen) > 0){
+      if (DEBUG == TRUE & last_screen == TRUE) cli::cli_h1(cli::col_green("[[FINISH STUDY screen]]"))
+    }
+    
+    
+    # FINALIZAR ESTUDIO >
+    #   # If text is "El participante ya completÃ³ el protocolo.", FINISH!
+      
     
     
   # DETECT status. CONTINUE or NOT -------------------------------------------
@@ -248,7 +272,8 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
 
     } else if (length(list_elements) == 0 | length(ID_names) == 0) {
       
-      if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgGreen("\n[[END OF EXPERIMENT]]\n"))) #NO elements found. CHECK: \n- 'outputs/END.png'\n -'outputs/source/'\n
+      # if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgGreen("\n[[END OF EXPERIMENT]]\n"))) #NO elements found. CHECK: \n- 'outputs/END.png'\n -'outputs/source/'\n
+      if (DEBUG == TRUE) cli::cli_h1(cli::col_green("[[END OF EXPERIMENT]]"))  
       # if (DEBUG == TRUE) write_lines(page_source[[1]][1], paste0("outputs/source/end_", index, ".html"))
       # if (DEBUG == TRUE) remDr$screenshot(file = "outputs/screenshots/END-DEBUG-get_elements-good-end.png")
         

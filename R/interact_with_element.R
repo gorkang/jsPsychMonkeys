@@ -1,8 +1,9 @@
 interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL, seed = 1) {
 
   # DEBUG
-    # remDr$screenshot(display = TRUE)
-  
+  # index = 1
+  # seed = 1
+    
     ## CONTROL + P
     # DEBUG = TRUE
     # seed = 11

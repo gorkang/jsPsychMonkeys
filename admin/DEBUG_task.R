@@ -10,8 +10,13 @@ reconnect_to_VNC(container_name = container_name)
 
 # THIS IS A WIP, but seems to work
 list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_elements
+
+# list_get_elements$DF_elements_options |> View()
+# list_get_elements$name_contents |> View()
+# list_get_elements$name_buttons |> View()
 # 
-# 
+# FINALIZAR ESTUDIO >
+
 # # In complete_task.R
 rstudioapi::navigateToFile("R/helper_select_input.R")
 # 
@@ -20,7 +25,12 @@ rstudioapi::navigateToFile("R/interact_with_element.R")
 interact_with_element(list_get_elements = list_get_elements, index = 1, seed = 11)
 
 
-
+tictoc::tic(msg = "GET")
+list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG)
+tictoc::toc()
+tictoc::tic(msg = "INTERACT")
+interact_with_element(list_get_elements = list_get_elements, index = 1, seed = 11)
+tictoc::toc()
 
 
 

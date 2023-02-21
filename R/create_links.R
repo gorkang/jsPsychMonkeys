@@ -13,7 +13,7 @@
 create_links <-
   function(parameters_monkeys,
            uid,
-           remoteDriver = NULL) {
+           remote_driver = NULL) {
     
     
     # DEBUG
@@ -28,8 +28,8 @@ create_links <-
       source("R/main_parameters.R", local = TRUE)
     
       
-    container_name = remoteDriver$container_name
-    remDr = remoteDriver$remDr
+    container_name = remote_driver$container_name
+    remDr = remote_driver$remDr
     
     
     # CHECKS -----------------------------------------------------------------

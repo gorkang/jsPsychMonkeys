@@ -188,10 +188,10 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
 debug_docker <- function(uid_participant) {
   
   # DEBUG
-  # uid_participant = 888
+  # uid_participant = 921
   # parameters_monkeys = parameters_monkeys
   
-  suppressMessages(source(shrtcts::locate_shortcuts_source()))
+  # suppressMessages(source(shrtcts::locate_shortcuts_source()))
   suppressMessages(source(here::here("_targets.R")))
 
   targets::tar_load(parameters_monkeys)
@@ -208,7 +208,7 @@ debug_docker <- function(uid_participant) {
   
   container_name_tar <- paste0("container_", uid)
   container_name <<- paste0("container", uid)
-  driver_name <<- paste0("remoteDriver_", uid)
+  driver_name <<- paste0("remote_driver_", uid)
   targets::tar_load(eval(container_name_tar))
   targets::tar_load(eval(driver_name))
   remDr <<- get(driver_name)$remDr
@@ -237,7 +237,7 @@ debug_function <- function(name_function) {
   # Function to tar_load or assign the parameters
   load_parameters <- function(parameters_function_separated, NUM) {
     
-    # NUM = 2
+    # NUM = 4
     parameter = parameters_function_separated[[NUM]]
     parameter_1 = gsub("\\n", "", parameter[1])
     parameter_2 = gsub("\\n", "", parameter[2])
@@ -249,10 +249,10 @@ debug_function <- function(name_function) {
     }
 
     
-    # A single parameter e.g. parameters_monkeys
+    # A single parameter e.g. parameters_monkeys (must be an existing object)
     if (length(parameter) == 1) {
       
-      targets::tar_load(parameter, envir = .GlobalEnv)
+      targets::tar_load(all_of(existing_object), envir = .GlobalEnv)
       
     # A parameter with "=" e.g: pid = 999
     } else if (length(parameter) == 2) {
@@ -264,11 +264,10 @@ debug_function <- function(name_function) {
       if (length(existing_object) == 1) {
         
         targets::tar_load(all_of(existing_object), envir = .GlobalEnv)
+        assign(parameter_1, eval(parse(text = parameter_2)), envir = .GlobalEnv)
         
       } else {
         
-      # assign(parameters_function_separated[[NUM]][1], parameters_function_separated[[NUM]][2], envir = .GlobalEnv)
-
       # If the variable contains $, it is a list, so load the actual value stored      
       if (grepl("\\$", parameter_2)) {
         
@@ -460,12 +459,14 @@ parse_elements <- function(what, page_source_rvest) {
   if (length(page_source_temp) > 0) {
     
     1:length(page_source_temp)  |>  
-      map_df(~ page_source_temp[[.x]]  |>   
-               html_attrs() |> 
-               bind_rows() |> 
-               mutate(tag_name = what, 
-                      content = page_source_temp[[.x]] |> rvest::html_text2()))      
-    
+      purrr::map_df(~ page_source_temp[[.x]]  |>   
+                      rvest::html_attrs() |> 
+                      dplyr::bind_rows() |> 
+                      dplyr::mutate(tag_name = what, 
+                                    content = page_source_temp[[.x]] |> 
+                                      rvest::html_text2()
+                                    )
+                    )
     
   } else {
     # cli::cli_alert_info("No {.code {what}} found")

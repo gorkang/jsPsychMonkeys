@@ -144,10 +144,10 @@ create_remDr <-
     CLEAN_OPEN_SAFELY = clean_open_safely(time_wait = 1)
     
     if (length(CLEAN_OPEN_SAFELY$error) > 0) {
-      cat(crayon::bgRed("ERROR: creating closing browsers [create_remDr()]\n"))
+      cli::cli_alert_warning("Warning: creating closing browsers failed: {CLEAN_OPEN_SAFELY$error}")
       CLEAN_OPEN_SAFELY = clean_open_safely(time_wait = 2)
       if (length(CLEAN_OPEN_SAFELY$error) > 0) {
-        cat(crayon::bgRed("ERROR2: creating closing browsers [create_remDr()]\n"))
+        cli::cli_alert_danger("Warning: creating closing browsers failed: {CLEAN_OPEN_SAFELY$error}")
         stop()
       }
     }

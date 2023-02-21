@@ -5,10 +5,10 @@
     # For a complete list of possible parameters, see set_parameters()  
     # Number of workers is defined in run.R: targets::tar_make_future(workers = future::availableCores() - 2)
   
-    parameters_monkeys_minimal = list(uid = 888, uid_URL = TRUE, forced_seed = 11,
+    parameters_monkeys_minimal = list(uid = 100, uid_URL = TRUE, forced_seed = 11, 
                                       # If using Windows: "C:/Users/myusername/Downloads/protocol999"
-                                      # local_folder_tasks = "~/Downloads/protocol999",
-                                      server_folder_tasks = "test/protocols_DEV/22",
+                                      local_folder_tasks = "~/Downloads/protocol999/",
+                                      # server_folder_tasks = "999",
                                       screenshot = FALSE,
                                       forced_refresh = FALSE, # Want monkeys to close and reopen their browsers?
                                       big_container = TRUE, 
@@ -66,7 +66,7 @@ TARGETS =  list(
       
       # 3) Open remote Driver and browser
       tar_target(
-        remoteDriver,
+        remote_driver,
         create_remDr(
           container_port = container$container_port,
           browserName = container$browserName,
@@ -82,7 +82,7 @@ TARGETS =  list(
         create_links(
           parameters_monkeys = parameters_monkeys,
           uid = uid,
-          remoteDriver = remoteDriver
+          remote_driver = remote_driver
         ), priority = .5
       ),
       
@@ -92,7 +92,7 @@ TARGETS =  list(
         existing_CSVs,
         check_Downloads(
           parameters_monkeys = parameters_monkeys,
-          links_tar = remoteDriver # This is so this runs before task
+          links_tar = remote_driver # This is so this runs before task
           ), priority = .5
       ),
       
@@ -104,7 +104,7 @@ TARGETS =  list(
           parameters_monkeys = parameters_monkeys,
           uid = uid,
           links = links_tar$links,
-          remoteDriver = remoteDriver
+          remote_driver = remote_driver
         ), priority = .5
       ),
       
