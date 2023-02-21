@@ -5,7 +5,7 @@
 if (exists("parameters_monkeys_minimal")) {
 
   # participants
-  if (!is.null(parameters_monkeys_minimal$uid)) uid = parameters_monkeys_minimal$uid
+  # if (!is.null(parameters_monkeys_minimal$uid)) uid = parameters_monkeys_minimal$uid
   
   # docker
   if (!is.null(parameters_monkeys_minimal$browserName)) browserName = parameters_monkeys_minimal$browserName
@@ -41,7 +41,7 @@ if (exists("parameters_monkeys_minimal")) {
 if (exists("parameters_monkeys")) {
     
   # participants
-  if (!is.null(parameters_monkeys$participants$uid)) uid = parameters_monkeys$participants$uid
+  # if (!is.null(parameters_monkeys$participants$uid)) uid = parameters_monkeys$participants$uid
   
   # docker
   if (!is.null(parameters_monkeys$docker$browserName)) browserName = parameters_monkeys$docker$browserName
