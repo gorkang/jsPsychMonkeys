@@ -157,6 +157,8 @@ create_docker <-
 
     # Get docker images -------------------------------------------------------
   
+    # TODO: This is not necessary, as docker run pulls the image if does not exist locally
+  
     DOCKER_images = system("docker images -a", intern = TRUE) |> tibble::as_tibble()
     LATEST_image = DOCKER_images |> 
       dplyr::filter(grepl(paste0(browserName, debug_label), value)) |> 
@@ -181,6 +183,23 @@ create_docker <-
     
 
     # Run docker container ----------------------------------------------------
+    
+    # https://github.com/SeleniumHQ/docker-selenium#debugging
+    # TODO: Redo this code. Avoid the selenium/standalone-chrome-debug, as it is outdated.
+      # Use selenium/standalone-chrome
+    
+    # Can make the ports more predictable like this: 
+    
+      # uid = 5:10
+      # port1 = 4444:(4444 + length(uid))
+      # port2 = 5900:(5900 + length(uid))
+      # 
+      # paste0('docker run -d -p ', port1, ':4444 -p ', port2, ':5900 --shm-size="2g" selenium/standalone-chrome:latest')
+    
+    # The VNC port is port2
+    
+    # CHANGE reconnect_to_VNC, etc to avoid all the "-debug" related code
+    
 
     
     # Run docker session. Map home directory to download docker container
