@@ -33,7 +33,7 @@ clean_up_docker <-
     if (keep_alive == FALSE) {
       
       # Container already exists
-      if (DEBUG == TRUE) cat(crayon::green("Removing container", container_name, "...\n"))
+      if (DEBUG == TRUE) cli::cli_alert_info("Removing container {.code {container_name}}")
       
       # Stop and remove containers:
       # If container is running stop it
@@ -49,10 +49,8 @@ clean_up_docker <-
       
     } else {
       
-      if (DEBUG == TRUE) cat(crayon::yellow("NOT removing container", container_name, " [keep_alive = TRUE]\n"))
+      if (DEBUG == TRUE) cli::cli_alert_info("NOT removing container {.code {container_name}} | [keep_alive = TRUE]")
       
     }
     
-  
-  
 }

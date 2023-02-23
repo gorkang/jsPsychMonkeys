@@ -13,7 +13,7 @@ create_docker <-
     # targets::tar_load_globals()
     # debug_function("create_docker")
     
-    
+    cli::cli_h1("UID: {uid}")
     
 # Packages -------------------------------------------------------------
   suppressMessages(suppressWarnings(library(RSelenium)))
@@ -123,7 +123,7 @@ create_docker <-
     if (container_name %in% system('docker ps -a --format "{{.Names}}"', intern = TRUE) == FALSE) {
       
       # Container does not exist
-      if (DEBUG == TRUE) cli::cli_alert_info("Container {container_name} does not exist. Creating it...\n") #cat(crayon::yellow("Container", container_name, "does not exist. Creating it...\n"))
+      if (DEBUG == TRUE) cli::cli_alert_info("Container {container_name} does not exist. Creating it...\n")
     
     } else {
       

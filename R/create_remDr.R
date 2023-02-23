@@ -70,10 +70,10 @@ create_remDr <-
       
     create_remDr <- function(container_port, browserName, time_wait = 1, errored = FALSE) {
       if (errored == FALSE) {
-        if (DEBUG == TRUE) cat(crayon::yellow("Creating remoteDriver in", paste0(time_wait, "s\n")))
+        if (DEBUG == TRUE)  cli::cli_alert_info("Creating remoteDriver in {time_wait}s")
         Sys.sleep(time_wait)
       } else if (errored == TRUE) {
-        if (DEBUG == TRUE) cat(crayon::bgRed("Error creating remoteDriver. Retrying after", paste0(time_wait, "s\n")))
+        if (DEBUG == TRUE) cli::cli_alert_warning("Error creating remoteDriver. Retrying in {time_wait}s")
         Sys.sleep(time_wait)
       }
 
@@ -105,7 +105,7 @@ create_remDr <-
     CREATE_REMOTE_DRIVER = create_remDr_safely(container_port = container_port, browserName = browserName, time_wait = 1)
 
     if (length(CREATE_REMOTE_DRIVER$error) > 0) {
-      cat(crayon::bgRed("ERROR: creating remote driver [create_remDr()]\n"))
+      cli::cli_alert_danger("Could not create remote driver `create_remDr()`, retrying: {.code {CREATE_REMOTE_DRIVER$error}}")
       CREATE_REMOTE_DRIVER = create_remDr_safely(container_port = container_port, browserName = browserName, time_wait = 2)
       
     }
@@ -116,8 +116,7 @@ create_remDr <-
 
   # Close all existing browsers ---------------------------------------------
     
-    if (DEBUG == TRUE) cat(crayon::yellow("\n-Closing browsers... \n"))
-    
+    if (DEBUG == TRUE) cli::cli_alert_info("Opening browser in a clean session...")
     
     # Close all browser instances
     clean_open <- function(time_wait = 1) {
@@ -128,8 +127,6 @@ create_remDr <-
       # REMEMBER: if open_VNC == FALSE, THIS FAILS. NO IDEA WHY
       # https://github.com/gorkang/jsPsychMonkeys/issues/8
       remDr$closeall()
-      
-      if (DEBUG == TRUE) cat(crayon::yellow("\n-About to open a browser... \n"))
       
       # OPEN browser
       remDr$open(silent = !DEBUG)

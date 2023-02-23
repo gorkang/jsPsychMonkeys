@@ -43,9 +43,9 @@ complete_task <-
   
     # If Docker container does not exist, stop execution.
     if (length(reconnect_to_VNC(container_name = container_name, just_check = TRUE)) == 0) {
-      cat(crayon::bgRed("NO DOCKER IMAGE available.\n"), crayon::silver("Maybe need to do:\n targets::tar_destroy() & targets::tar_make()\n\n"))
+      cli::cli_alert_danger("ERROR: No docker image available. Maybe need to do:\n `targets::tar_destroy() & targets::tar_make()`\n\n")
       targets::tar_invalidate(paste0("container_", parameters_monkeys$participants$uid))
-      cat(crayon::bgYellow("Invalidated ", container_name, " to restart process\n\n"))
+      cli::cli_alert_info("Invalidated {.code {container_name}} to restart process")
       stop()
       
     } else {
@@ -88,8 +88,7 @@ complete_task <-
     if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgGreen(paste0("[[START OF EXPERIMENT]] ", Sys.time(), " Waiting ", initial_wait, "s")), crayon::yellow("[If it fails, increase initial_wait or wait_retry]\n")))
     Sys.sleep(initial_wait)
     
-    if (length(LAUNCH_TASK$error) > 0) cat(crayon::bgRed(" ERROR: opening link [launch_task()] \n"), crayon::black(LAUNCH_TASK$error))
-    
+    if (length(LAUNCH_TASK$error) > 0) cli::cli_alert_danger("ERROR: opening link [launch_task()] \n {LAUNCH_TASK$error}")  
     
     ## Loop through items of a task --------------------------------------------
       
@@ -109,8 +108,6 @@ complete_task <-
         # If there is an alert, accept
         check_accept_alert(wait_retry, remDr)
         
-        
-        # if (!exists("index")) index = 1
         # Take screenshots
         if (screenshot == TRUE) {
           output_folder = paste0("outputs/screenshots/", parameters_monkeys$task$pid, "/", uid, "/")
@@ -149,6 +146,7 @@ complete_task <-
     
           # If we must continue
           if (list_get_elements$continue == TRUE) {
+            
       
               ### Interact with the elements we found ------------------
                 
@@ -225,7 +223,6 @@ complete_task <-
       if (console_logs == TRUE & length(console_logs_list) > 0) {
         
         # Store browser console logs
-        # write_lines(console_logs_list, paste0("outputs/log/", uid, "_console_logs", "_", index - 1, "_", Sys.time(), ".txt"))
         numbered_console_logs = console_logs_list %>% setNames(seq_along(.))
         DF_console_logs = 1:length(numbered_console_logs) %>% map_df(~ numbered_console_logs[[.x]] %>% bind_rows %>% mutate(page_number = .x)) %>% tidyr::drop_na(message)
         write_csv(DF_console_logs, paste0("outputs/log/", uid, "_console_logs", "_", gsub(":", "-", Sys.time()), ".csv"))

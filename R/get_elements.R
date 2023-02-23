@@ -22,12 +22,9 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     if (exists("list_elements_class")) remove("list_elements_class")
   
   
-    # End of experiment
-    # NOT active because it takes a bit of extra time and it is NOT needed 99% of the time
-    # if (remDr$getCurrentUrl()[[1]] == "http://cscn.uai.cl/") cat("END OF EXPERIMENT")
-  
-  
   # iframes -----------------------------------------------------------------
+  
+  # This is for jsPsychMaker v0.1. Should be safe to delete now. CHECK
   find_elements <- function() {
     check_accept_alert()
     remDr$findElements(using = "tag name", "iframe")
@@ -67,11 +64,9 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
       # Filter out invisible things
       filter(is.na(style) | style != "display: none;")
     
-      if (nrow(DF_elements_options_raw) == 0) cli::cli_alert_danger(" ERROR: No elements found in source")
+    if (nrow(DF_elements_options_raw) == 0) cli::cli_alert_danger(" ERROR: No elements found in source")
     
-    
-    # DF_elements_options_raw #%>% select(id, tag_name, class, content)
-    
+
     # Columns that we don't have in all the items but that are used in the case_when() below
     cols <- c(list = NA_character_)
     
@@ -167,12 +162,9 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
                  TRUE ~ type_extracted
                )) 
       
-    # DF_elements_options
-    
     # Store table for DEBUG
     # if (DEBUG == TRUE) write_csv(DF_elements_options, paste0("outputs/DF/EXTRACTED_", index, "_NEW.csv"))
     
-
     
   # Extract remDr elements --------------------------------------------------
 
@@ -195,11 +187,17 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     } else {
       
       if (length(DIV_names) == 0) {
+        
         list_elements = NULL  
+        
+      # We don't get inputs of buttons but we get a div. Usually a mesage about no quota, or already completed
       } else if (length(DIV_names) != 0 & try_number > 6) { # IF nothing but a div, and we tried a few times, then must be an end message
+        
         cli::cli_alert_info("Only a DIV element found: {.code {DIV_names}}")
         list_elements = list(remDr$findElements(using = 'id', value = DIV_names[1])) %>% setNames(DIV_names) %>% unlist()
+        
       } else {
+        
         list_elements = NULL  
         
       }
@@ -208,6 +206,8 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
 
 
     # Already completed -------------------------------------------------------
+    
+    # TODO: We have this here, "Detect last screen" below... join all this in a single chunk
     already_completed_strings = c("El participante ya completó el protocolo|The participant already completed the protocol")
     already_completed = any(grepl(already_completed_strings, DF_elements_options |> as_tibble() |> pull(content)))
     if(already_completed){
@@ -246,7 +246,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     DF_elements_options = DF_elements_options |> as_tibble()
     
     
-  # Detect last screen, already completed -----------------------------------
+  # Detect last screen  -----------------------------------------------------
 
     finish_study_strings = c("FINALIZAR ESTUDIO|FINISH STUDY")
     last_screen = any(grepl(finish_study_strings, name_buttons$content))
@@ -255,16 +255,12 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     }
     
     
-    # FINALIZAR ESTUDIO >
-    #   # If text is "El participante ya completÃ³ el protocolo.", FINISH!
-      
-    
-    
   # DETECT status. CONTINUE or NOT -------------------------------------------
 
+    # TODO: This should be a separate function, called from complete_task()
+    
     if (length(ID_names) == 1 & all(ID_names == c("jspsych-fullscreen-btn"))) {
       # Initial FULLSCREEN
-      # if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgYellow("\n  START of experiment \n")))
       if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::yellow("[SCREEN]", paste0("[-]"), ":"), crayon::silver(paste0(paste("Fullscreen button")), "\n")))
       
       DF_elements_options$status = "start"
@@ -272,12 +268,8 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
 
     } else if (length(list_elements) == 0 | length(ID_names) == 0) {
       
-      # if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgGreen("\n[[END OF EXPERIMENT]]\n"))) #NO elements found. CHECK: \n- 'outputs/END.png'\n -'outputs/source/'\n
       if (DEBUG == TRUE) cli::cli_h1(cli::col_green("[[END OF EXPERIMENT]]"))  
-      # if (DEBUG == TRUE) write_lines(page_source[[1]][1], paste0("outputs/source/end_", index, ".html"))
-      # if (DEBUG == TRUE) remDr$screenshot(file = "outputs/screenshots/END-DEBUG-get_elements-good-end.png")
-        
-        continue = FALSE
+      continue = FALSE
   
     } else if (length(ID_names) == 1 & "jspsych-html-keyboard-response-stimulus" %in% DF_elements_options$id & !"button" %in% DF_elements_options$type_extracted) {
       # No button, need to press a specific key
@@ -300,7 +292,6 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
                            name_contents = name_contents,
                            name_inputs = name_inputs,
                            name_buttons = name_buttons,
-                           # name_status = name_status,
                            continue = continue)
 
   return(list_get_elements)
