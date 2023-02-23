@@ -1,20 +1,12 @@
 select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
   
   # DEBUG
-    # remDr$screenshot(display = TRUE)
-    
-    ## CONTROL + P
-    # DEBUG = TRUE
-    # debug_docker(24000)
-    # source("R/complete_task.R")
-  
-  # list_get_elementsXXX = list_get_elements
-  
-    # list_get_elements = get_elements_safely(remDr = remDr, DEBUG = DEBUG, try_number = 2); list_get_elements
-  
-    # list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_elements
-    # list_get_elements = list_get_elements$result
-    # list_get_elements$name_inputs %>% View
+  # targets::tar_load_globals()
+  # debug_function("complete_task")
+  # debug_docker(uid_participant = uid)
+  # reconnect_to_VNC(container_name = container_name)
+  # list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_elements
+
   
   # SET SEED ----------------------------------------------------------------
   
@@ -103,8 +95,8 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
     
   } else if (any(selected_input$type_extracted %in% c("date"))) {
     
-    min_date = clock::year_month_day(1900, 1, 30) %>% clock::as_date()
-    max_date = clock::year_month_day(2021, 1, 30) %>% clock::as_date()
+    min_date = as.Date("1900-01-01")    
+    max_date = as.Date(Sys.Date())
     
     input_text = format(sample(seq(min_date, max_date, by = "day"), 1), "%m/%d/%Y")
     
@@ -208,7 +200,7 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
     # list_get_elements$name_inputs
     
     1:length(radio_groups) %>% 
-      walk( ~ {
+      purrr::walk( ~ {
         temp_list_get_elements = list_get_elements$name_inputs %>% filter(name == radio_groups[.x])
         
         selected_input = temp_list_get_elements[sample(1:nrow(temp_list_get_elements), 1),]
@@ -343,7 +335,7 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
     input_text = selected_checkboxes
     
     1:length(selected_checkboxes) %>% 
-      walk(~ list_get_elements$list_elements[[selected_checkboxes[.x]]]$clickElement())
+      purrr::walk(~ list_get_elements$list_elements[[selected_checkboxes[.x]]]$clickElement())
     
    
 
