@@ -188,7 +188,7 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
 debug_docker <- function(uid_participant) {
   
   # DEBUG
-  # uid_participant = 921
+  # uid_participant = 92
   # parameters_monkeys = parameters_monkeys
   
   # suppressMessages(source(shrtcts::locate_shortcuts_source()))
@@ -206,9 +206,12 @@ debug_docker <- function(uid_participant) {
   # uid <<- uid_participant
   
   
-  container_name_tar <- paste0("container_", uid)
-  container_name <<- paste0("container", uid)
-  driver_name <<- paste0("remote_driver_", uid)
+  # targets::tar_manifest() 
+  # targets::tar_meta()
+  
+  container_name_tar <- paste0("container_", uid_participant)
+  container_name <<- paste0("container", uid_participant)
+  driver_name <<- paste0("remote_driver_", uid_participant)
   targets::tar_load(eval(container_name_tar))
   targets::tar_load(eval(driver_name))
   remDr <<- get(driver_name)$remDr
@@ -229,7 +232,7 @@ debug_docker <- function(uid_participant) {
 #' @export
 #'
 #' @examples
-debug_function <- function(name_function) {
+debug_function <- function(name_function, uid = NULL) {
   
   # DEBUG
   # name_function = "create_docker"
@@ -302,8 +305,13 @@ debug_function <- function(name_function) {
   # if (length(parameters_function_raw) > 0) {
     
     # parameters_function_separated = strsplit(parameters_function_raw, ",") %>% unlist() %>% strsplit(., "=")
-    
-  DF_function = targets::tar_manifest() %>% filter(grepl(name_function, command)) %>% pull(command) %>% last()
+  
+  # If there are multiple uid's we need a way to filter   
+  if (is.null(uid)) uid = "*"
+  
+  DF_function = targets::tar_manifest() %>% filter(grepl(name_function, command)) %>% 
+    filter(grepl(uid, name)) |> 
+    pull(command) %>% last()
   
   if (!is.na(DF_function)) {
   
