@@ -17,6 +17,8 @@ create_remDr <-
   # DEBUG
     # targets::tar_load_globals()
     # debug_function("create_remDr")
+    # debug_docker(uid_participant = uid)
+    # reconnect_to_VNC(container_name = container_name)
     
     # DEBUG = TRUE
     # targets::tar_load("parameters_monkeys")
