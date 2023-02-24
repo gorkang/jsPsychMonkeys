@@ -51,7 +51,7 @@ complete_task <-
     } else {
       
       if (DEBUG == TRUE & open_VNC == TRUE) {
-        cli::cli_h1("Launching VNC")
+        cli::cli_h2("Launching VNC")
         reconnect_to_VNC(container_name, DEBUG = TRUE)
       }
     }
@@ -90,6 +90,7 @@ complete_task <-
     
     if (length(LAUNCH_TASK$error) > 0) cli::cli_alert_danger("ERROR: opening link [launch_task()] \n {LAUNCH_TASK$error}")  
     
+    
     ## Loop through items of a task --------------------------------------------
       
       # Condition to stop while
@@ -101,9 +102,8 @@ complete_task <-
       
       console_logs_list = list()
       
+      # Which screen inside the task. jsPsychMaker creates a single big "task"
       while (continue) {
-        
-        # Which screen inside the task
         
         # If there is an alert, accept
         check_accept_alert(wait_retry, remDr)
@@ -123,29 +123,45 @@ complete_task <-
           cli::cli_h2("Getting elements")
           try_number = 1
           wait_retry_loop = wait_retry # Reset to initial value
-          list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 1, DEBUG = DEBUG)
+          continue_elements = FALSE
           
-          while (!is.null(list_get_elements$error)) {
-            try_number = try_number + 1
-            Sys.sleep(wait_retry_loop)
-            # Make sure there are no alerts before retrying
-            check_accept_alert(wait_retry_loop)
-            list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = try_number, DEBUG = DEBUG)
-            
-            wait_retry_loop = wait_retry_loop + (try_number/5)
-            if (try_number == 8) Sys.sleep(wait_retry_loop + 3) # Last chance, take 3 extra seconds to give things time to load
-            if (try_number == 11) {
+          # list_get_elements = list(result = list(list_elements = NULL))
+          # list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 1, DEBUG = DEBUG)
+          # O ES NULL O SOLO TENEMOS `jspsych-content`
+          
+          # while (!is.null(list_get_elements$error)) {
+          # while (is.null(list_get_elements$result$list_elements)) {
+          while (!continue_elements) {
               
-              cli::cli_h1("Tried {try_number} times but could not find elements. Stopping")
-              cli::cli_abort("Tried {try_number} times but could not find elements. Stopping")
-            }
+            # Increase wait with each retry
+            wait_retry_loop = wait_retry_loop + (try_number/5)
+            if (try_number > 1) Sys.sleep(wait_retry_loop)
+            
+            # Last chance, take 3 extra seconds to give things time to load
+            if (try_number == 9) Sys.sleep(wait_retry_loop + 3)
+            
+            # Make sure there are no alerts before retrying
+            check_accept_alert(wait_retry_loop, remDr)
+            list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = try_number, DEBUG = DEBUG)
+
+            # When there is not an error, the content is in result
+            list_get_elements = list_get_elements$result
+            
+            # Check list_get_elements, show messages, and determine if we should continue
+            continue_elements = process_elements(list_get_elements = list_get_elements, try_number = try_number, DEBUG = DEBUG)
+            
+            # CHECKS
+            if (!is.null(list_get_elements$error)) cli::cli_alert_danger("ERROR on get_elements_safely()")
+            if (DEBUG == TRUE & continue_elements == FALSE & try_number < 10) cli::cli_alert_warning("WARNING: No input|button elements extracted on try {try_number}/10. Retrying in {wait_retry_loop} sec.")
+            if (continue_elements == FALSE & try_number == 10) cli::cli_alert_danger("Tried {try_number} times but could not find elements. Stopping")
+            
+            try_number = try_number + 1
           }
             
-          # When there is an error, usually we will have some content here (we "cause" the error with a stop())
-          list_get_elements = list_get_elements$result
+
     
           # If we must continue
-          if (list_get_elements$continue == TRUE) {
+          if (continue_elements == TRUE) {
             
       
               ### Interact with the elements we found ------------------
@@ -180,7 +196,7 @@ complete_task <-
                   # If we are in consent form, reset forced_seed_final to 1  
                   # if (grepl("Consentimiento informado", list_get_elements$name_contents$content)) forced_seed_final = 1
                   
-              if (list_get_elements$continue == TRUE) interact_with_element_safely(list_get_elements, DEBUG = DEBUG, index = index, seed = (forced_seed_final + index_task + index)) #interact_with_element
+              interact_with_element_safely(list_get_elements, DEBUG = DEBUG, index = index, seed = (forced_seed_final + index_task + index)) #interact_with_element
       
               # FORCED WAIT ---
                 if (forced_random_wait == TRUE) {
@@ -204,15 +220,15 @@ complete_task <-
                 }
                 
           
-          } else {
-            already_completed_strings = c("El participante ya completó el protocolo|The participant already completed the protocol")
-            already_completed = any(grepl(already_completed_strings, list_get_elements$DF_elements_options |> as_tibble() |> pull(content)))
-            if (DEBUG == TRUE & already_completed == TRUE) cli::cli_h1(cli::col_green("[[FINISH PROTOCOL]]: {DF_elements_options |> as_tibble() |> pull(content)}"))
+          # } else {
+          #   already_completed_strings = c("El participante ya completó el protocolo|The participant already completed the protocol")
+          #   already_completed = any(grepl(already_completed_strings, list_get_elements$DF_elements_options |> as_tibble() |> pull(content)))
+          #   if (DEBUG == TRUE & already_completed == TRUE) cli::cli_h1(cli::col_green("[[FINISH PROTOCOL]]: {DF_elements_options |> as_tibble() |> pull(content)}"))
             
           }
           
         # Output of while
-        continue = list_get_elements$continue
+        # continue = list_get_elements$continue
         index = index + 1
         index_task = index_task + 1
         

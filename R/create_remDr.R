@@ -24,12 +24,6 @@ create_remDr <-
     # targets::tar_load("parameters_monkeys")
     # debug_docker(uid_participant = 2, parameters_debug = parameters_monkeys)
     
-  # targets::tar_load(container_24001)
-  # browserName = parameters_monkeys$docker$browserName
-  # container_name = container_24001$container_name
-  # container_port = container_24001$container_port
-  # DEBUG = parameters_monkeys$debug$DEBUG
-
     
   # Check which parameters were entered in parameters_monkeys -----------------
     
@@ -68,11 +62,11 @@ create_remDr <-
 
   # Create browser instance -------------------------------------------------
   
-    if (DEBUG == TRUE) cat(crayon::silver("Create remoteDriver: [", container_port, "] [", browserName, "] [", container_name, "] [", "\n"))
+    if (DEBUG == TRUE) cli::cli_h1("Create remoteDriver: [ {container_port} ] [ {browserName} ] [ {container_name} ]" )
       
     create_remDr <- function(container_port, browserName, time_wait = 1, errored = FALSE) {
       if (errored == FALSE) {
-        if (DEBUG == TRUE)  cli::cli_alert_info("Creating remoteDriver in {time_wait}s")
+        if (DEBUG == TRUE) cli::cli_alert_info("Creating remoteDriver in {time_wait}s")
         Sys.sleep(time_wait)
       } else if (errored == TRUE) {
         if (DEBUG == TRUE) cli::cli_alert_warning("Error creating remoteDriver. Retrying in {time_wait}s")
@@ -131,7 +125,7 @@ create_remDr <-
       remDr$closeall()
       
       # OPEN browser
-      remDr$open(silent = !DEBUG)
+      remDr$open(silent = TRUE) #!DEBUG
       
     }
     
@@ -150,8 +144,6 @@ create_remDr <-
         stop()
       }
     }
-    # remDr$closeall()
-  
 
 
   # OUTPUT ------------------------------------------------------------------

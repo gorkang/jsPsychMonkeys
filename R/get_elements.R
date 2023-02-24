@@ -181,58 +181,27 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     if (length(ID_names) != 0) list_elements_ids = 1:length(ID_names) %>% map(~ remDr$findElements(using = 'id', value = ID_names[.x])) %>% setNames(ID_names) %>% unlist()
     if (length(ID_names) != 0) list_elements_names = 1:length(ID_names) %>% map(~ remDr$findElements(using = 'name', value = ID_names[.x])) %>% setNames(ID_names) %>% unlist()
     if (length(ID_names) != 0) list_elements_class = 1:length(ID_names) %>% map(~ remDr$findElements(using = 'class', value = ID_names[.x])) %>% setNames(ID_names) %>% unlist()
+
     
+    # Combine all elements in a single list: list_elements
     if (any(exists("list_elements_ids") | exists("list_elements_names") | exists("list_elements_class"))) {
+      
       list_elements = c(list_elements_ids, list_elements_names, list_elements_class) 
+      
+    # Does not find anything other than a DIV
+    } else if (length(DIV_names) > 0 & !any(exists("list_elements_ids") | exists("list_elements_names") | exists("list_elements_class"))) {
+      
+      # cli::cli_alert_info("Only a DIV element found: {.code {DIV_names}}\nThis usually means the protocol is starting or has finished")
+      list_elements = 1:length(DIV_names) %>% map(~ remDr$findElements(using = 'id', value = DIV_names[.x])) %>% setNames(DIV_names) %>% unlist()
+
     } else {
       
-      if (length(DIV_names) == 0) {
-        
-        list_elements = NULL  
-        
-      # We don't get inputs of buttons but we get a div. Usually a mesage about no quota, or already completed
-      } else if (length(DIV_names) != 0 & try_number > 6) { # IF nothing but a div, and we tried a few times, then must be an end message
-        
-        cli::cli_alert_info("Only a DIV element found: {.code {DIV_names}}")
-        list_elements = list(remDr$findElements(using = 'id', value = DIV_names[1])) %>% setNames(DIV_names) %>% unlist()
-        
-      } else {
-        
-        list_elements = NULL  
-        
-      }
+      list_elements = NULL  
       
     }
+      
+    
 
-
-    # Already completed -------------------------------------------------------
-    
-    # TODO: We have this here, "Detect last screen" below... join all this in a single chunk
-    already_completed_strings = c("El participante ya completó el protocolo|The participant already completed the protocol")
-    already_completed = any(grepl(already_completed_strings, DF_elements_options |> as_tibble() |> pull(content)))
-    if(already_completed){
-      if (DEBUG == TRUE) cli::cli_h1(cli::col_green("[[Protocol already completed]]"))
-      list_elements = NA
-    }
-      
-    
-    
-    # CHECK if we found any elements. The parameter try_number is set in complete_task.
-    if (length(list_elements) == 0 & try_number < 11) {
-      
-      if (DEBUG == TRUE) cli::cli_alert_warning("WARNING: No elements extracted on try {try_number}...")
-      stop("No elements found") # THIS IS NEEDED because the safe call to get_elements expects an error!!!
-      
-    } else if (length(list_elements) == 0) {
-      if (DEBUG == TRUE) cli::cli_alert_warning("Last WARNING: No elements extracted on try {try_number}...")
-      
-      # THIS SHOULD MARK THE END OF THE EXPERIMENT? continue = FALSE???
-      # if (DEBUG == TRUE) saveRDS(DF_elements_options_raw, "outputs/errors/no_elements.rds"); cli::cli_alert_warning("WARNING: No elements extracted on try {try_number}... [will end experiment]. See 'outputs/errors/no_elements.csv'")
-      stop("No elements found #2") 
-      
-    } else {
-      if (DEBUG == TRUE) cli::cli_alert_info("{length(list_elements)} elements extracted: {.code {names(list_elements)}}")
-    }
 
   
   # Inputs, buttons, status -------------------------------------------------
@@ -245,45 +214,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     # Back to tibble so we can look inside
     DF_elements_options = DF_elements_options |> as_tibble()
     
-    
-  # Detect last screen  -----------------------------------------------------
-
-    finish_study_strings = c("FINALIZAR ESTUDIO|FINISH STUDY")
-    last_screen = any(grepl(finish_study_strings, name_buttons$content))
-    if(length(last_screen) > 0){
-      if (DEBUG == TRUE & last_screen == TRUE) cli::cli_h1(cli::col_green("[[FINISH STUDY screen]]"))
-    }
-    
-    
-  # DETECT status. CONTINUE or NOT -------------------------------------------
-
-    # TODO: This should be a separate function, called from complete_task()
-    
-    if (length(ID_names) == 1 & all(ID_names == c("jspsych-fullscreen-btn"))) {
-      # Initial FULLSCREEN
-      if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::yellow("[SCREEN]", paste0("[-]"), ":"), crayon::silver(paste0(paste("Fullscreen button")), "\n")))
-      
-      DF_elements_options$status = "start"
-      continue = TRUE
-
-    } else if (length(list_elements) == 0 | length(ID_names) == 0) {
-      
-      if (DEBUG == TRUE) cli::cli_h1(cli::col_green("[[END OF EXPERIMENT]]"))  
-      continue = FALSE
-  
-    } else if (length(ID_names) == 1 & "jspsych-html-keyboard-response-stimulus" %in% DF_elements_options$id & !"button" %in% DF_elements_options$type_extracted) {
-      # No button, need to press a specific key
-      continue = TRUE
-    } else if (length(ID_names) == 1 & "jspsych-content" %in% DF_elements_options$id & !"button" %in% DF_elements_options$type_extracted) {
-      
-      if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgYellow("\n[[END OF EXPERIMENT2]]\n")))
-      continue = FALSE
-
-    } else  {
-      # Keep going!
-      continue = TRUE
-      
-    }
+   
     
   
   # Create output list -----------------------------------------------------
@@ -292,7 +223,9 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
                            name_contents = name_contents,
                            name_inputs = name_inputs,
                            name_buttons = name_buttons,
-                           continue = continue)
+                           # continue = continue,
+                           ID_names = ID_names,
+                           DIV_names = DIV_names)
 
   return(list_get_elements)
 

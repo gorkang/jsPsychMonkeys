@@ -21,7 +21,7 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
     selected_input_name = selected_input$id
     
     # Add columns if they don't exist
-    cols <- c(pattern = NA_character_)
+    cols <- c(pattern = NA_character_, value = NA_character_)
     selected_input = selected_input %>% tibble::add_column(!!!cols[!names(cols) %in% names(.)]) 
     
     # if (DEBUG == TRUE) cat(crayon::yellow("Selected", selected_input_name, "from", nrow(list_get_elements$name_inputs), "elements \n"))
@@ -87,6 +87,8 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
   } else if (any(selected_input$type_extracted %in% c("checkbox")) & !grepl("multi-select", selected_input$id)) {
     
     input_text = selected_input_name
+    # input_text_human_readable = destination_slider
+
     
     list_get_elements$list_elements[[selected_input_name]]$clickElement()
     
@@ -183,37 +185,25 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
     
   } else if (any(selected_input$type_extracted %in% c("radio"))) {
     
-    # Click 1
-    # input_text = selected_input_name
-    # list_get_elements$list_elements[[selected_input_name]]$clickElement()
-    # 
-    # # CLick 2
-    # selected_input = list_get_elements$name_inputs[sample(1:nrow(list_get_elements$name_inputs), 1),]
-    # selected_input_name = selected_input$id
-    # input_text = selected_input_name
-    # list_get_elements$list_elements[[selected_input_name]]$clickElement()
-    
-    
-  
-    
     radio_groups = unique(list_get_elements$name_inputs$name)
     # list_get_elements$name_inputs
     
-    1:length(radio_groups) %>% 
-      purrr::walk( ~ {
+    selected_input = 1:length(radio_groups) %>% 
+      purrr::map_df( ~ {
         temp_list_get_elements = list_get_elements$name_inputs %>% filter(name == radio_groups[.x])
         
         selected_input = temp_list_get_elements[sample(1:nrow(temp_list_get_elements), 1),]
         selected_input_name = selected_input$id
-        input_text = selected_input_name
+        input_text_human_readable = selected_input$value
         list_get_elements$list_elements[[selected_input_name]]$clickElement()
+        
+        selected_input |> mutate(input_text = selected_input_name,
+                                 input_text_human_readable = input_text_human_readable)
         
       })
     
-    
-    input_text = selected_input_name
-    list_get_elements$list_elements[[selected_input_name]]$clickElement()
-    
+    input_text = selected_input |> pull(input_text)
+    input_text_human_readable = selected_input |> pull(input_text_human_readable)
     
 
     
