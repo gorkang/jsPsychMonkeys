@@ -134,7 +134,7 @@ complete_task <-
           while (!continue_elements) {
               
             # Increase wait with each retry
-            wait_retry_loop = wait_retry_loop + (try_number/5)
+            wait_retry_loop = wait_retry_loop + (try_number/10)
             if (try_number > 1) Sys.sleep(wait_retry_loop)
             
             # Last chance, take 3 extra seconds to give things time to load
@@ -153,8 +153,17 @@ complete_task <-
             # CHECKS
             if (!is.null(list_get_elements$error)) cli::cli_alert_danger("ERROR on get_elements_safely()")
             if (DEBUG == TRUE & continue_elements == FALSE & try_number < 10) cli::cli_alert_warning("WARNING: No input|button elements extracted on try {try_number}/10. Retrying in {wait_retry_loop} sec.")
-            if (continue_elements == FALSE & try_number == 10) cli::cli_alert_danger("Tried {try_number} times but could not find elements. Stopping")
             
+            # Last try, show console errors
+            if (continue_elements == FALSE & try_number == 10) {
+              cli::cli_alert_danger("Tried {try_number} times but could not find elements. Stopping")
+              browser_console = remDr$log(type = "browser")
+              if (length(browser_console) > 0) browser_console_clean = browser_console |> bind_rows() |> filter(level == "SEVERE") |> pull(message)
+              if (length(browser_console_clean) > 0) cli::cli_alert_danger("Browser console: \n{.code {browser_console_clean}}")
+              continue_elements = TRUE # Get out of the while loop
+              continue = FALSE # Stop the task
+              }
+
             try_number = try_number + 1
           }
             
@@ -228,7 +237,7 @@ complete_task <-
           }
           
         # Output of while
-        # continue = list_get_elements$continue
+        # continue
         index = index + 1
         index_task = index_task + 1
         
