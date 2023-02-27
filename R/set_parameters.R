@@ -64,8 +64,8 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
                            initial_wait = 2,
                            wait_retry = .1,
                            forced_random_wait = FALSE,
-                           forced_refresh = NULL,
-                           forced_seed = NULL) {
+                           forced_refresh = FALSE,
+                           forced_seed = 11) {
   
   # DEBUG
   # parameters_monkeys = parameters_monkeys_minimal
@@ -92,9 +92,9 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
 
   necessary_folders = c(".vault", "outputs/DF", "outputs/log", "outputs/screenshots", "outputs/source")
   if (all(necessary_folders %in% dir(recursive = TRUE, include.dirs = TRUE, all.files = TRUE))) {
-    cat(crayon::green("All the necessary folders are present\n"))
+    if (DEBUG == TRUE) cat(crayon::green("All the necessary folders are present\n"))
   } else {
-    cat(crayon::yellow("Creating necessary folders: "), paste(necessary_folders, collapse = ", "), "\n")
+    if (DEBUG == TRUE) cat(crayon::yellow("Creating necessary folders: "), paste(necessary_folders, collapse = ", "), "\n")
     invisible(purrr::map(necessary_folders, dir.create, recursive = TRUE, showWarnings = FALSE))
   }
   

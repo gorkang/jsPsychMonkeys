@@ -13,7 +13,7 @@ create_docker <-
     # targets::tar_load_globals()
     # debug_function("create_docker")
     
-    cli::cli_h1("UID: {uid}")
+    if (DEBUG == TRUE) cli::cli_h1("UID: {uid}")
     
 # Packages -------------------------------------------------------------
   suppressMessages(suppressWarnings(library(RSelenium)))
@@ -233,8 +233,8 @@ create_docker <-
         #   )
       }
       
-      cli::cli_h1("Running DOCKER")
-      cli::cli_alert(DOCKER_run)
+      if (DEBUG == TRUE) cli::cli_h1("Running Docker")
+      if (DEBUG == TRUE) cli::cli_alert(DOCKER_run)
       
       system(DOCKER_run)
 

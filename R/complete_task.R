@@ -28,7 +28,7 @@ complete_task <-
     # remDr = remote_driver$remDr
     
     
-  cli::cli_h1("Completing tasks")
+  if (DEBUG == TRUE) cli::cli_h1("Completing tasks")
     
   # Check which parameters were entered in parameters_monkeys -----------------
     
@@ -120,7 +120,7 @@ complete_task <-
         
         ### Get elements of website ----------------------------
         
-          cli::cli_h2("Getting elements")
+          if (DEBUG == TRUE) cli::cli_h2("Getting elements")
           try_number = 1
           wait_retry_loop = wait_retry # Reset to initial value
           continue_elements = FALSE
@@ -171,7 +171,7 @@ complete_task <-
       
               ### Interact with the elements we found ------------------
                 
-                cli::cli_h2("Interacting with elements")
+                if (DEBUG == TRUE) cli::cli_h2("Interacting with elements")
                 # seed = (forced_seed_final + index) is critical so there is some variation in case a specific response is needed to continue (e.g. BART)
               
                   # SEED ---------
