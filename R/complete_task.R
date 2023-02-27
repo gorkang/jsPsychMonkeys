@@ -125,12 +125,7 @@ complete_task <-
           wait_retry_loop = wait_retry # Reset to initial value
           continue_elements = FALSE
           
-          # list_get_elements = list(result = list(list_elements = NULL))
-          # list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = 1, DEBUG = DEBUG)
-          # O ES NULL O SOLO TENEMOS `jspsych-content`
           
-          # while (!is.null(list_get_elements$error)) {
-          # while (is.null(list_get_elements$result$list_elements)) {
           while (!continue_elements) {
               
             # Increase wait with each retry
@@ -147,8 +142,10 @@ complete_task <-
             # When there is not an error, the content is in result
             list_get_elements = list_get_elements$result
             
-            # Check list_get_elements, show messages, and determine if we should continue
-            continue_elements = process_elements(list_get_elements = list_get_elements, try_number = try_number, DEBUG = DEBUG)
+            # Check list_get_elements, show messages, and determine if we should continue getting elements and/or move to the next task
+            OUTPUT_process_elements = process_elements(list_get_elements = list_get_elements, try_number = try_number, DEBUG = DEBUG)
+            continue_elements = OUTPUT_process_elements$continue_elements
+            continue = OUTPUT_process_elements$continue
             
             # CHECKS
             if (!is.null(list_get_elements$error)) cli::cli_alert_danger("ERROR on get_elements_safely()")
@@ -160,7 +157,7 @@ complete_task <-
               browser_console = remDr$log(type = "browser")
               if (length(browser_console) > 0) browser_console_clean = browser_console |> bind_rows() |> filter(level == "SEVERE") |> pull(message)
               if (length(browser_console_clean) > 0) cli::cli_alert_danger("Browser console: \n{.code {browser_console_clean}}")
-              continue_elements = TRUE # Get out of the while loop
+              continue_elements = TRUE # Get out of the while loop # TODO: Shouldn't this be FALSE?: while (!continue_elements) seems to be reversed
               continue = FALSE # Stop the task
               }
 
@@ -168,7 +165,6 @@ complete_task <-
           }
             
 
-    
           # If we must continue
           if (continue_elements == TRUE) {
             

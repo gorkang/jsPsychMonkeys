@@ -1,5 +1,6 @@
 process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
   
+  continue = TRUE # By default, should continue in the task while loop
   name_buttons = list_get_elements$name_buttons
   ID_names = list_get_elements$ID_names
   # DIV_names = list_get_elements$DIV_names
@@ -30,24 +31,34 @@ process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
 
   
   # CHECK if we found any elements. The parameter try_number is set in complete_task.
+  # if(already_completed){
+  #   
+  #   if (DEBUG == TRUE) cli::cli_h1(cli::col_green("[[Protocol already completed]]"))
+  #   list_elements = list(completed = "protocol already completed")
+  #   ID_names = ""
+  #   
+  # } else {
+    if (DEBUG == TRUE) cli::cli_alert_info("{length(list_elements)} elements extracted: {.code {names(list_elements)}}")
+  # }
+  
+  
+
+  # DETECT status ---------------------------------------------------------
+  
+  # continue_elements = TRUE: proceed to interact with element
+  # continue_elements = FALSE: keep on trying to extract elements!
+  
+  
   if(already_completed){
     
     if (DEBUG == TRUE) cli::cli_h1(cli::col_green("[[Protocol already completed]]"))
-    list_elements = list(completed = "protocol already completed")
-    ID_names = ""
+    continue_elements = TRUE
+    continue = FALSE
     
-  } else {
-    if (DEBUG == TRUE) cli::cli_alert_info("{length(list_elements)} elements extracted: {.code {names(list_elements)}}")
-  }
-  
-  
-
-  # DETECT status. CONTINUE or NOT -------------------------------------------
-  
-  
-
-  if (length(ID_names) == 1 & all(ID_names == c("jspsych-fullscreen-btn"))) {
-    # Initial FULLSCREEN
+    
+  # Initial FULLSCREEN
+  } else if (length(ID_names) == 1 & all(ID_names == c("jspsych-fullscreen-btn"))) { 
+    
     if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::yellow("[SCREEN]", paste0("[-]"), ":"), crayon::silver(paste0(paste("Fullscreen button")), "\n")))
     
     DF_elements_options$status = "start"
@@ -58,10 +69,12 @@ process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
     if (any(grepl("Cargando protocolo", content_screen))) cli::cli_alert_info("Loading protocol")
     continue_elements = FALSE # try again to get content!
     
+  # END of experiment
   } else if (try_number == 10 & (length(list_elements) == 0 | length(ID_names) == 0)) {
     
     if (DEBUG == TRUE) cli::cli_h1(cli::col_green("[[END OF EXPERIMENT]]"))  
     continue_elements = FALSE
+    continue = FALSE
     
   } else if (length(ID_names) == 1 & "jspsych-html-keyboard-response-stimulus" %in% DF_elements_options$id & !"button" %in% DF_elements_options$type_extracted) {
     # No button, need to press a specific key
@@ -70,6 +83,7 @@ process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
     
     if (DEBUG == TRUE) cli::cli_h1(cli::col_magenta("[[END OF EXPERIMENT - B]]"))  
     continue_elements = FALSE
+    continue = FALSE
     
   } else {
     
@@ -78,6 +92,13 @@ process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
     
   }
   
-  return(continue_elements)
+  
+
+  # Output ---
+
+  OUTPUT = list(continue_elements = continue_elements,
+                continue = continue)
+  
+  return(OUTPUT)
   
 }
