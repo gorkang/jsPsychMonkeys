@@ -5,7 +5,7 @@
 \title{check_accept_alert
 Safely checks if there in an alert and accepts it}
 \usage{
-check_accept_alert(wait_retry, remDr)
+check_accept_alert(wait_retry = 0.5, remDr, DEBUG)
 }
 \description{
 check_accept_alert

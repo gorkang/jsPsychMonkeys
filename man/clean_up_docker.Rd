@@ -10,9 +10,9 @@ clean_up_docker(
 )
 }
 \arguments{
-\item{container_name}{}
+\item{container_name}{name of the container}
 
-\item{parameters_monkeys}{}
+\item{parameters_monkeys}{parameters_monkeys list}
 }
 \description{
 Cleans up docker container
