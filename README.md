@@ -12,44 +12,37 @@ The goal of this package is to simplify testing a jsPysch experiment, generating
 jsPsychMonkeys can run local or online experiments. You can launch as many participants as you want (laws of Physics and time constraints for virtual Monkey's labour still apply), including a parallel horde (your number of CPU cores are the limit). You can also ask the monkeys to take a screenshot of every screen they see, etc.
 
 
-## How to use it
+## How to use
+
+First, install the jsPsychMonkeys package:
+
+```
+if (!require('remotes')) utils::install.packages('remotes'); remotes::install_github('gorkang/jsPsychMonkeys')
+```
+
+Then, to create and configure an RStudio project to release Monkeys:
 
 ---  
 
-#### 1) Download the jsMonkeys project
-
-To download this project to your computer:  
+Use the `folder` parameter to select a specific folder for the RStudio project  
+Use the `uid` parameter to set a number of participants, e.g. `uid = "1:10"` would launch monkeys 1 to 10
+Use the `local_folder_tasks` parameter to indicate the location of the jsPsychMakeR protocol
 
 ```
-if (!require('usethis')) install.packages('usethis'); library('usethis')
-usethis::use_course("https://github.com/gorkang/jsPsychMonkeys")
+jsPsychMonkeys::create_monkeys_project(folder = "~/Downloads/Monkeys/", 
+                                       uid = "1:10", 
+                                       local_folder_tasks = "~/Downloads/new_protocol/")
+
 ```
-
----  
-
-#### 2) Setup
-
-Install the dependencies (see packages used in `_targets_packages.R`) and make sure you have all the necessary folders:  
-
-`source("setup.R")`  
-
+  
 ---  
 
 
-#### 3) Parameters
-
-Edit the `Parameters` section of the `_targets.R` file. The minimal set of parameters needed are:  
-
-```
-parameters_monkeys_minimal = list(
-  uid = 1:10, # User id's for the participants. 
-  local_folder_tasks = "Downloads/tests/2" # Location of your jsPsych protocol
-)
-```
-
 ---  
 
-#### 4) Release the Monkeys! 
+## Release the Monkeys! 
+
+In the new RStudio project.
 
 If you want a sequential process: 
 

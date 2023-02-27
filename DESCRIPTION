@@ -1,9 +1,41 @@
 Package: jsPsychMonkeys
 Title: Release monkeys to a jsPsych experiment using the R package {targets}, docker and {RSelenium}.
-Version: 0.2.0
-Date: 2021-10-20
+Version: 0.2.5
+Date: 2023-02-27
 Authors@R: c(person("Gorka", "Navarrete", email = "gorkang@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7678-8656")))
+Description: Release monkeys to a jsPsych experiment using the R package {targets}, docker and {RSelenium}.
 Maintainer: Gorka Navarrete <gorkang@gmail.com>
 License: MIT + file LICENSE
 URL: https://github.com/gorkang/jsPsychMonkeys
 BugReports: https://github.com/gorkang/jsPsychMonkeys/issues
+Depends: 
+    R (>= 4.2.0)
+Imports: 
+    callr,
+    cli, 
+    dplyr, 
+    glue,
+    here, 
+    magrittr, 
+    purrr, 
+    renv, 
+    rlang,
+    rmarkdown, 
+    rstudioapi,
+    stringr, 
+    stringi,
+    tarchetypes, 
+    targets, 
+    tibble, 
+    tidyr
+Suggests: 
+    knitr,
+    testthat (>= 3.0.0),
+    visNetwork, 
+    webshot,
+    writexl, 
+    xml2
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
+Config/testthat/edition: 3

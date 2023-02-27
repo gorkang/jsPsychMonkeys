@@ -1,50 +1,50 @@
 #' check_trialids
 #'
 #'Checks that trialid's of an experiment in a folder follow the stantard expected rules
-#' @param local_folder_tasks 
+#' @param local_folder_tasks
 #'
 #' @return
 #' @export
 #'
 #' @examples
 check_trialids <- function(local_folder_protocol) {
-  
+
   suppressMessages(suppressWarnings(library(dplyr)))
   suppressMessages(suppressWarnings(library(purrr)))
   suppressMessages(suppressWarnings(library(readr)))
-  
+
   scripts = dir(path = paste0(local_folder_protocol, "/tasks"), pattern = ".js", recursive = TRUE, full.names = TRUE)
   if (length(scripts) == 0) stop(paste("Can't find anything in ", local_folder_protocol))
-  
+
   find_trialids <- function(file_name) {
-    
-    script = read_file(file_name) 
+
+    script = read_file(file_name)
     expres = ".*?trialid: '(.*?)'.*?"
     trialid = gsub(expres, "\\1; \n", script) %>% gsub("^(.*; \n).*", "\\1", .) %>% gsub(";", "", .) %>% gsub(" number \n", "", .)
     if (grepl("This document was made with test_maker", trialid)) trialid = ""
-    strsplit(trialid, " \n")[[1]] %>% as_tibble() %>% 
-      mutate(file = file_name) %>% 
-      rename(trialid = value) %>% 
+    strsplit(trialid, " \n")[[1]] %>% as_tibble() %>%
+      mutate(file = file_name) %>%
+      rename(trialid = value) %>%
       filter(!grepl("^Instructions|^Instructions_[0-9]{2}|^Fullscreen", trialid))
-    
+
   }
-  
-  
+
+
   DF_all_trialids = map_df(scripts, find_trialids)
-  
+
   rule_check_trialids = "^[a-zA-Z0-9]{1,100}_[0-9]{2,3}$|^[a-zA-Z0-9]{1,100}_[0-9]{2,3}_[0-9]{1,3}$" # NAME_001, NAMEexperiment_001_1
-  DF_problematic_trialids = 
-    DF_all_trialids %>% 
-    filter(!grepl(rule_check_trialids, trialid)) %>% 
-    mutate(experiment = basename(file)) %>% 
+  DF_problematic_trialids =
+    DF_all_trialids %>%
+    filter(!grepl(rule_check_trialids, trialid)) %>%
+    mutate(experiment = basename(file)) %>%
     select(-file)
-  
+
   if (nrow(DF_problematic_trialids) > 0) {
-    
-    cat(crayon::red(nrow(DF_problematic_trialids), "ISSUES:\n"), 
+
+    cat(crayon::red(nrow(DF_problematic_trialids), "ISSUES:\n"),
         "- experiment:", paste(DF_problematic_trialids %>% pull(experiment), collapse = ", "), "\n",
         "- trialid:   ", paste(DF_problematic_trialids %>% pull(trialid), collapse = ", "), "\n")
-    
+
   } else {
     cat(crayon::green("All trialid's look great!\n"))
   }
@@ -59,23 +59,23 @@ check_trialids <- function(local_folder_protocol) {
 #'
 #' @examples
 check_accept_alert <- function(wait_retry, remDr) {
-  
+
   get_alert <- function(variables) {
-    MESSAGE = remDr$getAlertText()  
+    MESSAGE = remDr$getAlertText()
     remDr$acceptAlert()
     return(MESSAGE)
   }
-  
+
   get_alert_safely = purrr::safely(get_alert)
   RESP = suppressMessages(get_alert_safely())
   while (!is.null(RESP$result)) {
     if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::yellow("[Alert] found, waiting", wait_retry, "seconds: ", crayon::silver(RESP[[1]]), "\n")))
     Sys.sleep(wait_retry)
-    
+
     RESP = suppressMessages(get_alert_safely())
   }
-  
-  
+
+
 }
 
 
@@ -90,7 +90,7 @@ check_accept_alert <- function(wait_retry, remDr) {
 #'
 #' @examples reconnect_to_VNC("test1")
 reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = NULL, DEBUG = FALSE) {
-  
+
   # DEBUG
   # targets::tar_load_globals()
   # debug_function("complete_task")
@@ -98,78 +98,78 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
   # just_check = TRUE
   # port = NULL
   # DEBUG = TRUE
-    
+
   if (is.null(container_name)) {
     # List containers
-    
+
     system('docker ps -a --format "{{.Names}}"', intern = TRUE) # Print container names
-    
+
   } else {
-    
+
     if (just_check == TRUE) {
       # Check if container exists
-    
-      # Outputs the name of the container if it exists, NULL otherwise  
+
+      # Outputs the name of the container if it exists, NULL otherwise
       containers_available = system('docker ps -a --format "{{.Names}}"', intern = TRUE) # Print container names
-      
+
       if (!container_name %in% containers_available) {
         NULL
       } else {
         container_name
       }
-      
-      
+
+
     } else {
       # Connect to container
       # If container is a debug container, we can connect
       if (any(grepl("debug", system('docker ps -a --format "{{.Image}}"', intern = TRUE)))) {
 
         if (!is.null(port)) {
-          
+
           container_port = port
-          
-        } else { 
-          
+
+        } else {
+
           # Get container port
           container_port_raw <- system(sprintf('docker port %s', container_name), intern = TRUE)
           container_port_raw_clean = container_port_raw[grepl(".*0.0.0.0:([0-9]{5})$", container_port_raw)]
-          
+
           container_ports_found = as.integer(gsub('.*:(.*)$', '\\1', container_port_raw_clean))
           if (length(container_ports_found) > 2) cli::cli_alert_warning("Multiple ports found: {container_ports_found}. \n - If the VNC command suplied below does not work, try the other ports.")
           container_port <- min(container_ports_found)
           if (is.na(container_port[1])) cat(crayon::red("Port not found?"))
-          
+
         }
-        
+
         # Open VNC, using second port in container_port, the password is 'secret'
         if (Sys.info()["sysname"] == "Windows") {
           vnc_program = '"C:/Program Files/RealVNC/VNC Viewer/vncviewer.exe"'
           end_command = ""
         } else {
-          vnc_program = "vncviewer"  
+          vnc_program = "vncviewer"
           end_command = " &"
-          
+
         }
-        
+
         vnc_command = paste0(vnc_program, ' 127.0.0.1:', container_port)
-        
-        
+
+
         # cat(crayon::yellow(paste0("\nOpen VNC | localhost:", container_port, " | pwd: secret\n"), crayon::black(vnc_command, "\n")))
         cli::cli_alert_info("Open VNC | localhost: {container_port} | pwd: secret")
         cli::cli_alert_info("In a terminal: {.code {vnc_command}}")
-        
+
         # if (DEBUG == TRUE) cat(crayon::silver(" \nDEBUG:", container_port_raw), "\n\n")
         if (DEBUG == TRUE) cli::cli_alert_info("DEBUG: {paste(container_port_raw, sep = '\n')}")
-        
+
         # If Using callr::r_bg() or callr::r() ERROR in task target
         # TODO: This could run with Windows if VNCviewer is installed
         if (Sys.info()["sysname"] != "Windows") system(paste0(vnc_command, end_command))
 
-        
+
       } else {
-        
+
         cat(crayon::bgRed("Docker container NOT in debug mode.\n"), crayon::silver("To connect, a container needs to be launched with the DEBUG=TRUE in _targets.R\n\n"))
-        
+
       }
     }
   }
@@ -179,24 +179,24 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
 
 #' debug_docker
 #'
-#' @param uid_participant 
+#' @param uid_participant
 #'
 #' @return
 #' @export
 #'
 #' @examples debug_docker(24000)
 debug_docker <- function(uid_participant) {
-  
+
   # DEBUG
   # uid_participant = 92
   # parameters_monkeys = parameters_monkeys
-  
+
   # suppressMessages(source(shrtcts::locate_shortcuts_source()))
   suppressMessages(source(here::here("_targets.R")))
 
   targets::tar_load(parameters_monkeys)
   source("R/main_parameters.R")
-  
+
   # Extract parameters from parameters_monkeys
   # DEBUG <<- parameters_debug$debug$DEBUG
   # screenshot <<- parameters_debug$debug$screenshot
@@ -204,136 +204,136 @@ debug_docker <- function(uid_participant) {
   # open_VNC <<- parameters_debug$debug$open_VNC
   # parameters_task <<- parameters_debug
   # uid <<- uid_participant
-  
-  
-  # targets::tar_manifest() 
+
+
+  # targets::tar_manifest()
   # targets::tar_meta()
-  
+
   container_name_tar <- paste0("container_", uid_participant)
   container_name <<- paste0("container", uid_participant)
   driver_name <<- paste0("remote_driver_", uid_participant)
   targets::tar_load(eval(container_name_tar))
   targets::tar_load(eval(driver_name))
   remDr <<- get(driver_name)$remDr
-  
+
   cli::cli_alert_info("Loaded {container_name_tar}")
-  
+
 }
 
 
 
 #' debug_function
-#' 
+#'
 #' Loads the parameters used in the functions present in _targets.R to make debugging easier
 #'
-#' @param name_function 
+#' @param name_function
 #'
 #' @return
 #' @export
 #'
 #' @examples
 debug_function <- function(name_function, uid = NULL) {
-  
+
   # DEBUG
   # name_function = "create_docker"
-  
+
   # Function to tar_load or assign the parameters
   load_parameters <- function(parameters_function_separated, NUM) {
-    
+
     # NUM = 4
     parameter = parameters_function_separated[[NUM]]
     parameter_1 = gsub("\\n", "", parameter[1])
     parameter_2 = gsub("\\n", "", parameter[2])
-    
+
     if (is.na(parameter_2)) {
       cli::cli_alert_info("processing {.code {parameter}}")
     } else {
       cli::cli_alert_info("processing {.code {parameter_1} = {parameter_2}}")
     }
 
-    
+
     # A single parameter e.g. parameters_monkeys (must be an existing object)
     if (length(parameter) == 1) {
-      
+
       targets::tar_load(all_of(existing_object), envir = .GlobalEnv)
-      
+
     # A parameter with "=" e.g: pid = 999
     } else if (length(parameter) == 2) {
-      
+
       # If parameter_2 is an existing object, load
       existing_object = parameter_2[parameter_2 %in% tar_objects()]
-      
+
       # If it's in tar_objects(), load
       if (length(existing_object) == 1) {
-        
+
         targets::tar_load(all_of(existing_object), envir = .GlobalEnv)
         assign(parameter_1, eval(parse(text = parameter_2)), envir = .GlobalEnv)
-        
+
       } else {
-        
-      # If the variable contains $, it is a list, so load the actual value stored      
+
+      # If the variable contains $, it is a list, so load the actual value stored
       if (grepl("\\$", parameter_2)) {
-        
+
         assign(parameter_1, eval(parse(text = parameter_2)), envir = .GlobalEnv)
-        
+
       # Else, just assign it
       } else {
-        
+
         assign(parameter_1, parameter_2, inherits = TRUE, envir = .GlobalEnv)
-      
+
       }
-      
-      
+
+
       }
     }
   }
-  
-  
+
+
   # Makes possible to use prepare_TASK or "prepare_TASK"
   if (substitute(name_function) != "name_function") name_function = substitute(name_function) #if (!interactive()) is so substitute do not overwrite name_function when in interactive mode
-  
+
   # Parses _targets.R
   # code <- parse("_targets.R")
   # if (file.exists("targets/targets_main.R")) code <- c(code, parse("targets/targets_main.R"))
-  
+
   # Finds the chunk where name_function is, and cleans the "\"
   # text_targets = grep(name_function, code, value = TRUE) %>% gsub("[^A-Za-z0-9\\(\\),_= ]", "", .)
-  
+
   # Gets and separates then parameters of the function
   # parameters_function_raw = gsub(paste0(".*", name_function, "\\((.*?)).*"), "\\1", text_targets) %>% gsub(" ", "", .)
-  
+
   # if (length(parameters_function_raw) > 0) {
-    
+
     # parameters_function_separated = strsplit(parameters_function_raw, ",") %>% unlist() %>% strsplit(., "=")
-  
-  # If there are multiple uid's we need a way to filter   
+
+  # If there are multiple uid's we need a way to filter
   if (is.null(uid)) uid = "*"
-  
-  DF_function = targets::tar_manifest() %>% filter(grepl(name_function, command)) %>% 
-    filter(grepl(uid, name)) |> 
+
+  DF_function = targets::tar_manifest() %>% filter(grepl(name_function, command)) %>%
+    filter(grepl(uid, name)) |>
     pull(command) %>% last()
-  
+
   if (!is.na(DF_function)) {
-  
+
     string_function = gsub(name_function, "", DF_function) %>% gsub(" |\\\\n|\\(|\\)", "", .)
     LOADME = stringr::str_extract_all(string_function, "=.*?[,\\$]", simplify = TRUE) %>% gsub("\\$|,|=", "", .) %>% as.vector() %>% unique()
     existing_objects = LOADME[LOADME %in% tar_objects()]
     if (length(existing_objects) > 0) tar_load(all_of(existing_objects))
 
     parameters_function_separated = strsplit(string_function, ",") %>% unlist() %>% strsplit(., "=")
-    
+
     # For each of the parameters, applies the load_parameters() function
-    seq_along(parameters_function_separated) %>% 
-      walk(~ 
+    seq_along(parameters_function_separated) %>%
+      walk(~
              load_parameters(parameters_function_separated, NUM = .x)
            )
-    
+
     cat(crayon::green("Loaded: "), gsub(",", ", ", name_function), "\n")
-    
+
   } else {
-    
+
     cat(crayon::red(paste0("'", name_function, "'", "not found in _targets.R")), "\n")
-    
+
   }
 }
 
@@ -341,23 +341,23 @@ debug_function <- function(name_function, uid = NULL) {
 
 
 #' tar_make_future_rowwise
-#' 
+#'
 #' Makes tar_make_future() work row-wise by assigning priorities to targets using their uid. This allows you to run as many participants as you want, avoiding memory issues.
 #'
-#' @param TARGETS 
-#' @param parameters_monkeys 
+#' @param TARGETS
+#' @param parameters_monkeys
 tar_make_future_rowwise <- function(TARGETS, uids) {
-  
+
   # TODO: The number in TARGETS[[2]] depends on the position of the tar_map() target!
-  
+
   assign_priority <- function(uid, target_name) {
     # browser()
     uid_container = gsub(".*_(.*)", "\\1", TARGETS[[2]][[target_name]][[uid]][["settings"]][["name"]])
     prioriry_container = as.numeric(uid_container) / max(uids)
     TARGETS[[2]][[target_name]][[uid]][["settings"]][["priority"]] = prioriry_container
-    
+
   }
-  
+
   1:length(uids) %>%
     walk(~{
       index_uid = .x
@@ -370,14 +370,14 @@ tar_make_future_rowwise <- function(TARGETS, uids) {
     })
 
   # TARGETS[[1]]$container[[1]]$settings$priority
-  
+
 }
 
 
 #' Check csv files in a folder
 #'
-#' @param pid 
-#' @param download_folder 
+#' @param pid
+#' @param download_folder
 #'
 #' @return
 #' @export
@@ -388,63 +388,63 @@ check_Downloads <- function(parameters_monkeys, uid = "", links_tar = "") {
   pid = parameters_monkeys$task_params$pid
   download_folder = parameters_monkeys$docker$folder_downloads
   local_or_server = parameters_monkeys$task_params$local_or_server
-  
+
   # Do this only in local protocols
   if (local_or_server == "local") {
-      
+
     # uid is used in copy_files_to_data so only that participant's data is copyied
-    cli::cli_alert_info(paste0("Looking for files for pid = {pid} and uid = {uid}"))
+    if (DEBUG == TRUE) cli::cli_alert_info(paste0("Looking for files for pid = {pid} and uid = {uid}"))
     files_downloaded = list.files(download_folder, pattern = paste0("^", pid, ".*", uid, "\\.csv"))
-    
+
     return(files_downloaded)
   }
-  
+
 }
 
 #' In local protocols, move the Downloaded csv to the data folder of the protocol
 #'
-#' @param pre_existing_CSV 
-#' @param parameters_monkeys 
-#' @param uid 
-#' @param task 
+#' @param pre_existing_CSV
+#' @param parameters_monkeys
+#' @param uid
+#' @param task
 #'
 #' @return
 #' @export
 #'
 #' @examples
 copy_files_to_data <- function(pre_existing_CSV, parameters_monkeys, uid, task = task) {
-  
+
   if (parameters_monkeys$task_params$local_or_server == "local") {
-    
+
     # Create data folder
     local_folder_tasks_data = paste0(parameters_monkeys$task_params$local_folder_tasks, "/.data")
     if(!dir.exists(local_folder_tasks_data)) dir.create(local_folder_tasks_data)
-    
+
     # Check final files in data folder
     final_files = check_Downloads(parameters_monkeys = parameters_monkeys, uid = uid)
-    
+
     # Prepare variables
     final_files_clean = final_files[!final_files %in% pre_existing_CSV]
-    
+
     if (length(final_files_clean) == 0) {
-      
+
       cli::cli_alert_warning("NO files to copy:
                              - pid is {parameters_monkeys$task_params$pid}
                              - uid is {uid}
                              - local folder is: {parameters_monkeys$task_params$local_folder_tasks}")
     }
-    
+
     from_files = paste0(parameters_monkeys$docker$folder_downloads, "/", final_files_clean)
     to_files = paste0(local_folder_tasks_data, "/", final_files_clean)
-    
+
     # Rename/Move to final location
     # cli::cli_alert_info("{from_files}, to {to_files}")
-    
+
     file.rename(from = from_files,
                 to = to_files)
-    
+
     cli::cli_alert_info("{length(final_files_clean)} files moved to {.code {local_folder_tasks_data}}")
-    
+
   }
 }
 
@@ -461,33 +461,33 @@ copy_files_to_data <- function(pre_existing_CSV, parameters_monkeys, uid, task =
 parse_elements <- function(what, page_source_rvest) {
   # what = "p"
   page_source_temp = page_source_rvest |> rvest::html_elements(what)
-  
+
   if (what == "textarea") what = "input" # We consider textarea a type of input
-  
+
   if (length(page_source_temp) > 0) {
-    
-    1:length(page_source_temp)  |>  
-      purrr::map_df(~ page_source_temp[[.x]]  |>   
-                      rvest::html_attrs() |> 
-                      dplyr::bind_rows() |> 
-                      dplyr::mutate(tag_name = what, 
-                                    content = 
+
+    1:length(page_source_temp)  |>
+      purrr::map_df(~ page_source_temp[[.x]]  |>
+                      rvest::html_attrs() |>
+                      dplyr::bind_rows() |>
+                      dplyr::mutate(tag_name = what,
+                                    content =
                                       page_source_temp[[.x]] |>
                                       rvest::html_text2() # Here the <big>TITLE</big> is lost
                                     )
                     )
-    
+
   } else {
     # cli::cli_alert_info("No {.code {what}} found")
     NULL
   }
-  
+
 }
 
 # Navigate to link
 launch_task <- function(links, wait_retry, remDr, DEBUG) {
   if (length(links) != 1) stop("links passed to remDr$navigate are != 1")
-  Sys.sleep(wait_retry) 
+  Sys.sleep(wait_retry)
   remDr$navigate(links)
 }
 
@@ -502,16 +502,16 @@ launch_task <- function(links, wait_retry, remDr, DEBUG) {
 #' @return Creates a _targets.R file
 #' @export
 create_targets_file <- function(folder = "~/Downloads/",
-                                uid = 1, 
-                                browserName = "chrome", 
-                                big_container = FALSE, 
-                                keep_alive = FALSE, 
+                                uid = 1,
+                                browserName = "chrome",
+                                big_container = FALSE,
+                                keep_alive = FALSE,
                                 folder_downloads = NULL,
-                                DEBUG = FALSE, 
+                                DEBUG = FALSE,
                                 screenshot = FALSE,
                                 debug_file = FALSE,
                                 console_logs = FALSE,
-                                open_VNC = FALSE, 
+                                open_VNC = FALSE,
                                 pid = NULL,
                                 uid_URL = TRUE,
                                 local_or_server = NULL, # ["local", "server", "test"]
@@ -524,40 +524,40 @@ create_targets_file <- function(folder = "~/Downloads/",
                                 forced_refresh = NULL,
                                 forced_seed = NULL,
                                 dont_ask = FALSE) {
-  
+
 
   # folder = "~/Downloads/"
   # uid = 1
   # browserName = "chrome"
-  # big_container = FALSE 
+  # big_container = FALSE
   # keep_alive = FALSE
-  # folder_downloads = NULL 
+  # folder_downloads = NULL
   # DEBUG = FALSE
-  # screenshot = FALSE 
-  # debug_file = FALSE 
-  # console_logs = FALSE 
+  # screenshot = FALSE
+  # debug_file = FALSE
+  # console_logs = FALSE
   # open_VNC = FALSE
-  # pid = NULL 
-  # uid_URL = TRUE 
+  # pid = NULL
+  # uid_URL = TRUE
   # local_folder_tasks = NULL
-  # server_folder_tasks = "999" 
-  # disable_web_security = FALSE 
-  # initial_wait = 2 
-  # wait_retry = .1 
-  # forced_random_wait = FALSE 
-  # forced_refresh = NULL 
-  # forced_seed = NULL 
-  # folder = NULL 
-  # dont_ask = FALSE 
-  
-  
-  
-  
-  
-  
+  # server_folder_tasks = "999"
+  # disable_web_security = FALSE
+  # initial_wait = 2
+  # wait_retry = .1
+  # forced_random_wait = FALSE
+  # forced_refresh = NULL
+  # forced_seed = NULL
+  # folder = NULL
+  # dont_ask = FALSE
+
+
+
+
+
+
   if (!is.null(local_folder_tasks)) FOLDER_TASKS = glue::glue('local_folder_tasks = "{local_folder_tasks}"') # No comma at the end because will be the last element
   if (!is.null(server_folder_tasks)) FOLDER_TASKS = glue::glue('server_folder_tasks = "{server_folder_tasks}"')# No comma at the end because will be the last element
-  
+
   if (!is.null(uid)) string_uid = glue::glue('uid = {dput(uid)},')
   if (!is.null(browserName)) string_browserName = glue::glue('browserName = "{browserName}",')
   if (!is.null(big_container)) string_big_container = glue::glue('big_container = {big_container},')
@@ -578,7 +578,7 @@ create_targets_file <- function(folder = "~/Downloads/",
   if (!is.null(forced_seed)) string_forced_seed = glue::glue('forced_seed = {forced_seed},')
   if (!is.null(dont_ask)) string_dont_ask = glue::glue('dont_ask = {dont_ask},')
 
-  
+
 string_uid = ifelse(exists("string_uid"), string_uid, "")
 string_browserName = ifelse(exists("string_browserName"), string_browserName, "")
 string_big_container = ifelse(exists("string_big_container"), string_big_container, "")
@@ -598,12 +598,12 @@ string_forced_random_wait = ifelse(exists("string_forced_random_wait"), string_f
 string_forced_refresh = ifelse(exists("string_forced_refresh"), string_forced_refresh, "")
 string_forced_seed = ifelse(exists("string_forced_seed"), string_forced_seed, "")
 string_dont_ask = ifelse(exists("string_dont_ask"), string_dont_ask, "")
-  
-    
-    # Read template
-    template = readLines("inst/templates/_targets_TEMPLATE.R")
 
-    new_parameters_monkeys_minimal = 
+
+    # Read template
+    template = readLines(paste0(folder, "/inst/templates/_targets_TEMPLATE.R"))
+
+    new_parameters_monkeys_minimal =
       glue::glue('
     parameters_monkeys_minimal = list(
                {string_uid}
@@ -627,60 +627,60 @@ string_dont_ask = ifelse(exists("string_dont_ask"), string_dont_ask, "")
                {string_dont_ask}
                {FOLDER_TASKS})
     ')
-    
-    
+
+
     # Prepare targets section and joins section
-    
-    # Replace targets and joins sections 
+
+    # Replace targets and joins sections
     final_file = gsub("#PARAMETERS_HERE", new_parameters_monkeys_minimal, template)
     # final_file
-    
-    
-    
+
+
+
     # Create final file
     cat(final_file, file = paste0(folder, "/_targets_automatic_file.R"), sep = "\n")
-    
+
 
   # If previous step was successful
   if (file.exists(paste0(folder, "/_targets_automatic_file.R"))) {
-    
+
     if (dont_ask == FALSE) {
-      
-      response_prompt = menu(choices = c("YES", "No"), 
+
+      response_prompt = menu(choices = c("YES", "No"),
                              title =  jsPsychHelpeR::cli_message(var_used = new_parameters_monkeys_minimal,
                                                  info = "{cli::style_bold((cli::col_yellow('Overwrite')))} file '_targets.R' to include the following parameters?",
                                                  details = "{new_parameters_monkeys_minimal}"))
     } else {
-      
-      cli_message(var_used = tasks,
+
+      jsPsychHelpeR::cli_message(var_used = tasks,
                   info = "{cli::style_bold((cli::col_yellow('Overwriten')))} file '_targets.R' to include the following parameters",
                   details = "{new_parameters_monkeys_minimal}")
       response_prompt = 1
-      
+
     }
-    
+
     if (response_prompt == 1) {
-      
+
       # Create Backup file
       if (file.exists(paste0(folder, "/_targets.R"))) file.rename(from = paste0(folder, "/_targets.R"), to = paste0(folder, "/_targets_old.R"))
-      
+
       # RENAME _targets_automatic_file.R as _targets.R. _targets_automatic_file.R was created in the previous step
       file.rename(from = paste0(folder, "/_targets_automatic_file.R"), to = paste0(folder, "/_targets.R"))
-      
-      
-      
+
+
+
       # END Message
-      jsPsychHelpeR::cli_message(h2_title = "All done", 
+      jsPsychHelpeR::cli_message(h2_title = "All done",
                   success = "NEW '_targets.R' created"
       )
-      
-      
+
+
     } else {
       cli::cli_alert_warning("OK, nothing done\n")
     }
-    
+
   }
-  
+
 }
 
 
@@ -695,36 +695,36 @@ string_dont_ask = ifelse(exists("string_dont_ask"), string_dont_ask, "")
 #'
 #' @examples setup_folders(tempdir())
 setup_folders <- function(folder, extract_zip = FALSE) {
-  
+
   # TODO: ADD check about empty folder and ASK user if we should delete contents
-  
+
   # Avoid spaces in folder path because other functions (e.g. update_data) won't work if there are spaces
   if (grepl(" ", folder)) cli::cli_abort("The folder path should NOT have spaces. You can replace {.code {folder}} for {.code {gsub(' ', '', folder)}}")
-  
+
   if (extract_zip == TRUE) {
     # Make sure folder exists and extract jsPsychMonkeys.zip there
     if (!dir.exists(folder)) dir.create(folder)
-    
+
     # Location of jsPsychMonkeys.zip
     if ("jsPsychMonkeys" %in% utils::installed.packages()) {
       jsPsychMonkeys_zip = system.file("templates", "jsPsychMonkeys.zip", package = "jsPsychMonkeys")
     } else {
       jsPsychMonkeys_zip = "inst/templates/jsPsychMonkeys.zip"
     }
-    
+
     utils::unzip(jsPsychMonkeys_zip, exdir = folder)
     cli::cli_alert_success("jsPsychMonkeys project extracted to {.code {folder}}\n")
-    
+
   }
-  
+
   # Necessary folders
   # necessary_folders = c(paste0("data/", pid), # data/manual_correction
-  #                       "outputs/backup", "outputs/data", "outputs/plots", "outputs/reliability", "outputs/reports", "outputs/tables", "outputs/tests_outputs", 
+  #                       "outputs/backup", "outputs/data", "outputs/plots", "outputs/reliability", "outputs/reports", "outputs/tables", "outputs/tests_outputs",
   #                       ".vault/data_vault", ".vault/Rmd", ".vault/outputs/data", ".vault/outputs/reports")
-  # 
+  #
   necessary_folders = c(".vault", "outputs/DF", "outputs/errors", "outputs/log", "outputs/screenshots", "outputs/source")
-  
-  
+
+
   if (all(necessary_folders %in% dir(folder, recursive = TRUE, include.dirs = TRUE, all.files = TRUE))) {
     cli::cli_alert_success("All the necessary folders are present\n")
   } else {
@@ -732,170 +732,164 @@ setup_folders <- function(folder, extract_zip = FALSE) {
     system("chmod 700 -R .vault/")
     cli::cli_alert_success("Created necessary folders: {.pkg {necessary_folders}}\n")
   }
-  
+
 }
 
 #' Create a jsPsychMonkeys project for your data
 #'
-#' run_initial_setup() will read your data and create a jsPsychMonkeys project 
+#' run_initial_setup() will read your data and create a jsPsychMonkeys project
 #' tailoring the _targets.R file to the tasks included in the data.
 #'
 #' @param pid project id
-#' @param download_files Download the data files? FALSE / TRUE
-#' - If TRUE, requires sFTP server credentials to be located in `.vault/credentials`
-#' - See `.vault/credentials_TEMPLATE` for more details
-#' @param data_location Local folder where the raw data for the project is located
-#' @param download_task_script should download the task scripts? (requires server credentials) FALSE / TRUE
-#' @param dont_ask answer YES to all questions so the process runs uninterrupted. This will: 
+#' @param dont_ask answer YES to all questions so the process runs uninterrupted. This will:
 #' @param folder location for the project
-#' @param sensitive_tasks short names of the sensitive tasks in the protocol, if any
+#' @param uid
+#' @param browserName
+#' @param big_container
+#' @param keep_alive
+#' @param folder_downloads
+#' @param DEBUG
+#' @param screenshot
+#' @param debug_file
+#' @param console_logs
+#' @param open_VNC
+#' @param uid_URL
+#' @param local_or_server
+#' @param local_folder_tasks
+#' @param server_folder_tasks
+#' @param disable_web_security
+#' @param initial_wait
+#' @param wait_retry
+#' @param forced_random_wait
+#' @param forced_refresh
+#' @param forced_seed
 #' @param open_rstudio Open RStudio with the new project TRUE / FALSE
 #'
 #' @return Opens a new RStudio project
 #' @export
-#' @examples 
+#' @examples
 #' run_initial_setup(pid = 999, download_files = FALSE,
 #' data_location = system.file("extdata", package = "jsPsychMonkeys"),
-#' download_task_script = FALSE, 
-#' folder = tempdir(), 
+#' download_task_script = FALSE,
+#' folder = tempdir(),
 #' sensitive_tasks = c(""), dont_ask = TRUE, open_rstudio = FALSE)
 
-run_initial_setup <- function(pid, download_files = FALSE, data_location = NULL, download_task_script = FALSE, folder =  "~/Downloads/jsPsychMonkeystest", sensitive_tasks = c(""), dont_ask = FALSE, open_rstudio = TRUE) {
-  
+create_monkeys_project <- function(folder = "~/Downloads/",
+                                   uid = 1,
+                                   browserName = "chrome",
+                                   big_container = FALSE,
+                                   keep_alive = FALSE,
+                                   folder_downloads = NULL,
+                                   DEBUG = FALSE,
+                                   screenshot = FALSE,
+                                   debug_file = FALSE,
+                                   console_logs = FALSE,
+                                   open_VNC = FALSE,
+                                   pid = NULL,
+                                   uid_URL = TRUE,
+                                   local_or_server = NULL, # ["local", "server", "test"]
+                                   local_folder_tasks = NULL, # ["Downloads/tests/test_prototol", "Downloads/tests/2"]
+                                   server_folder_tasks = NULL,
+                                   disable_web_security = FALSE,
+                                   initial_wait = 2,
+                                   wait_retry = .1,
+                                   forced_random_wait = FALSE,
+                                   forced_refresh = NULL,
+                                   forced_seed = NULL,
+                                   dont_ask = FALSE,
+                                   open_rstudio = TRUE) {
+
   # CHECKS
-  if (grepl("\\.zip", data_location)) cli::cli_abort("`data_location` should be a folder ")
-  if (download_files == FALSE & is.null(data_location)) cli::cli_abort("Either `download_files` or `data_location` need to be set. Otherwise, I don't have access to the project's data!")
-  if (download_files == TRUE & !is.null(data_location)) cli::cli_abort("Only one of `download_files` or `data_location` must be set.")
-  
   if (dont_ask == TRUE) response_prompt = 1
-  folder_data = paste0(folder, "/data/", pid, "/")
-  
-  credentials_exist = file.exists(".vault/.credentials") # TODO: location of credentials for other users. If not in jsPsychMonkeys folder, won't be able to Download
-  
-  # CHECK if NO files in project's folder & NO credentials to download
-  if (is.null(data_location) & credentials_exist == FALSE) {
-    
-    cli_message(var_used = pid, 
-                h1_title = "ERROR", 
-                danger = "Can't access .csv files for protocol `{pid}`:\n- No files in `data/{pid}`\n- `data_location` parameter is empty \n- `.vault/credentials` file not present",
-                info = "You can either:\n- manually download files to `data/{pid}`\n- edit `.vault/credentials_TEMPLATE` and rename it to `.vault/credentials`")
-    
-    cli::cli_abort("No way to get the protocol's .csv files")
-    
-  }
-  
-  
+
+
   # ASK FOR USER PERMISSION
-  if (dont_ask == FALSE)  response_prompt = menu(choices = c("Yes", "No"), 
-                                                 title = 
-                                                   cli_message(h1_title = "Initial SETUP", 
+  if (dont_ask == FALSE)  response_prompt = menu(choices = c("Yes", "No"),
+                                                 title =
+                                                   jsPsychHelpeR::cli_message(h1_title = "Initial SETUP",
                                                                info = "Do you want to run the {.pkg initial setup}?",
-                                                               details = "This will {cli::style_bold((cli::col_red('DELETE')))} the _targets/ folder, 
-                                                                         {cli::style_bold((cli::col_green('install')))} necessary packages, 
-                                                                         {cli::style_bold((cli::col_green('copy')))} configuration files, 
+                                                               details = "This will {cli::style_bold((cli::col_red('DELETE')))} the _targets/ folder,
+                                                                         {cli::style_bold((cli::col_green('install')))} necessary packages,
+                                                                         {cli::style_bold((cli::col_green('copy')))} configuration files,
                                                                          {cli::style_bold((cli::col_yellow('replace')))} the _targets.R, etc."))
-  
-  
-  
+
+
+
   if (response_prompt == 1) {
-    
+
     # 1) Run to make sure you have all the necessary packages and folders -------
-    
-    cli_message(h1_title = "Setup")
-    setup_folders(pid = pid, folder = folder, extract_zip = TRUE)
-    
-    
-    
-    # 2) Copy .csv/.zip files to data/[YOUR_PROJECT_ID]/  ------------
-    # DOWNLOAD from server (needs a .vault/credentials file) (rename and edit .vault/credentials_TEMPLATE)
-    # OR Copy from data_location
-    
-    cli_message(h1_title = "Get data files and task script")
-    if (download_files == TRUE) {
-      
-      if (!credentials_exist) cli::cli_abort("Can't find server credentials in '.vault/.credentials'")
-      
-      update_data(pid = pid, folder = folder) 
-      
-    } else if (download_files == FALSE) {
-      
-      # We will check if there is only a zip file or multiple csv's in create_targets_file(). No need to do it here too
-      
-      cli::cli_alert_info("Will copy files from {.code {data_location}}")
-      
-      # Copy files from data_location to folder_data
-      files_raw = list.files(path = data_location, pattern = "*.csv|*.zip", full.names = TRUE)
-      file.copy(from = files_raw, to = paste0(folder_data,  basename(files_raw)))
-      
-      # Files present in destination (after copying)
-      files_destination = list.files(folder_data, pattern = "*.csv|*.zip", full.names = FALSE)
-      cli::cli_alert_info("{length(files_destination)} files in 'data/{pid}'")
-      
-    }
-    
-    # Make sure sensitive tasks are in .vault
-    move_sensitive_tasks_to_vault(pid = pid, folder = folder, sensitive_tasks = sensitive_tasks)
-    
-    # Files present in destination (after copying)
-    files_pid = list.files(folder_data, pattern = "*.csv|*.zip", full.names = FALSE)
-    
-    if (download_task_script == TRUE) {
-      
-      cli_message(h1_title = "Download task script")
-      
-      # Get protocol without data and zip it in data/protocol_PID.zip
-      # TODO: download protocol to 'folder'. Now will download to the wd
-      get_zip(pid, what = "protocol", dont_ask = dont_ask)
-      
-      
-    } else if (download_task_script == FALSE) {
-      
-      cli::cli_alert_info("Will NOT download task script")
-      
-    }
-    
-    
-    # 3) Create a _targets.R file for your data -------------------------------
-    
-    cli_message(var_used = folder, h1_title = "Create _targets.R file in {.code {folder}}")
-    create_targets_file(pid = pid, folder = folder, dont_ask = dont_ask)
-    
+
+    jsPsychHelpeR::cli_message(h1_title = "Setup")
+    # setup_folders(pid = pid, folder = folder, extract_zip = TRUE)
+    setup_folders(folder = folder, extract_zip = TRUE)
+
+
+
+    # 2) Create a _targets.R file for your data -------------------------------
+
+    jsPsychHelpeR::cli_message(var_used = folder, h1_title = "Create _targets.R file in {.code {folder}}")
+
+    create_targets_file(folder = folder,
+                        uid = uid,
+                        browserName = browserName,
+                        big_container = big_container,
+                        keep_alive = keep_alive,
+                        folder_downloads = folder_downloads,
+                        DEBUG = DEBUG,
+                        screenshot = screenshot,
+                        debug_file = debug_file,
+                        console_logs = console_logs,
+                        open_VNC = open_VNC,
+                        pid = pid,
+                        uid_URL = uid_URL,
+                        local_or_server = local_or_server,
+                        local_folder_tasks = local_folder_tasks,
+                        server_folder_tasks = server_folder_tasks,
+                        disable_web_security = disable_web_security,
+                        initial_wait = initial_wait,
+                        wait_retry = wait_retry,
+                        forced_random_wait = forced_random_wait,
+                        forced_refresh = forced_refresh,
+                        forced_seed = forced_seed,
+                        dont_ask = dont_ask)
+
+
+
+
     # Copy tests to tests/testthat/
-    tests_templates_origin = list.files(paste0(folder, "/inst/templates/tests"), full.names = TRUE, recursive = TRUE)
-    tests_templates_destination = gsub("inst/templates/", "", tests_templates_origin)
-    folder_destination_snaps = paste0(folder, "/tests/testthat/_snaps/snapshots/") # Create needed folders
-    if(!dir.exists(folder_destination_snaps)) dir.create(folder_destination_snaps, recursive = TRUE)
-    file.copy(tests_templates_origin, tests_templates_destination, overwrite = TRUE)
-    
-    
-    cli_message(var_used = folder, h1_title = "Initial setup successful", 
+    # tests_templates_origin = list.files(paste0(folder, "/inst/templates/tests"), full.names = TRUE, recursive = TRUE)
+    # tests_templates_destination = gsub("inst/templates/", "", tests_templates_origin)
+    # # folder_destination_snaps = paste0(folder, "/tests/testthat/_snaps/snapshots/") # Create needed folders
+    # if(!dir.exists(folder_destination_snaps)) dir.create(folder_destination_snaps, recursive = TRUE)
+    # file.copy(tests_templates_origin, tests_templates_destination, overwrite = TRUE)
+
+
+    jsPsychHelpeR::cli_message(var_used = folder, h1_title = "Initial setup successful",
                 success = "The new RStudio project is in {.code {folder}}",
                 info = "Open `run.R` there to start",
-                
-                details = cli::col_grey("Use the following commands to start the data preparation:"),
-                list = c("Visualize pipeline: {.code targets::tar_visnetwork()}",
-                         "Delete cache: {.code targets::tar_destroy()}", 
-                         "Start data preparation: {.code targets::tar_make()}")
+
+                details = cli::col_grey(""),
+                list = c("")
     )
-    
+
     # Open _targets.R and run.R
     if (Sys.getenv("RSTUDIO") == "1" & open_rstudio == TRUE) {
-      cli_message(info = "Opening new RStudio project")
-      
+      jsPsychHelpeR::cli_message(info = "Opening new RStudio project")
+
       rstudioapi::openProject(folder, newSession = TRUE)
       # invisible(rstudioapi::navigateToFile("_targets.R"))
       # invisible(rstudioapi::navigateToFile("run.R"))
     } else {
-      
-      cli_message(var_used = folder, info = "Your RStudio project is in  {.code {folder}}")
-      
+
+      jsPsychHelpeR::cli_message(var_used = folder, info = "Your RStudio project is in  {.code {folder}}")
+
     }
-    
-    
+
+
   } else {
-    
+
     cli::cli_alert_warning("OK, nothing done")
-    
+
   }
 }
 
