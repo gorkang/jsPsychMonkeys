@@ -32,11 +32,8 @@ future::tweak(strategy = "multisession")
 # Maintenance -------------------------------------------------------------
 
 # So crayon colors work when using future and when in interactive mode
-if (!is.null(parameters_monkeys_minimal$debug_file)) {
-  if (parameters_monkeys_minimal$debug_file == FALSE) Sys.setenv(R_CLI_NUM_COLORS = crayon::num_ansi_colors())
-} else {
-  Sys.setenv(R_CLI_NUM_COLORS = crayon::num_ansi_colors())
-}
+Sys.setenv(R_CLI_NUM_COLORS = crayon::num_ansi_colors())
+
 
 # target options (packages, errors...)
 tar_option_set(

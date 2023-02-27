@@ -111,28 +111,10 @@ create_links <-
     }
     
     
-    # START LOG ----------------------------------------------------------------
-    
-    # Create log for each worker
-    if (parameters_monkeys$debug$debug_file == TRUE) {
-      con <- file(paste0("outputs/log/links_pid_", gsub("/", "_", parameters_monkeys$task$pid), "_uid_", uid, ".log"))
-      sink(con, append = TRUE)
-      sink(con, append = TRUE, type = "message")
-    }    
-    
     
     # Message -----------------------------------------------------------------
     
-    if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::underline(crayon::green(uid, "- ", links_tasks), "\n")))
-    
-    
-    # END LOG -----------------------------------------------------------------
-    
-    # Restore output to console
-    if (parameters_monkeys$debug$debug_file == TRUE) {
-      sink() 
-      sink(type = "message")
-    }
+    if (DEBUG == TRUE) cli::cli_alert_info("{uid} - {.url {links_tasks}} \n")
     
     
     # OUTPUT ------------------------------------------------------------------

@@ -133,7 +133,7 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
       if (debug_file == TRUE) DEBUG = TRUE
       if (open_VNC == TRUE) DEBUG = TRUE
   
-      
+      if (debug_file == TRUE) options(cli.num_colors = 1L) # Do not use cli and crayon colors to avoid weird chars in log file
       
       
       
