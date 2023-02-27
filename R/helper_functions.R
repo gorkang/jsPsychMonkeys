@@ -58,7 +58,7 @@ check_trialids <- function(local_folder_protocol) {
 #' @export
 #'
 #' @examples
-check_accept_alert <- function(wait_retry, remDr) {
+check_accept_alert <- function(wait_retry = .5, remDr, DEBUG) {
 
   get_alert <- function(variables) {
     MESSAGE = remDr$getAlertText()
@@ -388,6 +388,7 @@ check_Downloads <- function(parameters_monkeys, uid = "", links_tar = "") {
   pid = parameters_monkeys$task_params$pid
   download_folder = parameters_monkeys$docker$folder_downloads
   local_or_server = parameters_monkeys$task_params$local_or_server
+  DEBUG = parameters_monkeys$debug$DEBUG
 
   # Do this only in local protocols
   if (local_or_server == "local") {
