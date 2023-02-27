@@ -652,7 +652,7 @@ string_dont_ask = ifelse(exists("string_dont_ask"), string_dont_ask, "")
                                                  details = "{new_parameters_monkeys_minimal}"))
     } else {
 
-      jsPsychHelpeR::cli_message(var_used = tasks,
+      jsPsychHelpeR::cli_message(var_used = new_parameters_monkeys_minimal,
                   info = "{cli::style_bold((cli::col_yellow('Overwriten')))} file '_targets.R' to include the following parameters",
                   details = "{new_parameters_monkeys_minimal}")
       response_prompt = 1
@@ -894,6 +894,97 @@ create_monkeys_project <- function(folder = "~/Downloads/",
 }
 
 
-# SAFER functions ---------------------------------------------------------
+
+#' release a horde of Monkeys to complete a jsPsychMakeR protocol
+#'
+#' @param uid
+#' @param browserName
+#' @param big_container
+#' @param keep_alive
+#' @param folder_downloads
+#' @param DEBUG
+#' @param screenshot
+#' @param debug_file
+#' @param console_logs
+#' @param open_VNC
+#' @param pid
+#' @param uid_URL
+#' @param local_or_server
+#' @param local_folder_tasks
+#' @param server_folder_tasks
+#' @param disable_web_security
+#' @param initial_wait
+#' @param wait_retry
+#' @param forced_random_wait
+#' @param forced_refresh
+#' @param forced_seed
+#' @param dont_ask
+#' @param open_rstudio
+#'
+#' @return
+#' @export
+#'
+#' @examples
+release_the_monkeys <- function(uid = 1,
+                                browserName = "chrome",
+                                big_container = FALSE,
+                                keep_alive = FALSE,
+                                folder_downloads = NULL,
+                                DEBUG = FALSE,
+                                screenshot = FALSE,
+                                debug_file = FALSE,
+                                console_logs = FALSE,
+                                open_VNC = FALSE,
+                                pid = NULL,
+                                uid_URL = TRUE,
+                                local_or_server = NULL, # ["local", "server", "test"]
+                                local_folder_tasks = NULL, # ["Downloads/tests/test_prototol", "Downloads/tests/2"]
+                                server_folder_tasks = NULL,
+                                disable_web_security = FALSE,
+                                initial_wait = 2,
+                                wait_retry = .1,
+                                forced_random_wait = FALSE,
+                                forced_refresh = NULL,
+                                forced_seed = NULL,
+                                dont_ask = TRUE,
+                                open_rstudio = FALSE) {
+
+  HERE = getwd()
+  FOLDER = tempdir()
+  jsPsychMonkeys::create_monkeys_project(folder = FOLDER,
+                                         uid = uid,
+                                         browserName = browserName,
+                                         big_container = big_container,
+                                         keep_alive = keep_alive,
+                                         folder_downloads = folder_downloads,
+                                         DEBUG = DEBUG,
+                                         screenshot = screenshot,
+                                         debug_file = debug_file,
+                                         console_logs = console_logs,
+                                         open_VNC = open_VNC,
+                                         pid = pid,
+                                         uid_URL = uid_URL,
+                                         local_or_server = local_or_server,
+                                         local_folder_tasks = local_folder_tasks,
+                                         server_folder_tasks = server_folder_tasks,
+                                         disable_web_security = disable_web_security,
+                                         initial_wait = initial_wait,
+                                         wait_retry = wait_retry,
+                                         forced_random_wait = forced_random_wait,
+                                         forced_refresh = forced_refresh,
+                                         forced_seed = forced_seed,
+                                         dont_ask = dont_ask,
+                                         open_rstudio = open_rstudio)
+  setwd(dir = FOLDER)
+
+  cli::cli_h1("Releasing monkeys")
+  targets::tar_make()
+
+  setwd(dir = HERE)
+
+
+}
+
+# SAFER functions ----
 
 # In z_safely_helper_functions.R so it's the last function to load

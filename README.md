@@ -20,9 +20,19 @@ First, install the jsPsychMonkeys package:
 if (!require('remotes')) utils::install.packages('remotes'); remotes::install_github('gorkang/jsPsychMonkeys')
 ```
 
-Then, to create and configure an RStudio project to release Monkeys:
+---
+
+You are ready to release the monkeys! 
+
+```
+jsPsychMonkeys::release_the_monkeys(uid = "1:10", 
+                                    local_folder_tasks = "~/Downloads/new_protocol/")
+
+```
 
 ---  
+
+If you want to create and configure an RStudio project to release Monkeys:
 
 Use the `folder` parameter to select a specific folder for the RStudio project  
 Use the `uid` parameter to set a number of participants, e.g. `uid = "1:10"` would launch monkeys 1 to 10
@@ -36,6 +46,7 @@ jsPsychMonkeys::create_monkeys_project(folder = "~/Downloads/Monkeys/",
 ```
   
 ---  
+
 
 
 ---  

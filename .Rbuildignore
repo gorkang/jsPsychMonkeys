@@ -2,3 +2,6 @@
 ^\.Rproj\.user$
 ^jsPsychMonkeys\.Rproj$
 ^LICENSE\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

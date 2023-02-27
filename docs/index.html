@@ -85,8 +85,12 @@
 </h2>
 <p>First, install the jsPsychMonkeys package:</p>
 <pre><code><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st"><a href="https://remotes.r-lib.org" class="external-link">'remotes'</a></span><span class="op">)</span><span class="op">)</span> <span class="fu">utils</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'remotes'</span><span class="op">)</span>; <span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'gorkang/jsPsychMonkeys'</span><span class="op">)</span></span></code></pre>
-<p>Then, to create and configure an RStudio project to release Monkeys:</p>
 <hr>
+<p>You are ready to release the monkeys!</p>
+<pre><code><span><span class="fu">jsPsychMonkeys</span><span class="fu">::</span><span class="fu"><a href="reference/release_the_monkeys.html">release_the_monkeys</a></span><span class="op">(</span>uid <span class="op">=</span> <span class="st">"1:10"</span>, </span>
+<span>                                    local_folder_tasks <span class="op">=</span> <span class="st">"~/Downloads/new_protocol/"</span><span class="op">)</span></span></code></pre>
+<hr>
+<p>If you want to create and configure an RStudio project to release Monkeys:</p>
 <p>Use the <code>folder</code> parameter to select a specific folder for the RStudio project<br>
 Use the <code>uid</code> parameter to set a number of participants, e.g. <code>uid = "1:10"</code> would launch monkeys 1 to 10 Use the <code>local_folder_tasks</code> parameter to indicate the location of the jsPsychMakeR protocol</p>
 <pre><code><span><span class="fu">jsPsychMonkeys</span><span class="fu">::</span><span class="fu"><a href="reference/create_monkeys_project.html">create_monkeys_project</a></span><span class="op">(</span>folder <span class="op">=</span> <span class="st">"~/Downloads/Monkeys/"</span>, </span>

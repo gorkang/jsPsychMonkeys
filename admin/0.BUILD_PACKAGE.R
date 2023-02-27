@@ -9,16 +9,16 @@
   rstudioapi::navigateToFile(".Rprofile") # If this fails, it is uncommented
 
     # 1) Delete renv/cache and renv/lib folders
-    # 2) Only install the packages explicitly mentionened in _targets_options.R main_packages 
+    # 2) Only install the packages explicitly mentionened in _targets_options.R main_packages
       # - Open _targets_options.R, load main_packages
-      # renv::restore(packages = main_packages) 
-    # 3) Recreate _targets_packages.R: 
+      # renv::restore(packages = main_packages)
+    # 3) Recreate _targets_packages.R:
       # targets::tar_renv(extras = c("markdown", "rstudioapi","visNetwork"))
     # 4) Create lockfile with the installed subset
       # renv::snapshot()
 
     # Make sure project 999 runs: targets::tar_make()
-  
+
 
 # Prepare files -----------------------------------------------------------
 
@@ -28,7 +28,7 @@
   # DO THIS ALWAYS so jsPsychHelpeR.zip is updated!
   # Create jsPsychHelpeR.zip
   source("admin/helper-scripts-admin.R")
-  
+
   # add_renv_cache = TRUE creates a zip file with the renv cache (initially ~ 230MB package, after cleaning up a loot, 75.6MB)
   # Very useful to avoid downloading all renv cache again, to build the docker image much faster...
   # MAX Github uploads 100MB
@@ -40,38 +40,38 @@
 
   # .Rprofile: make sure source("renv/activate.R") is COMMENTED
   rstudioapi::navigateToFile(".Rprofile")
-  
+
   # Build and install
   devtools::document()
   devtools::load_all()
-  
-  
+
+
   # Documentation
-  devtools::spell_check() # Spell check    
+  devtools::spell_check() # Spell check
   pkgdown::build_site() # Create documentation! # pkgdown::build_news()
-  
+
   # Only one time?
   # usethis::use_pkgdown() # build-ignore the docs directory and _pkgdown.yml file to avoid NOTE in CRAN checks
   # pkgdown::deploy_site_github() # CHECK HOWTO (only first time?)
-  
-  
+
+
 # Install package ---------------------------------------------------------
 
   # Build
   devtools::build()
-  
+
   # devtools::install()
-  renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychHelpeR_0.2.5.tar.gz") # Install package from file
+  renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys_0.2.5.tar.gz") # Install package from file
 
 
 # CHECK functions ----------------------------------------------------------
 
-  # CHECK Main function 
+  # CHECK Main function
   jsPsychHelpeR::run_initial_setup(pid = 999, data_location = "~/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychHelpeR/data/999", dont_ask = TRUE)
-  
+
   # CHECK project works
   targets::tar_make()
-  
+
   # Check docker works
   # rstudioapi::navigateToFile("admin/create_docker.R")
   jsPsychHelpeR::create_docker_container()
@@ -79,10 +79,10 @@
   file.remove(list.files(paste0("~/Downloads/jsPsychHelpeR", PID, "/outputs"), recursive = TRUE, full.names = TRUE))
   system(paste0("docker run --rm -d --name pid", PID, " -v ~/Downloads/jsPsychHelpeR", PID, "/outputs:/home/project/jsPsychHelpeR/outputs:rw gorkang/jspsychhelper:pid", PID))
 
-  # ***DEBUG*** 
+  # ***DEBUG***
   # docker run --rm -ti -v ~/Downloads/jsPsychHelpeR999/outputs:/home/project/jsPsychHelpeR/outputs:rw gorkang/jspsychhelper:pid999 /bin/bash
-  
-  
+
+
 # CHECK package -----------------------------------------------------------
 
 devtools::check() # Check package (~30s)
@@ -106,14 +106,14 @@ devtools::test_coverage()
 # 3) Go to website: codecov.io using the GitHub account and setup the repo
 
 COV_REPORT = covr::package_coverage(); COV_REPORT # Test coverage report. If a testthat tests fails, this FAILS!
-covr::report(COV_REPORT) # Check local shiny app with Coverage report    
+covr::report(COV_REPORT) # Check local shiny app with Coverage report
 # TOKEN FROM step 3)
 covr::codecov(token = "6c8a8848-9175-446c-9cb8-131378f96356") # UPLOAD coverage reports to https://codecov.io/gh/gorkang/jsPsychMaker/
 
 
 # REMEMBER ----------------------------------------------------------------
 
-# If warning about non-ASCII characters. Find character and replace 
+# If warning about non-ASCII characters. Find character and replace
 # https://altcodeunicode.com/alt-codes-letter-o-with-accents/
 # tools::showNonASCIIfile(file = "R/create_task.R")
 # stringi::stri_escape_unicode("ó")
