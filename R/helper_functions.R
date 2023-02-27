@@ -69,7 +69,7 @@ check_accept_alert <- function(wait_retry, remDr) {
   get_alert_safely = purrr::safely(get_alert)
   RESP = suppressMessages(get_alert_safely())
   while (!is.null(RESP$result)) {
-    withr::with_options(list(crayon.enabled = FALSE), cat(crayon::yellow("[Alert] found, waiting", wait_retry, "seconds: ", crayon::silver(RESP[[1]]), "\n")))
+    if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::yellow("[Alert] found, waiting", wait_retry, "seconds: ", crayon::silver(RESP[[1]]), "\n")))
     Sys.sleep(wait_retry)
     
     RESP = suppressMessages(get_alert_safely())
@@ -471,8 +471,9 @@ parse_elements <- function(what, page_source_rvest) {
                       rvest::html_attrs() |> 
                       dplyr::bind_rows() |> 
                       dplyr::mutate(tag_name = what, 
-                                    content = page_source_temp[[.x]] |> 
-                                      rvest::html_text2()
+                                    content = 
+                                      page_source_temp[[.x]] |>
+                                      rvest::html_text2() # Here the <big>TITLE</big> is lost
                                     )
                     )
     
@@ -483,11 +484,6 @@ parse_elements <- function(what, page_source_rvest) {
   
 }
 
-
-
-
-
-
 # Navigate to link
 launch_task <- function(links, wait_retry, remDr, DEBUG) {
   if (length(links) != 1) stop("links passed to remDr$navigate are != 1")
@@ -496,8 +492,414 @@ launch_task <- function(links, wait_retry, remDr, DEBUG) {
 }
 
 
+
+#' Create _targets.R file from a protocol folder
+#'
+#' @param pid project id
+#' @param folder protocol folder
+#' @param dont_ask do everything without asking for user input
+#'
+#' @return Creates a _targets.R file
+#' @export
+create_targets_file <- function(folder = "~/Downloads/",
+                                uid = 1, 
+                                browserName = "chrome", 
+                                big_container = FALSE, 
+                                keep_alive = FALSE, 
+                                folder_downloads = NULL,
+                                DEBUG = FALSE, 
+                                screenshot = FALSE,
+                                debug_file = FALSE,
+                                console_logs = FALSE,
+                                open_VNC = FALSE, 
+                                pid = NULL,
+                                uid_URL = TRUE,
+                                local_or_server = NULL, # ["local", "server", "test"]
+                                local_folder_tasks = NULL, # ["Downloads/tests/test_prototol", "Downloads/tests/2"]
+                                server_folder_tasks = NULL,
+                                disable_web_security = FALSE,
+                                initial_wait = 2,
+                                wait_retry = .1,
+                                forced_random_wait = FALSE,
+                                forced_refresh = NULL,
+                                forced_seed = NULL,
+                                dont_ask = FALSE) {
+  
+
+  # folder = "~/Downloads/"
+  # uid = 1
+  # browserName = "chrome"
+  # big_container = FALSE 
+  # keep_alive = FALSE
+  # folder_downloads = NULL 
+  # DEBUG = FALSE
+  # screenshot = FALSE 
+  # debug_file = FALSE 
+  # console_logs = FALSE 
+  # open_VNC = FALSE
+  # pid = NULL 
+  # uid_URL = TRUE 
+  # local_folder_tasks = NULL
+  # server_folder_tasks = "999" 
+  # disable_web_security = FALSE 
+  # initial_wait = 2 
+  # wait_retry = .1 
+  # forced_random_wait = FALSE 
+  # forced_refresh = NULL 
+  # forced_seed = NULL 
+  # folder = NULL 
+  # dont_ask = FALSE 
+  
+  
+  
+  
+  
+  
+  if (!is.null(local_folder_tasks)) FOLDER_TASKS = glue::glue('local_folder_tasks = "{local_folder_tasks}"') # No comma at the end because will be the last element
+  if (!is.null(server_folder_tasks)) FOLDER_TASKS = glue::glue('server_folder_tasks = "{server_folder_tasks}"')# No comma at the end because will be the last element
+  
+  if (!is.null(uid)) string_uid = glue::glue('uid = {dput(uid)},')
+  if (!is.null(browserName)) string_browserName = glue::glue('browserName = "{browserName}",')
+  if (!is.null(big_container)) string_big_container = glue::glue('big_container = {big_container},')
+  if (!is.null(keep_alive)) string_keep_alive = glue::glue('keep_alive = {keep_alive},')
+  if (!is.null(folder_downloads)) string_folder_downloads = glue::glue('folder_downloads = "{folder_downloads}",')
+  if (!is.null(DEBUG)) string_DEBUG = glue::glue('DEBUG = {DEBUG},')
+  if (!is.null(screenshot)) string_screenshot = glue::glue('screenshot = {screenshot},')
+  if (!is.null(debug_file)) string_debug_file = glue::glue('debug_file = {debug_file},')
+  if (!is.null(console_logs)) string_console_logs = glue::glue('console_logs = {console_logs},')
+  if (!is.null(open_VNC)) string_open_VNC = glue::glue('open_VNC = {open_VNC},')
+  if (!is.null(pid)) string_pid = glue::glue('pid = "{pid}",')
+  if (!is.null(uid_URL)) string_uid_URL = glue::glue('uid_URL = {uid_URL},')
+  if (!is.null(disable_web_security)) string_disable_web_security = glue::glue('disable_web_security = {disable_web_security},')
+  if (!is.null(initial_wait)) string_initial_wait = glue::glue('initial_wait = {initial_wait},')
+  if (!is.null(wait_retry)) string_wait_retry = glue::glue('wait_retry = {wait_retry},')
+  if (!is.null(forced_random_wait)) string_forced_random_wait = glue::glue('forced_random_wait = {forced_random_wait},')
+  if (!is.null(forced_refresh)) string_forced_refresh = glue::glue('forced_refresh = {forced_refresh},')
+  if (!is.null(forced_seed)) string_forced_seed = glue::glue('forced_seed = {forced_seed},')
+  if (!is.null(dont_ask)) string_dont_ask = glue::glue('dont_ask = {dont_ask},')
+
+  
+string_uid = ifelse(exists("string_uid"), string_uid, "")
+string_browserName = ifelse(exists("string_browserName"), string_browserName, "")
+string_big_container = ifelse(exists("string_big_container"), string_big_container, "")
+string_keep_alive = ifelse(exists("string_keep_alive"), string_keep_alive, "")
+string_folder_downloads = ifelse(exists("string_folder_downloads"), string_folder_downloads, "")
+string_DEBUG = ifelse(exists("string_DEBUG"), string_DEBUG, "")
+string_screenshot = ifelse(exists("string_screenshot"), string_screenshot, "")
+string_debug_file = ifelse(exists("string_debug_file"), string_debug_file, "")
+string_console_logs = ifelse(exists("string_console_logs"), string_console_logs, "")
+string_open_VNC = ifelse(exists("string_open_VNC"), string_open_VNC, "")
+string_pid = ifelse(exists("string_pid"), string_pid, "")
+string_uid_URL = ifelse(exists("string_uid_URL"), string_uid_URL, "")
+string_disable_web_security = ifelse(exists("string_disable_web_security"), string_disable_web_security, "")
+string_initial_wait = ifelse(exists("string_initial_wait"), string_initial_wait, "")
+string_wait_retry = ifelse(exists("string_wait_retry"), string_wait_retry, "")
+string_forced_random_wait = ifelse(exists("string_forced_random_wait"), string_forced_random_wait, "")
+string_forced_refresh = ifelse(exists("string_forced_refresh"), string_forced_refresh, "")
+string_forced_seed = ifelse(exists("string_forced_seed"), string_forced_seed, "")
+string_dont_ask = ifelse(exists("string_dont_ask"), string_dont_ask, "")
+  
+    
+    # Read template
+    template = readLines("inst/templates/_targets_TEMPLATE.R")
+
+    new_parameters_monkeys_minimal = 
+      glue::glue('
+    parameters_monkeys_minimal = list(
+               {string_uid}
+               {string_browserName}
+               {string_big_container}
+               {string_keep_alive}
+               {string_folder_downloads}
+               {string_DEBUG}
+               {string_screenshot}
+               {string_debug_file}
+               {string_console_logs}
+               {string_open_VNC}
+               {string_pid}
+               {string_uid_URL}
+               {string_disable_web_security}
+               {string_initial_wait}
+               {string_wait_retry}
+               {string_forced_random_wait}
+               {string_forced_refresh}
+               {string_forced_seed}
+               {string_dont_ask}
+               {FOLDER_TASKS})
+    ')
+    
+    
+    # Prepare targets section and joins section
+    
+    # Replace targets and joins sections 
+    final_file = gsub("#PARAMETERS_HERE", new_parameters_monkeys_minimal, template)
+    # final_file
+    
+    
+    
+    # Create final file
+    cat(final_file, file = paste0(folder, "/_targets_automatic_file.R"), sep = "\n")
+    
+
+  # If previous step was successful
+  if (file.exists(paste0(folder, "/_targets_automatic_file.R"))) {
+    
+    if (dont_ask == FALSE) {
+      
+      response_prompt = menu(choices = c("YES", "No"), 
+                             title =  jsPsychHelpeR::cli_message(var_used = new_parameters_monkeys_minimal,
+                                                 info = "{cli::style_bold((cli::col_yellow('Overwrite')))} file '_targets.R' to include the following parameters?",
+                                                 details = "{new_parameters_monkeys_minimal}"))
+    } else {
+      
+      cli_message(var_used = tasks,
+                  info = "{cli::style_bold((cli::col_yellow('Overwriten')))} file '_targets.R' to include the following parameters",
+                  details = "{new_parameters_monkeys_minimal}")
+      response_prompt = 1
+      
+    }
+    
+    if (response_prompt == 1) {
+      
+      # Create Backup file
+      if (file.exists(paste0(folder, "/_targets.R"))) file.rename(from = paste0(folder, "/_targets.R"), to = paste0(folder, "/_targets_old.R"))
+      
+      # RENAME _targets_automatic_file.R as _targets.R. _targets_automatic_file.R was created in the previous step
+      file.rename(from = paste0(folder, "/_targets_automatic_file.R"), to = paste0(folder, "/_targets.R"))
+      
+      
+      
+      # END Message
+      jsPsychHelpeR::cli_message(h2_title = "All done", 
+                  success = "NEW '_targets.R' created"
+      )
+      
+      
+    } else {
+      cli::cli_alert_warning("OK, nothing done\n")
+    }
+    
+  }
+  
+}
+
+
+#' setup_folders
+#' Extract jsPsychMonkeys.zip and make sure we have all necessary folders in a specific location
+#'
+#' @param folder destination folder for the project
+#' @param extract_zip If TRUE, extracts jsPsychMonkeys.zip to folder
+#'
+#' @return NULL
+#' @export
+#'
+#' @examples setup_folders(tempdir())
+setup_folders <- function(folder, extract_zip = FALSE) {
+  
+  # TODO: ADD check about empty folder and ASK user if we should delete contents
+  
+  # Avoid spaces in folder path because other functions (e.g. update_data) won't work if there are spaces
+  if (grepl(" ", folder)) cli::cli_abort("The folder path should NOT have spaces. You can replace {.code {folder}} for {.code {gsub(' ', '', folder)}}")
+  
+  if (extract_zip == TRUE) {
+    # Make sure folder exists and extract jsPsychMonkeys.zip there
+    if (!dir.exists(folder)) dir.create(folder)
+    
+    # Location of jsPsychMonkeys.zip
+    if ("jsPsychMonkeys" %in% utils::installed.packages()) {
+      jsPsychMonkeys_zip = system.file("templates", "jsPsychMonkeys.zip", package = "jsPsychMonkeys")
+    } else {
+      jsPsychMonkeys_zip = "inst/templates/jsPsychMonkeys.zip"
+    }
+    
+    utils::unzip(jsPsychMonkeys_zip, exdir = folder)
+    cli::cli_alert_success("jsPsychMonkeys project extracted to {.code {folder}}\n")
+    
+  }
+  
+  # Necessary folders
+  # necessary_folders = c(paste0("data/", pid), # data/manual_correction
+  #                       "outputs/backup", "outputs/data", "outputs/plots", "outputs/reliability", "outputs/reports", "outputs/tables", "outputs/tests_outputs", 
+  #                       ".vault/data_vault", ".vault/Rmd", ".vault/outputs/data", ".vault/outputs/reports")
+  # 
+  necessary_folders = c(".vault", "outputs/DF", "outputs/errors", "outputs/log", "outputs/screenshots", "outputs/source")
+  
+  
+  if (all(necessary_folders %in% dir(folder, recursive = TRUE, include.dirs = TRUE, all.files = TRUE))) {
+    cli::cli_alert_success("All the necessary folders are present\n")
+  } else {
+    invisible(purrr::map(paste0(folder, "/", necessary_folders), dir.create, recursive = TRUE, showWarnings = FALSE))
+    system("chmod 700 -R .vault/")
+    cli::cli_alert_success("Created necessary folders: {.pkg {necessary_folders}}\n")
+  }
+  
+}
+
+#' Create a jsPsychMonkeys project for your data
+#'
+#' run_initial_setup() will read your data and create a jsPsychMonkeys project 
+#' tailoring the _targets.R file to the tasks included in the data.
+#'
+#' @param pid project id
+#' @param download_files Download the data files? FALSE / TRUE
+#' - If TRUE, requires sFTP server credentials to be located in `.vault/credentials`
+#' - See `.vault/credentials_TEMPLATE` for more details
+#' @param data_location Local folder where the raw data for the project is located
+#' @param download_task_script should download the task scripts? (requires server credentials) FALSE / TRUE
+#' @param dont_ask answer YES to all questions so the process runs uninterrupted. This will: 
+#' @param folder location for the project
+#' @param sensitive_tasks short names of the sensitive tasks in the protocol, if any
+#' @param open_rstudio Open RStudio with the new project TRUE / FALSE
+#'
+#' @return Opens a new RStudio project
+#' @export
+#' @examples 
+#' run_initial_setup(pid = 999, download_files = FALSE,
+#' data_location = system.file("extdata", package = "jsPsychMonkeys"),
+#' download_task_script = FALSE, 
+#' folder = tempdir(), 
+#' sensitive_tasks = c(""), dont_ask = TRUE, open_rstudio = FALSE)
+
+run_initial_setup <- function(pid, download_files = FALSE, data_location = NULL, download_task_script = FALSE, folder =  "~/Downloads/jsPsychMonkeystest", sensitive_tasks = c(""), dont_ask = FALSE, open_rstudio = TRUE) {
+  
+  # CHECKS
+  if (grepl("\\.zip", data_location)) cli::cli_abort("`data_location` should be a folder ")
+  if (download_files == FALSE & is.null(data_location)) cli::cli_abort("Either `download_files` or `data_location` need to be set. Otherwise, I don't have access to the project's data!")
+  if (download_files == TRUE & !is.null(data_location)) cli::cli_abort("Only one of `download_files` or `data_location` must be set.")
+  
+  if (dont_ask == TRUE) response_prompt = 1
+  folder_data = paste0(folder, "/data/", pid, "/")
+  
+  credentials_exist = file.exists(".vault/.credentials") # TODO: location of credentials for other users. If not in jsPsychMonkeys folder, won't be able to Download
+  
+  # CHECK if NO files in project's folder & NO credentials to download
+  if (is.null(data_location) & credentials_exist == FALSE) {
+    
+    cli_message(var_used = pid, 
+                h1_title = "ERROR", 
+                danger = "Can't access .csv files for protocol `{pid}`:\n- No files in `data/{pid}`\n- `data_location` parameter is empty \n- `.vault/credentials` file not present",
+                info = "You can either:\n- manually download files to `data/{pid}`\n- edit `.vault/credentials_TEMPLATE` and rename it to `.vault/credentials`")
+    
+    cli::cli_abort("No way to get the protocol's .csv files")
+    
+  }
+  
+  
+  # ASK FOR USER PERMISSION
+  if (dont_ask == FALSE)  response_prompt = menu(choices = c("Yes", "No"), 
+                                                 title = 
+                                                   cli_message(h1_title = "Initial SETUP", 
+                                                               info = "Do you want to run the {.pkg initial setup}?",
+                                                               details = "This will {cli::style_bold((cli::col_red('DELETE')))} the _targets/ folder, 
+                                                                         {cli::style_bold((cli::col_green('install')))} necessary packages, 
+                                                                         {cli::style_bold((cli::col_green('copy')))} configuration files, 
+                                                                         {cli::style_bold((cli::col_yellow('replace')))} the _targets.R, etc."))
+  
+  
+  
+  if (response_prompt == 1) {
+    
+    # 1) Run to make sure you have all the necessary packages and folders -------
+    
+    cli_message(h1_title = "Setup")
+    setup_folders(pid = pid, folder = folder, extract_zip = TRUE)
+    
+    
+    
+    # 2) Copy .csv/.zip files to data/[YOUR_PROJECT_ID]/  ------------
+    # DOWNLOAD from server (needs a .vault/credentials file) (rename and edit .vault/credentials_TEMPLATE)
+    # OR Copy from data_location
+    
+    cli_message(h1_title = "Get data files and task script")
+    if (download_files == TRUE) {
+      
+      if (!credentials_exist) cli::cli_abort("Can't find server credentials in '.vault/.credentials'")
+      
+      update_data(pid = pid, folder = folder) 
+      
+    } else if (download_files == FALSE) {
+      
+      # We will check if there is only a zip file or multiple csv's in create_targets_file(). No need to do it here too
+      
+      cli::cli_alert_info("Will copy files from {.code {data_location}}")
+      
+      # Copy files from data_location to folder_data
+      files_raw = list.files(path = data_location, pattern = "*.csv|*.zip", full.names = TRUE)
+      file.copy(from = files_raw, to = paste0(folder_data,  basename(files_raw)))
+      
+      # Files present in destination (after copying)
+      files_destination = list.files(folder_data, pattern = "*.csv|*.zip", full.names = FALSE)
+      cli::cli_alert_info("{length(files_destination)} files in 'data/{pid}'")
+      
+    }
+    
+    # Make sure sensitive tasks are in .vault
+    move_sensitive_tasks_to_vault(pid = pid, folder = folder, sensitive_tasks = sensitive_tasks)
+    
+    # Files present in destination (after copying)
+    files_pid = list.files(folder_data, pattern = "*.csv|*.zip", full.names = FALSE)
+    
+    if (download_task_script == TRUE) {
+      
+      cli_message(h1_title = "Download task script")
+      
+      # Get protocol without data and zip it in data/protocol_PID.zip
+      # TODO: download protocol to 'folder'. Now will download to the wd
+      get_zip(pid, what = "protocol", dont_ask = dont_ask)
+      
+      
+    } else if (download_task_script == FALSE) {
+      
+      cli::cli_alert_info("Will NOT download task script")
+      
+    }
+    
+    
+    # 3) Create a _targets.R file for your data -------------------------------
+    
+    cli_message(var_used = folder, h1_title = "Create _targets.R file in {.code {folder}}")
+    create_targets_file(pid = pid, folder = folder, dont_ask = dont_ask)
+    
+    # Copy tests to tests/testthat/
+    tests_templates_origin = list.files(paste0(folder, "/inst/templates/tests"), full.names = TRUE, recursive = TRUE)
+    tests_templates_destination = gsub("inst/templates/", "", tests_templates_origin)
+    folder_destination_snaps = paste0(folder, "/tests/testthat/_snaps/snapshots/") # Create needed folders
+    if(!dir.exists(folder_destination_snaps)) dir.create(folder_destination_snaps, recursive = TRUE)
+    file.copy(tests_templates_origin, tests_templates_destination, overwrite = TRUE)
+    
+    
+    cli_message(var_used = folder, h1_title = "Initial setup successful", 
+                success = "The new RStudio project is in {.code {folder}}",
+                info = "Open `run.R` there to start",
+                
+                details = cli::col_grey("Use the following commands to start the data preparation:"),
+                list = c("Visualize pipeline: {.code targets::tar_visnetwork()}",
+                         "Delete cache: {.code targets::tar_destroy()}", 
+                         "Start data preparation: {.code targets::tar_make()}")
+    )
+    
+    # Open _targets.R and run.R
+    if (Sys.getenv("RSTUDIO") == "1" & open_rstudio == TRUE) {
+      cli_message(info = "Opening new RStudio project")
+      
+      rstudioapi::openProject(folder, newSession = TRUE)
+      # invisible(rstudioapi::navigateToFile("_targets.R"))
+      # invisible(rstudioapi::navigateToFile("run.R"))
+    } else {
+      
+      cli_message(var_used = folder, info = "Your RStudio project is in  {.code {folder}}")
+      
+    }
+    
+    
+  } else {
+    
+    cli::cli_alert_warning("OK, nothing done")
+    
+  }
+}
+
+
 # SAFER functions ---------------------------------------------------------
 
-launch_task_safely = safely(launch_task)
-
-
+# In z_safely_helper_functions.R so it's the last function to load
