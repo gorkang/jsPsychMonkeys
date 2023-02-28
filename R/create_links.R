@@ -75,27 +75,45 @@ create_links <-
     # LOCAL
     } else {
 
+      # TODO: should check if folder has write permissions and leave it as is if possible
+
+      # # Check if we have write permission
+      # write_permission = file.access(parameters_monkeys$task$local_folder_tasks, 2) == 0
+      #
+      # # Give permissions [TODO: review if this works on Windows]
+      # if (!write_permission) system(paste0("chmod 777 ", parameters_monkeys$task$local_folder_tasks, " * -R"), intern = TRUE)
+
+
       # If folder NOT in Downloads, make a copy (Selenium can only access ~/Downloads)
-      if (!grepl("Downloads", parameters_monkeys$task$local_folder_tasks)) {
-        source_folder = parameters_monkeys$task$local_folder_tasks
-        destination_folder = paste0("~/Downloads/JSPSYCH/")
-
-        # CHECK: if can't find given folder, try as if it is an absolute path
-        if (length(dir(source_folder)) == 0) source_folder = paste0("/", source_folder)
-
-        final_complete_folder = paste0(gsub("~/", "", destination_folder), basename(source_folder), "/")
-        cat("",
-            crayon::yellow("Folder does not exist or is not accesible:"), source_folder, "\n",
-            crayon::green("Copying to:"), final_complete_folder, "\n")
-        if (!dir.exists(destination_folder)) dir.create(destination_folder)
-        file.copy(source_folder, destination_folder, recursive=TRUE, copy.mode = TRUE)
-
-        # Change local_folder_tasks parameter to accessible folder
-        parameters_monkeys$task$local_folder_tasks = final_complete_folder
-      }
+      # if (!grepl("Downloads", parameters_monkeys$task$local_folder_tasks)) {
+      #   source_folder = parameters_monkeys$task$local_folder_tasks
+      #   destination_folder = paste0("~/Downloads/JSPSYCH/")
+      #
+      #   # CHECK: if can't find given folder, try as if it is an absolute path
+      #   if (length(dir(source_folder)) == 0) source_folder = paste0("/", source_folder)
+      #
+      #   final_complete_folder = paste0(gsub("~/", "", destination_folder), basename(source_folder), "/")
+      #
+      #   cat("",
+      #       crayon::yellow("Folder does not exist or is not accesible:"), source_folder, "\n",
+      #       crayon::green("Copying to:"), final_complete_folder, "\n")
+      #   if (!dir.exists(destination_folder)) dir.create(destination_folder)
+      #   file.copy(source_folder, destination_folder, recursive=TRUE, copy.mode = TRUE)
+      #
+      #   # Change local_folder_tasks parameter to accessible folder
+      #   # REVIEW: DOES THIS IS EXPORTED to other targets?
+      #   parameters_monkeys$task$local_folder_tasks = final_complete_folder
+      # }
 
       # Get folder inside downloads
-      post_downloads_folder = gsub(".*Downloads(.*)", "\\1", parameters_monkeys$task$local_folder_tasks)
+      if (!grepl("Downloads", parameters_monkeys$task$local_folder_tasks)) {
+        if (DEBUG == TRUE) cli::cli_alert_info("Folder NOT inside ~/Downloads")
+        post_downloads_folder = basename(parameters_monkeys$task$local_folder_tasks)
+      } else {
+        post_downloads_folder = gsub(".*Downloads(.*)", "\\1", parameters_monkeys$task$local_folder_tasks)
+      }
+
+
       # By default, use local
       # OLD: links_tasks = paste0("file:///home/seluser/", parameters_monkeys$task$local_folder_tasks, "/index.html?pid=", parameters_monkeys$task$pid, uid_string)
 
@@ -117,10 +135,7 @@ create_links <-
 
     # OUTPUT ------------------------------------------------------------------
 
-    output_list = list(
-      # remDr = remDr,
-      # container_name = container_name,
-      links = links_tasks)
+    output_list = list(links = links_tasks)
 
     return(output_list)
 
