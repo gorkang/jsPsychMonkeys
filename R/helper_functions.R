@@ -385,17 +385,42 @@ tar_make_future_rowwise <- function(TARGETS, uids) {
 #' @examples
 check_Downloads <- function(parameters_monkeys, uid = "", links_tar = "") {
 
+  # DEBUG
+  # parameters_monkeys
+  # uid = "3"
+
   pid = parameters_monkeys$task_params$pid
   download_folder = parameters_monkeys$docker$folder_downloads
   local_or_server = parameters_monkeys$task_params$local_or_server
   DEBUG = parameters_monkeys$debug$DEBUG
 
+
   # Do this only in local protocols
   if (local_or_server == "local") {
 
+    folder_protocol = basename(parameters_monkeys$task_params$local_folder_tasks)
+
     # uid is used in copy_files_to_data so only that participant's data is copyied
-    if (DEBUG == TRUE) cli::cli_alert_info(paste0("Looking for files for pid = {pid} and uid = {uid}"))
+    if (DEBUG == TRUE) cli::cli_alert_info(paste0("Looking for files for pid = {pid} (/{folder_protocol}) and uid = {uid}"))
     files_downloaded = list.files(download_folder, pattern = paste0("^", pid, ".*", uid, "\\.csv"))
+
+    # If no files are found when looking for files for a specific uid, try harder
+    if (length(files_downloaded) == 0 & uid != "") {
+
+      all_csv_found = list.files(download_folder, pattern = paste0("^.*", uid, "\\.csv"))
+
+      if (length(all_csv_found) > 0) {
+        pid_found = unique(gsub("([0-9]{1,10})_.*", "\\1", all_csv_found))
+
+        cli::cli_h1("No csv files found using pid = {pid} and uid = {uid}")
+        cli::cli_alert_info("Ignoring pid = {pid}, I found {length(all_csv_found)} files: \n{all_csv_found}\n")
+
+        cli::cli_alert_danger("You should rename the folder_protocol {.code {folder_protocol}} so the numeric part ({parameters_monkeys$task_params$pid}) matches the `pid` in config.js!")
+      } else {
+        cli::cli_alert_warning("No csv files found using uid = {uid}")
+      }
+
+    }
 
     return(files_downloaded)
   }
@@ -962,9 +987,10 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
 
 
 
-  HERE = getwd()
+  current_WD = getwd()
   RND_int = round(runif(1, 0, 10000), 0)
   FOLDER = paste0(tempdir(), "/Monkeys_", RND_int)
+
   jsPsychMonkeys::create_monkeys_project(folder = FOLDER,
                                          credentials_folder = credentials_folder,
                                          uid = uid,
@@ -993,9 +1019,14 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
 
 
 
-  make_and_clean_monkeys <- function(FOLDER, clean_up_targets, credentials_folder, sequential_parallel, number_of_cores) {
+  make_and_clean_monkeys <- function(FOLDER, clean_up_targets, credentials_folder, sequential_parallel, number_of_cores, current_WD) {
 
+    cli::cli_alert_info("Changing WD to {.code {FOLDER}}")
     setwd(dir = FOLDER)
+
+    INITIAL_files = list.files(paste0(local_folder_tasks, "/.data"), pattern = "csv")
+
+
 
     cli::cli_h1("Releasing monkeys")
 
@@ -1006,8 +1037,12 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
       targets::tar_make_future(workers = number_of_cores)
 
     } else {
+
       targets::tar_make()
+
     }
+
+    FINAL_files = list.files(paste0(local_folder_tasks, "/.data"), pattern = "csv")
 
 
 
@@ -1029,16 +1064,33 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
 
     }
 
-    setwd(dir = HERE)
+    cli::cli_alert_info("Changing WD back to {.code {current_WD}}")
+    setwd(dir = current_WD)
+
+    NEW_files = FINAL_files[!FINAL_files %in% INITIAL_files]
+
+    return(NEW_files)
   }
 
   make_and_clean_monkeys_safely = purrr::safely(make_and_clean_monkeys)
 
-  if (clean_up_targets == TRUE) {
-    OUTPUT = make_and_clean_monkeys_safely(FOLDER, clean_up_targets, credentials_folder, sequential_parallel, number_of_cores)
-    cli::cli_alert_info(OUTPUT)
+  OUTPUT = make_and_clean_monkeys_safely(FOLDER, clean_up_targets, credentials_folder, sequential_parallel, number_of_cores, current_WD)
 
+  # Output message
+  if (!is.null(OUTPUT$error)) {
+    message_out = paste0("Something went wrong", OUTPUT$error)
+  } else if (!is.null(OUTPUT$result)) {
+    message_out = paste0("The Monkeys completed ", length(OUTPUT$result), " tasks.")
   }
+
+  cli::cli_alert_info(message_out)
+
+
+  OUTPUT_fun = list(message_out = message_out,
+                    output = OUTPUT$result,
+                    error = OUTPUT$error)
+
+  return(OUTPUT_fun)
 
 }
 

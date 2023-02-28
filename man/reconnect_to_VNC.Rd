@@ -22,5 +22,5 @@ reconnect_to_VNC(
 reconnect_to_VNC
 }
 \examples{
-reconnect_to_VNC("test1")
+reconnect_to_VNC()
 }

@@ -133,7 +133,7 @@ complete_task <-
             if (try_number > 1) Sys.sleep(wait_retry_loop)
 
             # Last chance, take 3 extra seconds to give things time to load
-            if (try_number == 9) Sys.sleep(wait_retry_loop + 3)
+            # if (try_number == 9) Sys.sleep(wait_retry_loop + 3)
 
             # Make sure there are no alerts before retrying
             check_accept_alert(wait_retry_loop, remDr, DEBUG)
