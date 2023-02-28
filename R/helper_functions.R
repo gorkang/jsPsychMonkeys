@@ -1024,6 +1024,15 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
     cli::cli_alert_info("Changing WD to {.code {FOLDER}}")
     setwd(dir = FOLDER)
 
+
+    # TODO: CHECK files in server here and in FINAL_files
+    jsPsychHelpeR::sync_server_local(server_folder = paste0("https://cscn.uai.cl/lab/public/instruments/protocols/", server_folder_tasks),
+                                     local_folder = paste0(local_folder_tasks, "/.data"),
+                                     direction = "server_to_local", only_test = TRUE)
+
+
+    # This works for local protocols
+    # TODO: see if list_data_server() below works on Windows
     INITIAL_files = list.files(paste0(local_folder_tasks, "/.data"), pattern = "csv")
 
 
@@ -1042,6 +1051,7 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
 
     }
 
+    # This works for local protocols
     FINAL_files = list.files(paste0(local_folder_tasks, "/.data"), pattern = "csv")
 
 
@@ -1067,6 +1077,7 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
     cli::cli_alert_info("Changing WD back to {.code {current_WD}}")
     setwd(dir = current_WD)
 
+    # Works only for local protocols
     NEW_files = FINAL_files[!FINAL_files %in% INITIAL_files]
 
     return(NEW_files)
@@ -1083,6 +1094,9 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
     message_out = paste0("The Monkeys completed ", length(OUTPUT$result), " tasks.")
   }
 
+  # For the server
+  if (!is.null(server_folder_tasks)) message_out = paste0("The Monkeys completed the protocol.")
+
   cli::cli_alert_info(message_out)
 
 
@@ -1093,6 +1107,76 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
   return(OUTPUT_fun)
 
 }
+
+
+#' List files in the .data folder in the server
+#'
+#' @param pid protocol id
+#' @param list_credentials list with credentials
+#'
+#' @return
+#' @export
+#'
+#' @examples
+list_data_server <- function(pid, list_credentials = NULL) {
+
+  # pid = "999"
+  # list_credentials = NULL
+
+  # Parameters ---
+  dry_run = " --dry-run "
+
+  # Check and prepare local folder and path
+  # if (!file.exists(local_folder)) dir.create(local_folder)
+  local_folder = normalizePath(here::here("."))
+  local_folder_terminal = gsub(" ", "\\\\ ", local_folder)
+
+
+  # CHECKS we have credentials and necessary software ---
+
+  # Get server credentials
+  if (is.null(list_credentials)) {
+    list_credentials = source(here::here(".vault/.credentials"))
+    credentials_exist = file.exists(here::here(".vault/.credentials"))
+  } else {
+    credentials_exist = TRUE
+  }
+
+
+  # credentials_exist = file.exists(here::here(".vault/.credentials"))
+  SSHPASS = Sys.which("sshpass") # Check if sshpass is installed
+  RSYNC = Sys.which("rsync") # Check if rsync is installed
+
+
+  if (credentials_exist) {
+    # sshpass and rsync installed (?)
+    if (SSHPASS != "" & RSYNC != "") {
+      # cli::cli_text(cli::col_green("{cli::symbol$tick} "), "rsync installed and credentials exist")
+    } else {
+      cli::cli_abort("'sshpass' or 'rsync' not installed. Can't use `sync_server_local()`")
+    }
+  } else {
+    cli::cli_abort("Can't find server credentials in '.vault/.credentials'")
+  }
+
+  # GET ---
+
+  # DOWNLOAD server to local
+  OUT =
+    suppressWarnings(
+      system(
+        paste0('sshpass -p ', list_credentials$value$password, ' rsync -av ', dry_run, ' --rsh=ssh ',
+               list_credentials$value$user, "@", list_credentials$value$IP, ":", list_credentials$value$main_FOLDER, pid, '/.data/ ',
+               here::here(local_folder_terminal), '/ '
+        ), intern = TRUE
+      )
+    )
+
+  length_OUT = length(OUT)
+  clean_OUT = tibble::tibble(files = OUT[-c(1:3,(length_OUT-3):length(OUT))])
+  return(clean_OUT)
+}
+
 
 # SAFELY functions ----
 
