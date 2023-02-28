@@ -6,6 +6,7 @@
 \usage{
 release_the_monkeys(
   uid = 1,
+  credentials_folder = NULL,
   browserName = "chrome",
   big_container = FALSE,
   keep_alive = FALSE,
@@ -27,7 +28,8 @@ release_the_monkeys(
   forced_refresh = NULL,
   forced_seed = NULL,
   dont_ask = TRUE,
-  open_rstudio = FALSE
+  open_rstudio = FALSE,
+  clean_up_targets = FALSE
 )
 }
 \arguments{

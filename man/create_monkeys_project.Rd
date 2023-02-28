@@ -6,6 +6,7 @@
 \usage{
 create_monkeys_project(
   folder = "~/Downloads/",
+  credentials_folder = NULL,
   uid = 1,
   browserName = "chrome",
   big_container = FALSE,

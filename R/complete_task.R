@@ -153,7 +153,7 @@ complete_task <-
 
             # Last try, show console errors
             if (continue_elements == FALSE & try_number == 10) {
-              cli::cli_alert_danger("Tried {try_number} times but could not find elements. Stopping")
+              if (DEBUG == TRUE) cli::cli_alert_danger("Tried {try_number} times but could not find elements. Stopping")
               browser_console = remDr$log(type = "browser")
               if (length(browser_console) > 0) browser_console_clean = browser_console |> bind_rows() |> filter(level == "SEVERE") |> pull(message)
               if (length(browser_console_clean) > 0) cli::cli_alert_danger("Browser console: \n{.code {browser_console_clean}}")

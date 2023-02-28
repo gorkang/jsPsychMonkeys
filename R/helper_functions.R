@@ -552,10 +552,7 @@ create_targets_file <- function(folder = "~/Downloads/",
   # dont_ask = FALSE
 
 
-
-
-
-
+  # Prepare all parameters
   if (!is.null(local_folder_tasks)) FOLDER_TASKS = glue::glue('local_folder_tasks = "{local_folder_tasks}"') # No comma at the end because will be the last element
   if (!is.null(server_folder_tasks)) FOLDER_TASKS = glue::glue('server_folder_tasks = "{server_folder_tasks}"')# No comma at the end because will be the last element
 
@@ -580,30 +577,32 @@ create_targets_file <- function(folder = "~/Downloads/",
   if (!is.null(dont_ask)) string_dont_ask = glue::glue('dont_ask = {dont_ask},')
 
 
-string_uid = ifelse(exists("string_uid"), string_uid, "")
-string_browserName = ifelse(exists("string_browserName"), string_browserName, "")
-string_big_container = ifelse(exists("string_big_container"), string_big_container, "")
-string_keep_alive = ifelse(exists("string_keep_alive"), string_keep_alive, "")
-string_folder_downloads = ifelse(exists("string_folder_downloads"), string_folder_downloads, "")
-string_DEBUG = ifelse(exists("string_DEBUG"), string_DEBUG, "")
-string_screenshot = ifelse(exists("string_screenshot"), string_screenshot, "")
-string_debug_file = ifelse(exists("string_debug_file"), string_debug_file, "")
-string_console_logs = ifelse(exists("string_console_logs"), string_console_logs, "")
-string_open_VNC = ifelse(exists("string_open_VNC"), string_open_VNC, "")
-string_pid = ifelse(exists("string_pid"), string_pid, "")
-string_uid_URL = ifelse(exists("string_uid_URL"), string_uid_URL, "")
-string_disable_web_security = ifelse(exists("string_disable_web_security"), string_disable_web_security, "")
-string_initial_wait = ifelse(exists("string_initial_wait"), string_initial_wait, "")
-string_wait_retry = ifelse(exists("string_wait_retry"), string_wait_retry, "")
-string_forced_random_wait = ifelse(exists("string_forced_random_wait"), string_forced_random_wait, "")
-string_forced_refresh = ifelse(exists("string_forced_refresh"), string_forced_refresh, "")
-string_forced_seed = ifelse(exists("string_forced_seed"), string_forced_seed, "")
-string_dont_ask = ifelse(exists("string_dont_ask"), string_dont_ask, "")
+  # Make sure not parameter is empty
+  string_uid = ifelse(exists("string_uid"), string_uid, "")
+  string_browserName = ifelse(exists("string_browserName"), string_browserName, "")
+  string_big_container = ifelse(exists("string_big_container"), string_big_container, "")
+  string_keep_alive = ifelse(exists("string_keep_alive"), string_keep_alive, "")
+  string_folder_downloads = ifelse(exists("string_folder_downloads"), string_folder_downloads, "")
+  string_DEBUG = ifelse(exists("string_DEBUG"), string_DEBUG, "")
+  string_screenshot = ifelse(exists("string_screenshot"), string_screenshot, "")
+  string_debug_file = ifelse(exists("string_debug_file"), string_debug_file, "")
+  string_console_logs = ifelse(exists("string_console_logs"), string_console_logs, "")
+  string_open_VNC = ifelse(exists("string_open_VNC"), string_open_VNC, "")
+  string_pid = ifelse(exists("string_pid"), string_pid, "")
+  string_uid_URL = ifelse(exists("string_uid_URL"), string_uid_URL, "")
+  string_disable_web_security = ifelse(exists("string_disable_web_security"), string_disable_web_security, "")
+  string_initial_wait = ifelse(exists("string_initial_wait"), string_initial_wait, "")
+  string_wait_retry = ifelse(exists("string_wait_retry"), string_wait_retry, "")
+  string_forced_random_wait = ifelse(exists("string_forced_random_wait"), string_forced_random_wait, "")
+  string_forced_refresh = ifelse(exists("string_forced_refresh"), string_forced_refresh, "")
+  string_forced_seed = ifelse(exists("string_forced_seed"), string_forced_seed, "")
+  string_dont_ask = ifelse(exists("string_dont_ask"), string_dont_ask, "")
 
 
     # Read template
     template = readLines(paste0(folder, "/inst/templates/_targets_TEMPLATE.R"))
 
+    # Create parameters_monkeys_minimal code
     new_parameters_monkeys_minimal =
       glue::glue('
     parameters_monkeys_minimal = list(
@@ -630,12 +629,8 @@ string_dont_ask = ifelse(exists("string_dont_ask"), string_dont_ask, "")
     ')
 
 
-    # Prepare targets section and joins section
-
-    # Replace targets and joins sections
+    # Include parameters_monkeys_minimal
     final_file = gsub("#PARAMETERS_HERE", new_parameters_monkeys_minimal, template)
-    # final_file
-
 
 
     # Create final file
@@ -656,6 +651,7 @@ string_dont_ask = ifelse(exists("string_dont_ask"), string_dont_ask, "")
       jsPsychHelpeR::cli_message(var_used = new_parameters_monkeys_minimal,
                   info = "{cli::style_bold((cli::col_yellow('Overwriten')))} file '_targets.R' to include the following parameters",
                   details = "{new_parameters_monkeys_minimal}")
+
       response_prompt = 1
 
     }
@@ -730,7 +726,7 @@ setup_folders <- function(folder, extract_zip = FALSE) {
     cli::cli_alert_success("All the necessary folders are present\n")
   } else {
     invisible(purrr::map(paste0(folder, "/", necessary_folders), dir.create, recursive = TRUE, showWarnings = FALSE))
-    system("chmod 700 -R .vault/")
+    system(paste0("chmod 700 -R ", folder, "/.vault/"))
     cli::cli_alert_success("Created necessary folders: {.pkg {necessary_folders}}\n")
   }
 
@@ -776,6 +772,7 @@ setup_folders <- function(folder, extract_zip = FALSE) {
 #' sensitive_tasks = c(""), dont_ask = TRUE, open_rstudio = FALSE)
 
 create_monkeys_project <- function(folder = "~/Downloads/",
+                                   credentials_folder = NULL,
                                    uid = 1,
                                    browserName = "chrome",
                                    big_container = FALSE,
@@ -809,8 +806,7 @@ create_monkeys_project <- function(folder = "~/Downloads/",
                                                  title =
                                                    jsPsychHelpeR::cli_message(h1_title = "Initial SETUP",
                                                                info = "Do you want to run the {.pkg initial setup}?",
-                                                               details = "This will {cli::style_bold((cli::col_red('DELETE')))} the _targets/ folder,
-                                                                         {cli::style_bold((cli::col_green('install')))} necessary packages,
+                                                               details = "This will {cli::style_bold((cli::col_green('install')))} necessary packages,
                                                                          {cli::style_bold((cli::col_green('copy')))} configuration files,
                                                                          {cli::style_bold((cli::col_yellow('replace')))} the _targets.R, etc."))
 
@@ -824,6 +820,19 @@ create_monkeys_project <- function(folder = "~/Downloads/",
     # setup_folders(pid = pid, folder = folder, extract_zip = TRUE)
     setup_folders(folder = folder, extract_zip = TRUE)
 
+    # Copy credentials files to new project
+    if (!is.null(credentials_folder)) {
+
+      cli::cli_h1("Copying credentials")
+      FILES_temp =  c("SERVER_PATH.R", ".credentials")
+      FILES_to_COPY = c(paste0(credentials_folder, FILES_temp))
+      FILES_DESTINATION = c(paste0(folder, "/.vault/", FILES_temp))
+
+      cli::cli_inform("FILES_to_COPY: {FILES_to_COPY} \n
+                      FILES_DESTINATION: {FILES_DESTINATION}")
+
+      file.copy(from = FILES_to_COPY, to = FILES_DESTINATION)
+    }
 
 
     # 2) Create a _targets.R file for your data -------------------------------
@@ -864,26 +873,12 @@ create_monkeys_project <- function(folder = "~/Downloads/",
     # if(!dir.exists(folder_destination_snaps)) dir.create(folder_destination_snaps, recursive = TRUE)
     # file.copy(tests_templates_origin, tests_templates_destination, overwrite = TRUE)
 
-
-    jsPsychHelpeR::cli_message(var_used = folder, h1_title = "Initial setup successful",
-                success = "The new RStudio project is in {.code {folder}}",
-                info = "Open `run.R` there to start",
-
-                details = cli::col_grey(""),
-                list = c("")
-    )
-
-    # Open _targets.R and run.R
+    # Open RStudio project
     if (Sys.getenv("RSTUDIO") == "1" & open_rstudio == TRUE) {
-      jsPsychHelpeR::cli_message(info = "Opening new RStudio project")
-
+      jsPsychHelpeR::cli_message(var_used = folder, info = "Opening new RStudio project {.code {folder}}")
       rstudioapi::openProject(folder, newSession = TRUE)
-      # invisible(rstudioapi::navigateToFile("_targets.R"))
-      # invisible(rstudioapi::navigateToFile("run.R"))
     } else {
-
-      jsPsychHelpeR::cli_message(var_used = folder, info = "Your RStudio project is in  {.code {folder}}")
-
+      cli::cli_alert_success("The new RStudio project is in {.code {folder}}")
     }
 
 
@@ -927,6 +922,7 @@ create_monkeys_project <- function(folder = "~/Downloads/",
 #'
 #' @examples
 release_the_monkeys <- function(uid = 1,
+                                credentials_folder = NULL,
                                 browserName = "chrome",
                                 big_container = FALSE,
                                 keep_alive = FALSE,
@@ -948,11 +944,23 @@ release_the_monkeys <- function(uid = 1,
                                 forced_refresh = NULL,
                                 forced_seed = NULL,
                                 dont_ask = TRUE,
-                                open_rstudio = FALSE) {
+                                open_rstudio = FALSE,
+                                clean_up_targets = FALSE) {
+
+
+
+
+  # CHECKS ---
+
+if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("To run tasks on server I need `credentials_folder`")
+
+
 
   HERE = getwd()
-  FOLDER = tempdir()
+  RND_int = round(runif(1, 0, 10000), 0)
+  FOLDER = paste0(tempdir(), "/Monkeys_", RND_int)
   jsPsychMonkeys::create_monkeys_project(folder = FOLDER,
+                                         credentials_folder = credentials_folder,
                                          uid = uid,
                                          browserName = browserName,
                                          big_container = big_container,
@@ -976,16 +984,47 @@ release_the_monkeys <- function(uid = 1,
                                          forced_seed = forced_seed,
                                          dont_ask = dont_ask,
                                          open_rstudio = open_rstudio)
-  setwd(dir = FOLDER)
 
-  cli::cli_h1("Releasing monkeys")
-  targets::tar_make()
 
-  setwd(dir = HERE)
 
+  make_and_clean_monkeys <- function(FOLDER, clean_up_targets, credentials_folder) {
+
+    setwd(dir = FOLDER)
+
+    cli::cli_h1("Releasing monkeys")
+    targets::tar_make()
+
+    # REMOVE _targets.R
+    if (clean_up_targets == TRUE) {
+      cli::cli_h1("Monkeys tidying up")
+      targets::tar_destroy(ask = FALSE)
+      FILES = list.files(paste0(FOLDER, "/_targets/"), recursive = TRUE, full.names = TRUE)
+      file.remove(FILES)
+
+      if (!is.null(credentials_folder)) {
+
+        FILES_temp =  c("/SERVER_PATH.R", "/.credentials")
+        FILES_DESTINATION = c(paste0(FOLDER, FILES_temp))
+
+        file.remove(FILES_DESTINATION)
+      }
+
+
+    }
+
+    setwd(dir = HERE)
+  }
+
+  make_and_clean_monkeys_safely = purrr::safely(make_and_clean_monkeys)
+
+  if (clean_up_targets == TRUE) {
+    OUTPUT = make_and_clean_monkeys_safely(FOLDER, clean_up_targets, credentials_folder)
+    cli::cli_alert_info(OUTPUT)
+
+  }
 
 }
 
-# SAFER functions ----
+# SAFELY functions ----
 
 # In z_safely_helper_functions.R so it's the last function to load
