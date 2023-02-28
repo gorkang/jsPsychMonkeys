@@ -88,7 +88,7 @@ check_accept_alert <- function(wait_retry = .5, remDr, DEBUG) {
 #' @return
 #' @export
 #'
-#' @examples reconnect_to_VNC("test1")
+#' @examples reconnect_to_VNC()
 reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = NULL, DEBUG = FALSE) {
 
   # DEBUG
@@ -916,6 +916,10 @@ create_monkeys_project <- function(folder = "~/Downloads/",
 #' @param forced_seed
 #' @param dont_ask
 #' @param open_rstudio
+#' @param credentials_folder
+#' @param sequential_parallel
+#' @param number_of_cores
+#' @param clean_up_targets
 #'
 #' @return
 #' @export
@@ -923,6 +927,8 @@ create_monkeys_project <- function(folder = "~/Downloads/",
 #' @examples
 release_the_monkeys <- function(uid = 1,
                                 credentials_folder = NULL,
+                                sequential_parallel = "sequential",
+                                number_of_cores = ceiling(future::availableCores()/2), # Half of available cores
                                 browserName = "chrome",
                                 big_container = FALSE,
                                 keep_alive = FALSE,
@@ -987,12 +993,23 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
 
 
 
-  make_and_clean_monkeys <- function(FOLDER, clean_up_targets, credentials_folder) {
+  make_and_clean_monkeys <- function(FOLDER, clean_up_targets, credentials_folder, sequential_parallel, number_of_cores) {
 
     setwd(dir = FOLDER)
 
     cli::cli_h1("Releasing monkeys")
-    targets::tar_make()
+
+    if (sequential_parallel == "parallel") {
+
+      cli::cli_alert_info("{number_of_cores} monkeys released")
+
+      targets::tar_make_future(workers = number_of_cores)
+
+    } else {
+      targets::tar_make()
+    }
+
+
 
     # REMOVE _targets.R
     if (clean_up_targets == TRUE) {
@@ -1003,8 +1020,8 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
 
       if (!is.null(credentials_folder)) {
 
-        FILES_temp =  c("/SERVER_PATH.R", "/.credentials")
-        FILES_DESTINATION = c(paste0(FOLDER, FILES_temp))
+        FILES_temp =  c("SERVER_PATH.R", ".credentials")
+        FILES_DESTINATION = c(paste0(FOLDER, "/.vault/", FILES_temp))
 
         file.remove(FILES_DESTINATION)
       }
@@ -1018,7 +1035,7 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
   make_and_clean_monkeys_safely = purrr::safely(make_and_clean_monkeys)
 
   if (clean_up_targets == TRUE) {
-    OUTPUT = make_and_clean_monkeys_safely(FOLDER, clean_up_targets, credentials_folder)
+    OUTPUT = make_and_clean_monkeys_safely(FOLDER, clean_up_targets, credentials_folder, sequential_parallel, number_of_cores)
     cli::cli_alert_info(OUTPUT)
 
   }

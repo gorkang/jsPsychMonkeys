@@ -7,6 +7,8 @@
 release_the_monkeys(
   uid = 1,
   credentials_folder = NULL,
+  sequential_parallel = "sequential",
+  number_of_cores = ceiling(future::availableCores()/2),
   browserName = "chrome",
   big_container = FALSE,
   keep_alive = FALSE,
@@ -33,7 +35,7 @@ release_the_monkeys(
 )
 }
 \arguments{
-\item{open_rstudio}{}
+\item{clean_up_targets}{}
 }
 \description{
 release a horde of Monkeys to complete a jsPsychMakeR protocol
