@@ -61,16 +61,19 @@
     <loc>/reference/index.html</loc>
   </url>
   <url>
+    <loc>/reference/list_data_server.html</loc>
+  </url>
+  <url>
     <loc>/reference/parse_elements.html</loc>
+  </url>
+  <url>
+    <loc>/reference/pipe.html</loc>
   </url>
   <url>
     <loc>/reference/reconnect_to_VNC.html</loc>
   </url>
   <url>
     <loc>/reference/release_the_monkeys.html</loc>
-  </url>
-  <url>
-    <loc>/reference/run_initial_setup.html</loc>
   </url>
   <url>
     <loc>/reference/set_parameters.html</loc>

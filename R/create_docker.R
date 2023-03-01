@@ -14,9 +14,9 @@ create_docker <-
     # debug_function("create_docker")
 
 # Packages -------------------------------------------------------------
-  suppressMessages(suppressWarnings(library(RSelenium)))
-  suppressMessages(suppressWarnings(library(dplyr)))
-  suppressMessages(suppressWarnings(library(purrr)))
+  # suppressMessages(suppressWarnings(library(RSelenium)))
+  # suppressMessages(suppressWarnings(library(dplyr)))
+  # suppressMessages(suppressWarnings(library(purrr)))
 
 
 

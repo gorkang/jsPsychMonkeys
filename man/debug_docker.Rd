@@ -7,7 +7,7 @@
 debug_docker(uid_participant)
 }
 \arguments{
-\item{uid_participant}{}
+\item{uid_participant}{uid of participant}
 }
 \description{
 debug_docker

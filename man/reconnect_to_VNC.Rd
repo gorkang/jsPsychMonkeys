@@ -14,6 +14,8 @@ reconnect_to_VNC(
 \arguments{
 \item{container_name}{if empty, show available containers}
 
+\item{just_check}{FALSE / TRUE}
+
 \item{port}{No need to specify one}
 
 \item{DEBUG}{TRUE/FALSE}

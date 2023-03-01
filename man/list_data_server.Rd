@@ -11,6 +11,9 @@ list_data_server(pid, list_credentials = NULL)
 
 \item{list_credentials}{list with credentials}
 }
+\value{
+A tibble with a list of files
+}
 \description{
 List files in the .data folder in the server
 }

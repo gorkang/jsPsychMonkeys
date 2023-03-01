@@ -5,3 +5,9 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+dev/
+admin/
+run.R
+_targets/
+_targets.R
+_targets_packages.R

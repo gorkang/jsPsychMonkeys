@@ -64,29 +64,51 @@
   renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys_0.2.5.tar.gz") # Install package from file
 
 
+  # QUICK
+  source("admin/helper-scripts-admin.R")
+  create_jsPsychHelpeR_zip(add_renv_cache = FALSE)
+  devtools::document()
+  devtools::load_all()
+  devtools::build()
+  renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys_0.2.5.tar.gz") # Install package from file
+
+  # devtools::test() # Packages tests  (~180s) [ FAIL 0 | WARN 0 | SKIP 0 | PASS 3 ]
+  # devtools::check() # Check package (~230s)
+
+
+
 # CHECK functions ----------------------------------------------------------
 
-  # CHECK Main function
-  jsPsychHelpeR::run_initial_setup(pid = 999, data_location = "~/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychHelpeR/data/999", dont_ask = TRUE)
+  # Same as tests in test-release_the_monkeys
 
-  # CHECK project works
-  targets::tar_make()
+  # Create local protocol
+  jsPsychMaker::create_protocol(canonical_tasks = "AIM", folder_output = "~/Downloads/new_protocol_999/", launch_browser = FALSE)
 
-  # Check docker works
-  # rstudioapi::navigateToFile("admin/create_docker.R")
-  jsPsychHelpeR::create_docker_container()
-  PID = 999
-  file.remove(list.files(paste0("~/Downloads/jsPsychHelpeR", PID, "/outputs"), recursive = TRUE, full.names = TRUE))
-  system(paste0("docker run --rm -d --name pid", PID, " -v ~/Downloads/jsPsychHelpeR", PID, "/outputs:/home/project/jsPsychHelpeR/outputs:rw gorkang/jspsychhelper:pid", PID))
+  # Test local protocol
+  jsPsychMonkeys::release_the_monkeys(uid = "1", local_folder_tasks = "~/Downloads/new_protocol_999/", DEBUG = TRUE)
 
-  # ***DEBUG***
-  # docker run --rm -ti -v ~/Downloads/jsPsychHelpeR999/outputs:/home/project/jsPsychHelpeR/outputs:rw gorkang/jspsychhelper:pid999 /bin/bash
+  # Test parallel monkeys
+  jsPsychMonkeys::release_the_monkeys(uid = "18:20", open_VNC = FALSE,
+                                      local_folder_tasks = "~/Downloads/new_protocol_999/",
+                                      DEBUG = TRUE, sequential_parallel = "parallel", # number_of_cores = 2,
+                                      clean_up_targets = TRUE)
+
+
+  uid_random = round(runif(1, 1, 10000), 0)
+  # Test online protocol "test/protocols_DEV/test9999" is a simple protocol with AIM
+  jsPsychMonkeys::release_the_monkeys(uid = uid_random, open_VNC = TRUE,
+                                      server_folder_tasks = "test/protocols_DEV/test9999",
+                                      clean_up_targets = TRUE,
+                                      credentials_folder = "~/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys/.vault/")
 
 
 # CHECK package -----------------------------------------------------------
 
+
+# WARNING: some of the tests KILL ALL THE DOCKER CONTAINERS
+
 devtools::check() # Check package (~30s)
-devtools::test() # Run all tests for the package (This includes test-0run_initial_setup.R, which will create a full project and run the protocol tests in the tmp/project) (~47s): [ FAIL 0 | WARN 0 | SKIP 0 | PASS 115 ]
+devtools::test() # Run all tests for the package (183.2 s): [ FAIL 1 | WARN 0 | SKIP 0 | PASS 2 ]
   # Package Tests are in tests/testthat/
   # Protocol tests are in inst/templates/tests/testthat/
   # Snapshots in inst/templates/tests/testthat/_snaps/snapshots/
@@ -115,7 +137,7 @@ covr::codecov(token = "6c8a8848-9175-446c-9cb8-131378f96356") # UPLOAD coverage 
 
 # If warning about non-ASCII characters. Find character and replace
 # https://altcodeunicode.com/alt-codes-letter-o-with-accents/
-# tools::showNonASCIIfile(file = "R/create_task.R")
+# tools::showNonASCIIfile(file = "R/process_elements.R")
 # stringi::stri_escape_unicode("ó")
 # e.g. ó -> \u00F3
 

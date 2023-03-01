@@ -1,5 +1,5 @@
 Package: jsPsychMonkeys
-Title: Release monkeys to a jsPsych experiment using the R package {targets}, docker and {RSelenium}.
+Title: Release monkeys to a jsPsych experiment using the R package {targets}, docker and {RSelenium}
 Version: 0.2.5
 Date: 2023-02-27
 Authors@R: c(person("Gorka", "Navarrete", email = "gorkang@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7678-8656")))
@@ -11,24 +11,33 @@ BugReports: https://github.com/gorkang/jsPsychMonkeys/issues
 Depends: 
     R (>= 4.2.0)
 Imports: 
+    assertthat,
     callr,
     cli, 
-    dplyr, 
+    dplyr,
+    dtplyr,
     future,
+    future.callr,
     glue,
     here, 
+    jsPsychMaker,
+    jsPsychHelpeR,
     magrittr, 
     purrr, 
     renv, 
+    rvest,
     rlang,
     rmarkdown, 
+    RSelenium,
     rstudioapi,
+    shinyWidgets,
     stringr, 
     stringi,
     tarchetypes, 
     targets, 
     tibble, 
-    tidyr
+    tidyr,
+    XML
 Suggests: 
     knitr,
     testthat (>= 3.0.0),
@@ -36,6 +45,9 @@ Suggests:
     webshot,
     writexl, 
     xml2
+Remotes:
+  gorkang/jsPsychMaker,
+  gorkang/jsPsychHelpeR
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3

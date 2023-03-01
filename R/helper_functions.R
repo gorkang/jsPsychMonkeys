@@ -1,7 +1,7 @@
 #' check_trialids
 #'
 #'Checks that trialid's of an experiment in a folder follow the stantard expected rules
-#' @param local_folder_tasks
+#' @param local_folder_tasks local folders where the tasks are
 #'
 #' @return
 #' @export
@@ -9,9 +9,9 @@
 #' @examples
 check_trialids <- function(local_folder_protocol) {
 
-  suppressMessages(suppressWarnings(library(dplyr)))
-  suppressMessages(suppressWarnings(library(purrr)))
-  suppressMessages(suppressWarnings(library(readr)))
+  # suppressMessages(suppressWarnings(library(dplyr)))
+  # suppressMessages(suppressWarnings(library(purrr)))
+  # suppressMessages(suppressWarnings(library(readr)))
 
   scripts = dir(path = paste0(local_folder_protocol, "/tasks"), pattern = ".js", recursive = TRUE, full.names = TRUE)
   if (length(scripts) == 0) stop(paste("Can't find anything in ", local_folder_protocol))
@@ -54,10 +54,12 @@ check_trialids <- function(local_folder_protocol) {
 #' check_accept_alert
 #' Safely checks if there in an alert and accepts it
 #'
+#' @param wait_retry In seconds, how much to wait before retrying
+#' @param remDr remDr object
+#' @param DEBUG TRUE/FALSE
+#'
 #' @return
 #' @export
-#'
-#' @examples
 check_accept_alert <- function(wait_retry = .5, remDr, DEBUG) {
 
   get_alert <- function(variables) {
@@ -82,6 +84,7 @@ check_accept_alert <- function(wait_retry = .5, remDr, DEBUG) {
 #' reconnect_to_VNC
 #'
 #' @param container_name if empty, show available containers
+#' @param just_check FALSE / TRUE
 #' @param port No need to specify one
 #' @param DEBUG TRUE/FALSE
 #'
@@ -179,7 +182,7 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
 
 #' debug_docker
 #'
-#' @param uid_participant
+#' @param uid_participant uid of participant
 #'
 #' @return
 #' @export
@@ -226,7 +229,7 @@ debug_docker <- function(uid_participant) {
 #'
 #' Loads the parameters used in the functions present in _targets.R to make debugging easier
 #'
-#' @param name_function
+#' @param name_function Name of function to debug
 #'
 #' @return
 #' @export
@@ -261,7 +264,7 @@ debug_function <- function(name_function, uid = NULL) {
     } else if (length(parameter) == 2) {
 
       # If parameter_2 is an existing object, load
-      existing_object = parameter_2[parameter_2 %in% tar_objects()]
+      existing_object = parameter_2[parameter_2 %in% targets::tar_objects()]
 
       # If it's in tar_objects(), load
       if (length(existing_object) == 1) {
@@ -318,14 +321,14 @@ debug_function <- function(name_function, uid = NULL) {
 
     string_function = gsub(name_function, "", DF_function) %>% gsub(" |\\\\n|\\(|\\)", "", .)
     LOADME = stringr::str_extract_all(string_function, "=.*?[,\\$]", simplify = TRUE) %>% gsub("\\$|,|=", "", .) %>% as.vector() %>% unique()
-    existing_objects = LOADME[LOADME %in% tar_objects()]
-    if (length(existing_objects) > 0) tar_load(all_of(existing_objects))
+    existing_objects = LOADME[LOADME %in% targets::tar_objects()]
+    if (length(existing_objects) > 0) targets::tar_load(all_of(existing_objects))
 
     parameters_function_separated = strsplit(string_function, ",") %>% unlist() %>% strsplit(., "=")
 
     # For each of the parameters, applies the load_parameters() function
     seq_along(parameters_function_separated) %>%
-      walk(~
+      purrr::walk(~
              load_parameters(parameters_function_separated, NUM = .x)
            )
 
@@ -341,12 +344,16 @@ debug_function <- function(name_function, uid = NULL) {
 
 
 
-#' tar_make_future_rowwise
-#'
 #' Makes tar_make_future() work row-wise by assigning priorities to targets using their uid. This allows you to run as many participants as you want, avoiding memory issues.
+
 #'
-#' @param TARGETS
-#' @param parameters_monkeys
+#' @param TARGETS targets list
+#' @param uids user id's
+#'
+#' @return
+#' @export
+#'
+#' @examples
 tar_make_future_rowwise <- function(TARGETS, uids) {
 
   # TODO: The number in TARGETS[[2]] depends on the position of the tar_map() target!
@@ -360,10 +367,10 @@ tar_make_future_rowwise <- function(TARGETS, uids) {
   }
 
   1:length(uids) %>%
-    walk(~{
+    purrr::walk(~{
       index_uid = .x
       1:length(names(TARGETS[[2]])) %>%
-        walk(~{
+        purrr::walk(~{
           index_target = .x
           # cat("uid = ", uid_walk, "name = ", .x)
           assign_priority(uid = index_uid, target_name = index_target)
@@ -782,7 +789,7 @@ setup_folders <- function(folder, extract_zip = FALSE) {
 #' @param server_folder_tasks
 #' @param disable_web_security
 #' @param initial_wait
-#' @param wait_retry
+#' @param wait_retry In seconds, how much to wait before retrying
 #' @param forced_random_wait
 #' @param forced_refresh
 #' @param forced_seed
@@ -936,7 +943,7 @@ create_monkeys_project <- function(folder = "~/Downloads/",
 #' @param server_folder_tasks
 #' @param disable_web_security
 #' @param initial_wait
-#' @param wait_retry
+#' @param wait_retry In seconds, how much to wait before retrying
 #' @param forced_random_wait
 #' @param forced_refresh
 #' @param forced_seed
@@ -1029,7 +1036,7 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
     if(!is.null(server_folder_tasks)) {
       pid = paste0(server_folder_tasks)
       cli::cli_alert_info("Checking files for pid = {pid}")
-      INITIAL_files = list_data_server(pid = pid)
+      INITIAL_files = list_data_server(pid = pid) |> dplyr::pull(files)
     } else {
       INITIAL_files = list.files(paste0(local_folder_tasks, "/.data"), pattern = "csv")
     }
@@ -1048,9 +1055,9 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
 
     }
 
-    # This works for local protocols
+    # Files in .data after the Monkeys finish
     if(!is.null(server_folder_tasks)) {
-      FINAL_files = list_data_server(pid = pid)
+      FINAL_files = list_data_server(pid = pid) |> dplyr::pull(files)
     } else {
       FINAL_files = list.files(paste0(local_folder_tasks, "/.data"), pattern = "csv")
     }
@@ -1077,7 +1084,7 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
     cli::cli_alert_info("Changing WD back to {.code {current_WD}}")
     setwd(dir = current_WD)
 
-    # Works only for local protocols
+    # New files
     NEW_files = FINAL_files[!FINAL_files %in% INITIAL_files]
 
     return(NEW_files)
@@ -1116,13 +1123,12 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
 #' @param pid protocol id
 #' @param list_credentials list with credentials
 #'
-#' @return
+#' @return A tibble with a list of files
 #' @export
-#'
-#' @examples
 list_data_server <- function(pid, list_credentials = NULL) {
 
   # pid = "999"
+
   # list_credentials = NULL
 
   # Parameters ---
@@ -1174,9 +1180,12 @@ list_data_server <- function(pid, list_credentials = NULL) {
       )
     )
 
-  length_OUT = length(OUT)
-  clean_OUT = tibble::tibble(files = OUT[-c(1:3,(length_OUT-3):length(OUT))])
+  clean_OUT =
+    tibble::tibble(files = OUT) |>
+      dplyr::filter(grepl("^[0-9]{1,20}_.*\\.csv$", files))
+
   return(clean_OUT)
+
 }
 
 

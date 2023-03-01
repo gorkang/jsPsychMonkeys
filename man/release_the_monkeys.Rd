@@ -35,6 +35,8 @@ release_the_monkeys(
 )
 }
 \arguments{
+\item{wait_retry}{In seconds, how much to wait before retrying}
+
 \item{clean_up_targets}{}
 }
 \description{

@@ -7,7 +7,7 @@
 debug_function(name_function, uid = NULL)
 }
 \arguments{
-\item{name_function}{}
+\item{name_function}{Name of function to debug}
 }
 \description{
 Loads the parameters used in the functions present in _targets.R to make debugging easier

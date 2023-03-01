@@ -7,6 +7,13 @@ Safely checks if there in an alert and accepts it}
 \usage{
 check_accept_alert(wait_retry = 0.5, remDr, DEBUG)
 }
+\arguments{
+\item{wait_retry}{In seconds, how much to wait before retrying}
+
+\item{remDr}{remDr object}
+
+\item{DEBUG}{TRUE/FALSE}
+}
 \description{
 check_accept_alert
 Safely checks if there in an alert and accepts it

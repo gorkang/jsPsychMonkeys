@@ -2,9 +2,14 @@
 % Please edit documentation in R/helper_functions.R
 \name{tar_make_future_rowwise}
 \alias{tar_make_future_rowwise}
-\title{tar_make_future_rowwise}
+\title{Makes tar_make_future() work row-wise by assigning priorities to targets using their uid. This allows you to run as many participants as you want, avoiding memory issues.}
 \usage{
 tar_make_future_rowwise(TARGETS, uids)
+}
+\arguments{
+\item{TARGETS}{targets list}
+
+\item{uids}{user id's}
 }
 \description{
 Makes tar_make_future() work row-wise by assigning priorities to targets using their uid. This allows you to run as many participants as you want, avoiding memory issues.

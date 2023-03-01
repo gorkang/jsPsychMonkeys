@@ -37,6 +37,8 @@ create_monkeys_project(
 
 \item{pid}{project id}
 
+\item{wait_retry}{In seconds, how much to wait before retrying}
+
 \item{dont_ask}{answer YES to all questions so the process runs uninterrupted. This will:}
 
 \item{open_rstudio}{Open RStudio with the new project TRUE / FALSE}
