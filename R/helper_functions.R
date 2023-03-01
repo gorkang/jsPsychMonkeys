@@ -309,9 +309,10 @@ debug_function <- function(name_function, uid = NULL) {
   # If there are multiple uid's we need a way to filter
   if (is.null(uid)) uid = "*"
 
-  DF_function = targets::tar_manifest() %>% filter(grepl(name_function, command)) %>%
-    filter(grepl(uid, name)) |>
-    pull(command) %>% last()
+  DF_function = targets::tar_manifest() %>%
+    dplyr::filter(grepl(name_function, command)) %>%
+    dplyr::filter(grepl(uid, name)) |>
+    dplyr::pull(command) %>% dplyr::last()
 
   if (!is.na(DF_function)) {
 
@@ -1024,18 +1025,14 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
     cli::cli_alert_info("Changing WD to {.code {FOLDER}}")
     setwd(dir = FOLDER)
 
-
-    # TODO: CHECK files in server here and in FINAL_files
-    jsPsychHelpeR::sync_server_local(server_folder = paste0("https://cscn.uai.cl/lab/public/instruments/protocols/", server_folder_tasks),
-                                     local_folder = paste0(local_folder_tasks, "/.data"),
-                                     direction = "server_to_local", only_test = TRUE)
-
-
-    # This works for local protocols
     # TODO: see if list_data_server() below works on Windows
-    INITIAL_files = list.files(paste0(local_folder_tasks, "/.data"), pattern = "csv")
-
-
+    if(!is.null(server_folder_tasks)) {
+      pid = paste0(server_folder_tasks)
+      cli::cli_alert_info("Checking files for pid = {pid}")
+      INITIAL_files = list_data_server(pid = pid)
+    } else {
+      INITIAL_files = list.files(paste0(local_folder_tasks, "/.data"), pattern = "csv")
+    }
 
     cli::cli_h1("Releasing monkeys")
 
@@ -1052,8 +1049,11 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
     }
 
     # This works for local protocols
-    FINAL_files = list.files(paste0(local_folder_tasks, "/.data"), pattern = "csv")
-
+    if(!is.null(server_folder_tasks)) {
+      FINAL_files = list_data_server(pid = pid)
+    } else {
+      FINAL_files = list.files(paste0(local_folder_tasks, "/.data"), pattern = "csv")
+    }
 
 
     # REMOVE _targets.R
@@ -1090,12 +1090,14 @@ if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("
   # Output message
   if (!is.null(OUTPUT$error)) {
     message_out = paste0("Something went wrong", OUTPUT$error)
+    cli::cli_alert_info("Restoring WD back to {.code {current_WD}}")
+    setwd(dir = current_WD)
   } else if (!is.null(OUTPUT$result)) {
     message_out = paste0("The Monkeys completed ", length(OUTPUT$result), " tasks.")
   }
 
   # For the server
-  if (!is.null(server_folder_tasks)) message_out = paste0("The Monkeys completed the protocol.")
+  # if (!is.null(server_folder_tasks) & is.null(OUTPUT$error)) message_out = paste0("The Monkeys completed the protocol.")
 
   cli::cli_alert_info(message_out)
 

@@ -98,8 +98,8 @@ Process the parameters_monkeys_minimal parameters so a minimal set of input para
 }
 \examples{
 
-set_parameters(parameters_monkeys = list(uid = 888, uid_URL = TRUE, forced_seed = 11, 
-                                       local_folder_tasks = "~/Downloads/protocol999", 
-                                       screenshot = FALSE, forced_refresh = FALSE, 
+set_parameters(parameters_monkeys = list(uid = 888, uid_URL = TRUE, forced_seed = 11,
+                                       local_folder_tasks = "~/Downloads/protocol999",
+                                       screenshot = FALSE, forced_refresh = FALSE,
                                        debug = TRUE, open_VNC = TRUE))
 }

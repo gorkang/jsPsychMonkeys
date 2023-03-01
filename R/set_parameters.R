@@ -147,7 +147,7 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
       } else if (!is.null(server_folder_tasks)) {
         FOLDER = server_folder_tasks
       }
-      pid = stringr::str_extract_all(basename(FOLDER), pattern = "[0-9]{1,10}", simplify = TRUE) |> last()
+      pid = stringr::str_extract_all(basename(FOLDER), pattern = "[0-9]{1,10}", simplify = TRUE) |> dplyr::last()
       if (length(pid) != 1) cli::cli_alert_warning("Something weird with the pid: {pid}")
     }
 
