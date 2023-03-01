@@ -983,26 +983,25 @@ list_data_server <- function(pid, list_credentials = NULL) {
   if (credentials_exist) {
     # sshpass and rsync installed (?)
     if (SSHPASS != "" & RSYNC != "") {
-      # cli::cli_text(cli::col_green("{cli::symbol$tick} "), "rsync installed and credentials exist")
+
+      OUT =
+        suppressWarnings(
+          system(
+            paste0('sshpass -p ', list_credentials$value$password, ' rsync -av ', dry_run, ' --rsh=ssh ',
+                   list_credentials$value$user, "@", list_credentials$value$IP, ":", list_credentials$value$main_FOLDER, pid, '/.data/ ',
+                   here::here(local_folder_terminal), '/ '
+            ), intern = TRUE
+          )
+        )
+
     } else {
-      cli::cli_abort("'sshpass' or 'rsync' not installed. Can't use `sync_server_local()`")
+      cli::cli_alert_warning("'sshpass' or 'rsync' not installed. Can't use `sync_server_local()`")
+      OUT = NA
     }
   } else {
-    cli::cli_abort("Can't find server credentials in '.vault/.credentials'")
+    cli::cli_alert_warning("Can't find server credentials in '.vault/.credentials'")
   }
 
-  # GET ---
-
-  # DOWNLOAD server to local
-  OUT =
-    suppressWarnings(
-      system(
-        paste0('sshpass -p ', list_credentials$value$password, ' rsync -av ', dry_run, ' --rsh=ssh ',
-               list_credentials$value$user, "@", list_credentials$value$IP, ":", list_credentials$value$main_FOLDER, pid, '/.data/ ',
-               here::here(local_folder_terminal), '/ '
-        ), intern = TRUE
-      )
-    )
 
   clean_OUT =
     tibble::tibble(files = OUT) |>
