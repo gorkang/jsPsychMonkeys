@@ -11,6 +11,9 @@ tar_make_future_rowwise(TARGETS, uids)
 
 \item{uids}{user id's}
 }
+\value{
+a list of targets
+}
 \description{
 Makes tar_make_future() work row-wise by assigning priorities to targets using their uid. This allows you to run as many participants as you want, avoiding memory issues.
 }

@@ -46,7 +46,7 @@ This is useful to debug.}
 \itemize{
 \item On linux, can be something like ~/Download
 \item On windows, can be something like: C:/Users/myusername/Downloads/protocol999
-If Monkeys are running OK but no csv's are donwloaded, make sure the docker username has write access to the folder
+If Monkeys are running OK but no csv's are downloaded, make sure the docker username has write access to the folder
 }}
 
 \item{DEBUG}{Show debug messages: FALSE / TRUE}

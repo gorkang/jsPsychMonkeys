@@ -35,6 +35,8 @@ create_monkeys_project(
 \arguments{
 \item{folder}{location for the project}
 
+\item{credentials_folder}{}
+
 \item{pid}{project id}
 
 \item{wait_retry}{In seconds, how much to wait before retrying}

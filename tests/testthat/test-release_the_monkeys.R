@@ -1,4 +1,4 @@
-test_that("local protocol runs", {
+test_that("local and server protocol runs", {
 
   # Clean up containers
   active_containers = system('docker ps -q', intern = TRUE)

@@ -4,10 +4,7 @@
 #' @param uid user id
 #' @param remote_driver remDr
 #'
-#' @return
-#' @export
-#'
-#' @examples
+#' @return A list of links
 create_links <-
   function(parameters_monkeys,
            uid,

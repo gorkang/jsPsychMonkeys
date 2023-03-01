@@ -102,6 +102,14 @@
                                       credentials_folder = "~/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys/.vault/")
 
 
+  uid_random = round(runif(1, 1, 10000), 0)
+  # Test online protocol "test/protocols_DEV/test9999" is a simple protocol with AIM
+  jsPsychMonkeys::release_the_monkeys(uid = uid_random, open_VNC = TRUE,
+                                      server_folder_tasks = "test/protocols_DEV/999new",
+                                      clean_up_targets = TRUE,
+                                      credentials_folder = "~/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys/.vault/")
+
+
 # CHECK package -----------------------------------------------------------
 
 
@@ -130,7 +138,7 @@ devtools::test_coverage()
 COV_REPORT = covr::package_coverage(); COV_REPORT # Test coverage report. If a testthat tests fails, this FAILS!
 covr::report(COV_REPORT) # Check local shiny app with Coverage report
 # TOKEN FROM step 3)
-covr::codecov(token = "6c8a8848-9175-446c-9cb8-131378f96356") # UPLOAD coverage reports to https://codecov.io/gh/gorkang/jsPsychMaker/
+covr::codecov(token = "asdasdasdasd") # UPLOAD coverage reports to https://codecov.io/gh/gorkang/jsPsychMaker/
 
 
 # REMEMBER ----------------------------------------------------------------

@@ -10,5 +10,5 @@ check_trialids(local_folder_protocol)
 \item{local_folder_tasks}{local folders where the tasks are}
 }
 \description{
-Checks that trialid's of an experiment in a folder follow the stantard expected rules
+Checks that trialid's of an experiment in a folder follow the standard expected rules
 }

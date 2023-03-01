@@ -10,7 +10,7 @@
 #' @param folder_downloads Local folder where csv's will be downloaded:
 #' - On linux, can be something like ~/Download
 #' - On windows, can be something like: C:/Users/myusername/Downloads/protocol999
-#' If Monkeys are running OK but no csv's are donwloaded, make sure the docker username has write access to the folder
+#' If Monkeys are running OK but no csv's are downloaded, make sure the docker username has write access to the folder
 #' @param DEBUG Show debug messages: FALSE / TRUE
 #' @param screenshot Should the monkey's take screenshots of each screen they see?
 #' - The images will be in outputs/screenshots

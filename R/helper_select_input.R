@@ -1,3 +1,11 @@
+#' Helper to select and interact with input fields
+#'
+#' @param list_get_elements list_get_elements
+#' @param DEBUG TRUE / FALSE
+#' @param seed numeric random seed
+#'
+#' @return
+#' @export
 select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
 
   # DEBUG

@@ -13,6 +13,9 @@ create_links(parameters_monkeys, uid, remote_driver = NULL)
 
 \item{remote_driver}{remDr}
 }
+\value{
+A list of links
+}
 \description{
 create_links
 }
