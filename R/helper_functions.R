@@ -850,6 +850,14 @@ create_monkeys_project <- function(folder = "~/Downloads/",
   if (dont_ask == TRUE) response_prompt = 1
 
 
+  # Make sure paths work on different OS
+    # credentials_folder = r"(c:\Program files\R)"
+  if (!is.null(folder_downloads)) folder_downloads = fs::path_abs(folder_downloads)
+  if (!is.null(credentials_folder)) credentials_folder = fs::path_abs(credentials_folder)
+  if (!is.null(folder)) folder = fs::path_abs(folder)
+
+
+
   # ASK FOR USER PERMISSION
   if (dont_ask == FALSE)  response_prompt = menu(choices = c("Yes", "No"),
                                                  title =
@@ -873,9 +881,23 @@ create_monkeys_project <- function(folder = "~/Downloads/",
     if (!is.null(credentials_folder)) {
 
       cli::cli_h1("Copying credentials")
-      FILES_temp =  c("SERVER_PATH.R", ".credentials")
-      FILES_to_COPY = c(paste0(credentials_folder, FILES_temp)) |> normalizePath()
-      FILES_DESTINATION = c(paste0(folder, "/.vault/", FILES_temp)) |> normalizePath()
+
+      OS = Sys.info()["sysname"]
+
+      if (OS == "Linux" | OS == "Darwin" | OS == "macOS") {
+        FILES_temp =  c("SERVER_PATH.R", ".credentials")
+        FILES_to_COPY = c(paste0(credentials_folder, "/", FILES_temp))
+        FILES_DESTINATION = c(paste0(folder, "/.vault/", FILES_temp))
+
+      } else if (OS == "Windows") {
+
+        FILES_temp =  c("SERVER_PATH.R", ".credentials")
+        FILES_to_COPY = c(paste0(credentials_folder, "/", FILES_temp)) #|> normalizePath()
+        FILES_DESTINATION = c(paste0(folder, "/.vault/", FILES_temp)) #|> normalizePath()
+
+      } else {
+        stop("Not sure about your operative system.")
+      }
 
       cli::cli_inform("FILES_to_COPY: {FILES_to_COPY} \n
                       FILES_DESTINATION: {FILES_DESTINATION}")

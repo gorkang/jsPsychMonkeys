@@ -13,13 +13,6 @@ create_docker <-
     # targets::tar_load_globals()
     # debug_function("create_docker")
 
-# Packages -------------------------------------------------------------
-  # suppressMessages(suppressWarnings(library(RSelenium)))
-  # suppressMessages(suppressWarnings(library(dplyr)))
-  # suppressMessages(suppressWarnings(library(purrr)))
-
-
-
 # Check which parameters were entered in parameters_monkeys -----------------
 
   # If the parameter was entered in the parameters_monkeys list, use it
@@ -43,7 +36,7 @@ create_docker <-
     # It works, but encounter permission issues, as the local Download folder need to have 777
     # A simpler way to do this can be seen in create_remDr(), where we set the Download folder in Chrome.
     # We encounter the same permission issues, as the local Download folder need to have 777
-    if (OS == "Linux") {
+    if (OS == "Linux" | OS == "Darwin" | OS == "macOS") {
 
       grep_command = "grep"
       # folder_downloads = folder_downloads
@@ -61,6 +54,11 @@ create_docker <-
       # DEBUG
       # parameters_monkeys$task_params$local_folder_tasks = "C:\\\\Users\\\\emrys\\\\Downloads\\\\protocol999"
 
+      # files = r"(c:\Program files\R)"
+      # files = "~/Downloads/protocol999/"
+      # file.path(normalizePath(dirname(files)), files)
+      # fs::path_abs(files)
+
       # OLD Working
       if (parameters_monkeys$task_params$local_or_server == "local") {
         folder_downloads_temp = paste0(normalizePath(parameters_monkeys$task_params$local_folder_tasks), "")
@@ -73,13 +71,6 @@ create_docker <-
       # folder_downloads = paste0(normalizePath(parameters_monkeys$task_params$local_folder_tasks), "")
       # folder_protocol_local = gsub("C:", "c", paste0("//",folder_downloads))  %>% gsub("\\\\", "/", .)
 
-
-    } else if (OS == "Darwin" | OS == "macOS") {
-
-      grep_command = "grep"
-
-      # folder_downloads = folder_downloads
-      folder_protocol_local = paste0(folder_downloads, "/", basename(parameters_monkeys$task_params$local_folder_tasks))
 
     } else {
       stop("Not sure about your operative system.")
