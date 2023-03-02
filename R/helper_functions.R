@@ -874,8 +874,8 @@ create_monkeys_project <- function(folder = "~/Downloads/",
 
       cli::cli_h1("Copying credentials")
       FILES_temp =  c("SERVER_PATH.R", ".credentials")
-      FILES_to_COPY = c(paste0(credentials_folder, FILES_temp))
-      FILES_DESTINATION = c(paste0(folder, "/.vault/", FILES_temp))
+      FILES_to_COPY = c(paste0(credentials_folder, FILES_temp)) |> normalizePath()
+      FILES_DESTINATION = c(paste0(folder, "/.vault/", FILES_temp)) |> normalizePath()
 
       cli::cli_inform("FILES_to_COPY: {FILES_to_COPY} \n
                       FILES_DESTINATION: {FILES_DESTINATION}")
