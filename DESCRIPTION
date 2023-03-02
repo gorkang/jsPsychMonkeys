@@ -16,6 +16,7 @@ Imports:
     cli, 
     dplyr,
     dtplyr,
+    fs,
     future,
     future.callr,
     glue,
@@ -37,7 +38,8 @@ Imports:
     targets, 
     tibble, 
     tidyr,
-    XML
+    XML,
+    stats
 Suggests: 
     knitr,
     testthat (>= 3.0.0),

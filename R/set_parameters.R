@@ -39,7 +39,6 @@
 #' @export
 #'
 #' @examples
-#'
 #' set_parameters(parameters_monkeys = list(uid = 888, uid_URL = TRUE, forced_seed = 11,
 #'                                        local_folder_tasks = "~/Downloads/protocol999",
 #'                                        screenshot = FALSE, forced_refresh = FALSE,
@@ -103,7 +102,7 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
   # Check which parameters were entered in parameters_monkeys -----------------
 
   # If the parameter was entered in the parameters_monkeys list, use it
-   source("R/main_parameters.R", local = TRUE)
+   source(here::here("R/main_parameters.R"), local = TRUE)
 
 
   # Parameters with dependencies --------------------------------------------

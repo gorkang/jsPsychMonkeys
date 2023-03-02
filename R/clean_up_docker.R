@@ -3,10 +3,9 @@
 #' @param container_name name of the container
 #' @param parameters_monkeys parameters_monkeys list
 #'
-#' @return
+#' @return NULL
 #' @export
 #'
-#' @examples
 clean_up_docker <-
   function(container_name = "test",
            parameters_monkeys = parameters_monkeys
@@ -16,7 +15,7 @@ clean_up_docker <-
   # Check which parameters were entered in parameters_monkeys -----------------
 
     # If the parameter was entered in the parameters_monkeys list, use it
-    source("R/main_parameters.R", local = TRUE)
+    source(here::here("R/main_parameters.R"), local = TRUE)
 
 
   # CHECK -------------------------------------------------------------------

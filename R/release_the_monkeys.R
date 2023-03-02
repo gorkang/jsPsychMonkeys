@@ -70,7 +70,7 @@ release_the_monkeys <- function(uid = 1,
 
 
   current_WD = getwd()
-  RND_int = round(runif(1, 0, 10000), 0)
+  RND_int = round(stats::runif(1, 0, 10000), 0)
   FOLDER = paste0(tempdir(), "/Monkeys_", RND_int)
 
   jsPsychMonkeys::create_monkeys_project(folder = FOLDER,
@@ -147,7 +147,7 @@ release_the_monkeys <- function(uid = 1,
       if (!is.null(credentials_folder)) {
 
         FILES_temp =  c("SERVER_PATH.R", ".credentials")
-        FILES_DESTINATION = c(paste0(FOLDER, "/.vault/", FILES_temp))
+        FILES_DESTINATION = here::here(c(paste0(FOLDER, "/.vault/", FILES_temp)))
 
         file.remove(FILES_DESTINATION)
       }

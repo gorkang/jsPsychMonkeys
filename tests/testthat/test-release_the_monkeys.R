@@ -44,14 +44,19 @@ test_that("local and server protocol runs", {
   # Online protocol ---------------------------------------------------------
 
   # "test/protocols_DEV/test9999" is a simple protocol with AIM
-  uid_random = round(runif(1, 1, 10000), 0)
-  OUTPUT_simple_online = jsPsychMonkeys::release_the_monkeys(uid = uid_random, open_VNC = FALSE,
-                                                server_folder_tasks = "test/protocols_DEV/test9999",
-                                                clean_up_targets = TRUE,
-                                                credentials_folder = "~/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys/.vault/")
+  uid_random = round(stats::runif(1, 1, 10000), 0)
+  OUTPUT_simple_online = jsPsychMonkeys::release_the_monkeys(uid = uid_random,
+                                                             open_VNC = FALSE,
+                                                             server_folder_tasks = "test/protocols_DEV/test9999",
+                                                             clean_up_targets = TRUE,
+                                                             credentials_folder = "~/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys/.vault/")
 
 
   testthat::expect_equal(object = OUTPUT_simple_online$message_out, expected = "The Monkeys completed 3 tasks.")
+
+  active_containers = system('docker ps -q', intern = TRUE)
+  active_containers |> purrr::walk(~system(paste0('docker stop ', .x)))
+  system("docker system prune -f") # Cleans up system (stopped containers, etc.)
 
 
 })

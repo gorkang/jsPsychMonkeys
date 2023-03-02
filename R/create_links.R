@@ -20,7 +20,7 @@ create_links <-
     # Check which parameters were entered in parameters_monkeys -----------------
 
       # If the parameter was entered in the parameters_monkeys list, use it
-      source("R/main_parameters.R", local = TRUE)
+      source(here::here("R/main_parameters.R"), local = TRUE)
 
 
     container_name = remote_driver$container_name
@@ -58,7 +58,7 @@ create_links <-
 
     if (parameters_monkeys$task$local_or_server == "server") {
 
-      source(".vault/SERVER_PATH.R") # server:path
+      source(here::here(".vault/SERVER_PATH.R")) # server:path
       parameters_monkeys$task$server_path = server_path
       links_tasks = paste0(parameters_monkeys$task$server_path, parameters_monkeys$task$server_folder_tasks, "/index.html?pid=", parameters_monkeys$task$pid,uid_string)
 

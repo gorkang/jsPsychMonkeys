@@ -1,6 +1,6 @@
 #' Creates a docker container
 #'
-#' @param container_name Container name
+#' @param uid user id
 #' @param parameters_monkeys parameters_monkeys list of parameters
 #'
 #' @return A list with the parameters of the newly created docker container
@@ -15,8 +15,14 @@ create_docker <-
 
 # Check which parameters were entered in parameters_monkeys -----------------
 
+  # Make sure local_folder_tasks behave consistenly across OSes
+  if (!is.null(parameters_monkeys$task_params$local_folder_tasks)) parameters_monkeys$task_params$local_folder_tasks = fs::path_abs(parameters_monkeys$task_params$local_folder_tasks)
+
   # If the parameter was entered in the parameters_monkeys list, use it
-  source("R/main_parameters.R", local = TRUE)
+  source(here::here("R/main_parameters.R"), local = TRUE)
+
+  folder_protocol_local = parameters_monkeys$task_params$local_folder_tasks
+
 
   if (DEBUG == TRUE) cli::cli_h1("UID: {uid}")
 
@@ -39,38 +45,18 @@ create_docker <-
     if (OS == "Linux" | OS == "Darwin" | OS == "macOS") {
 
       grep_command = "grep"
-      # folder_downloads = folder_downloads
-
-      # folder_protocol_local   folder_protocol_docker
-      # # -v ~/Downloads/protocol999:/home/seluser/protocol999
-
-      # folder_protocol_local = paste0(folder_downloads, "/", basename(parameters_monkeys$task_params$local_folder_tasks))
-      folder_protocol_local = parameters_monkeys$task_params$local_folder_tasks
-
 
     } else if (OS == "Windows") {
 
       grep_command = "findstr"
-      # DEBUG
-      # parameters_monkeys$task_params$local_folder_tasks = "C:\\\\Users\\\\emrys\\\\Downloads\\\\protocol999"
 
-      # files = r"(c:\Program files\R)"
-      # files = "~/Downloads/protocol999/"
-      # file.path(normalizePath(dirname(files)), files)
-      # fs::path_abs(files)
-
-      # OLD Working
+      # OLD Working. If the new fs::path_abs() works, clean up
       if (parameters_monkeys$task_params$local_or_server == "local") {
-        folder_downloads_temp = paste0(normalizePath(parameters_monkeys$task_params$local_folder_tasks), "")
-        # # if (!dir.exists(folder_downloads)) dir.create(folder_downloads)
-        if (grepl("C:", folder_downloads_temp)) folder_downloads = gsub("C:", "c", paste0("//",folder_downloads_temp)) %>% dirname() %>% gsub("\\\\", "/", .)
-        if (grepl("D:", folder_downloads_temp)) folder_downloads = gsub("D:", "d", paste0("//",folder_downloads_temp)) %>% dirname() %>% gsub("\\\\", "/", .)
-        folder_protocol_local = basename(parameters_monkeys$task_params$local_folder_tasks) %>% gsub("C:", "c", paste0("//",folder_downloads))  %>% gsub("\\\\", "/", .)
-
+        # folder_downloads_temp = paste0(normalizePath(parameters_monkeys$task_params$local_folder_tasks), "")
+        # if (grepl("C:", folder_downloads_temp)) folder_downloads = gsub("C:", "c", paste0("//",folder_downloads_temp)) %>% dirname() %>% gsub("\\\\", "/", .)
+        # if (grepl("D:", folder_downloads_temp)) folder_downloads = gsub("D:", "d", paste0("//",folder_downloads_temp)) %>% dirname() %>% gsub("\\\\", "/", .)
+        # folder_protocol_local = basename(parameters_monkeys$task_params$local_folder_tasks) %>% gsub("C:", "c", paste0("//",folder_downloads))  %>% gsub("\\\\", "/", .)
       }
-      # folder_downloads = paste0(normalizePath(parameters_monkeys$task_params$local_folder_tasks), "")
-      # folder_protocol_local = gsub("C:", "c", paste0("//",folder_downloads))  %>% gsub("\\\\", "/", .)
-
 
     } else {
       stop("Not sure about your operative system.")

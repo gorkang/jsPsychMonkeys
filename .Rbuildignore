@@ -5,6 +5,8 @@
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+.vault/
+outputs/
 dev/
 admin/
 run.R

@@ -28,7 +28,7 @@ create_remDr <-
   # Check which parameters were entered in parameters_monkeys -----------------
     
     # If the parameter was entered in the parameters_monkeys list, use it
-    source("R/main_parameters.R", local = TRUE)
+    source(here::here("R/main_parameters.R"), local = TRUE)
     
     
     

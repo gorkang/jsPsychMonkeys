@@ -1,12 +1,11 @@
 #' check_trialids
 #'
 #'Checks that trialid's of an experiment in a folder follow the standard expected rules
-#' @param local_folder_tasks local folders where the tasks are
 #'
-#' @return
+#' @param local_folder_protocol path to local folder with protocol
+#'
+#' @return A message
 #' @export
-#'
-#' @examples
 check_trialids <- function(local_folder_protocol) {
 
   # suppressMessages(suppressWarnings(library(dplyr)))
@@ -18,14 +17,14 @@ check_trialids <- function(local_folder_protocol) {
 
   find_trialids <- function(file_name) {
 
-    script = read_file(file_name)
+    script = readr::read_file(file_name)
     expres = ".*?trialid: '(.*?)'.*?"
     trialid = gsub(expres, "\\1; \n", script) %>% gsub("^(.*; \n).*", "\\1", .) %>% gsub(";", "", .) %>% gsub(" number \n", "", .)
     if (grepl("This document was made with test_maker", trialid)) trialid = ""
-    strsplit(trialid, " \n")[[1]] %>% as_tibble() %>%
-      mutate(file = file_name) %>%
-      rename(trialid = value) %>%
-      filter(!grepl("^Instructions|^Instructions_[0-9]{2}|^Fullscreen", trialid))
+    strsplit(trialid, " \n")[[1]] %>% tibble::as_tibble() %>%
+      dplyr::mutate(file = file_name) %>%
+      dplyr::rename(trialid = value) %>%
+      dplyr::filter(!grepl("^Instructions|^Instructions_[0-9]{2}|^Fullscreen", trialid))
 
   }
 
@@ -35,15 +34,15 @@ check_trialids <- function(local_folder_protocol) {
   rule_check_trialids = "^[a-zA-Z0-9]{1,100}_[0-9]{2,3}$|^[a-zA-Z0-9]{1,100}_[0-9]{2,3}_[0-9]{1,3}$" # NAME_001, NAMEexperiment_001_1
   DF_problematic_trialids =
     DF_all_trialids %>%
-    filter(!grepl(rule_check_trialids, trialid)) %>%
-    mutate(experiment = basename(file)) %>%
-    select(-file)
+    dplyr::filter(!grepl(rule_check_trialids, trialid)) %>%
+    dplyr::mutate(experiment = basename(file)) %>%
+    dplyr::select(-file)
 
   if (nrow(DF_problematic_trialids) > 0) {
 
     cat(crayon::red(nrow(DF_problematic_trialids), "ISSUES:\n"),
-        "- experiment:", paste(DF_problematic_trialids %>% pull(experiment), collapse = ", "), "\n",
-        "- trialid:   ", paste(DF_problematic_trialids %>% pull(trialid), collapse = ", "), "\n")
+        "- experiment:", paste(DF_problematic_trialids %>% dplyr::pull(experiment), collapse = ", "), "\n",
+        "- trialid:   ", paste(DF_problematic_trialids %>% dplyr::pull(trialid), collapse = ", "), "\n")
 
   } else {
     cat(crayon::green("All trialid's look great!\n"))
@@ -58,7 +57,7 @@ check_trialids <- function(local_folder_protocol) {
 #' @param remDr remDr object
 #' @param DEBUG TRUE/FALSE
 #'
-#' @return
+#' @return Accepts an alert, if present
 #' @export
 check_accept_alert <- function(wait_retry = .5, remDr, DEBUG) {
 
@@ -88,7 +87,7 @@ check_accept_alert <- function(wait_retry = .5, remDr, DEBUG) {
 #' @param port No need to specify one
 #' @param DEBUG TRUE/FALSE
 #'
-#' @return
+#' @return Names of containers available or opens one
 #' @export
 #'
 #' @examples reconnect_to_VNC()
@@ -184,10 +183,11 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
 #'
 #' @param uid_participant uid of participant
 #'
-#' @return
+#' @return Loads in GlobalEnv the vars necessary to debug a docker container
 #' @export
 #'
-#' @examples debug_docker(24000)
+#' @examples
+#' try(debug_docker(24000))
 debug_docker <- function(uid_participant) {
 
   # DEBUG
@@ -198,7 +198,7 @@ debug_docker <- function(uid_participant) {
   suppressMessages(source(here::here("_targets.R")))
 
   targets::tar_load(parameters_monkeys)
-  source("R/main_parameters.R")
+  source(here::here("R/main_parameters.R"), local = TRUE)
 
   # Extract parameters from parameters_monkeys
   # DEBUG <<- parameters_debug$debug$DEBUG
@@ -230,11 +230,11 @@ debug_docker <- function(uid_participant) {
 #' Loads the parameters used in the functions present in _targets.R to make debugging easier
 #'
 #' @param name_function Name of function to debug
+#' @param uid User id
 #'
-#' @return
+#' @return Loads in GlobalEnv the parameters of a function present in _targets.R
 #' @export
 #'
-#' @examples
 debug_function <- function(name_function, uid = NULL) {
 
   # DEBUG
@@ -380,13 +380,12 @@ tar_make_future_rowwise <- function(TARGETS, uids) {
 
 #' Check csv files in a folder
 #'
-#' @param pid project id
-#' @param download_folder
+#' @param parameters_monkeys parameter_monkeys list
+#' @param uid user id
+#' @param links_tar targets object dependency to control when this target runs
 #'
-#' @return
+#' @return A list of csv files
 #' @export
-#'
-#' @examples
 check_Downloads <- function(parameters_monkeys, uid = "", links_tar = "") {
 
   # DEBUG
@@ -433,15 +432,13 @@ check_Downloads <- function(parameters_monkeys, uid = "", links_tar = "") {
 
 #' In local protocols, move the Downloaded csv to the data folder of the protocol
 #'
-#' @param pre_existing_CSV
-#' @param parameters_monkeys
-#' @param uid
-#' @param task
+#' @param pre_existing_CSV vector with filenames from a previous call of check_Downloads()
+#' @param parameters_monkeys parameters_monkeys list
+#' @param task Last task in _targets pipeline
+#' @param uid User id
 #'
-#' @return
+#' @return copies the new csv files to .data
 #' @export
-#'
-#' @examples
 copy_files_to_data <- function(pre_existing_CSV, parameters_monkeys, uid, task = task) {
 
   if (parameters_monkeys$task_params$local_or_server == "local") {
@@ -483,11 +480,10 @@ copy_files_to_data <- function(pre_existing_CSV, parameters_monkeys, uid, task =
 #' Parse website elements to extract and tabulate all the properties
 #'
 #' @param what a html tag such as c("p", "textarea", "input", "div", ...)
+#' @param page_source_rvest page source rvest object
 #'
-#' @return
+#' @return A DF
 #' @export
-#'
-#' @examples
 parse_elements <- function(what, page_source_rvest) {
   # what = "p"
   page_source_temp = page_source_rvest |> rvest::html_elements(what)
@@ -783,8 +779,8 @@ setup_folders <- function(folder, extract_zip = FALSE) {
 
 #' Create a jsPsychMonkeys project for your data
 #'
-#' run_initial_setup() will read your data and create a jsPsychMonkeys project
-#' tailoring the _targets.R file to the tasks included in the data.
+#' create_monkeys_project() will create a jsPsychMonkeys project adapted to
+#' the parameters you entered
 #'
 #' @param pid project id
 #' @param dont_ask answer YES to all questions so the process runs uninterrupted. This will:
@@ -812,14 +808,8 @@ setup_folders <- function(folder, extract_zip = FALSE) {
 #' @param open_rstudio Open RStudio with the new project TRUE / FALSE
 #' @param credentials_folder
 #'
-#' @return Opens a new RStudio project
+#' @return Creates a new project
 #' @export
-#' @examples
-#' run_initial_setup(pid = 999, download_files = FALSE,
-#' data_location = system.file("extdata", package = "jsPsychMonkeys"),
-#' download_task_script = FALSE,
-#' folder = tempdir(),
-#' sensitive_tasks = c(""), dont_ask = TRUE, open_rstudio = FALSE)
 create_monkeys_project <- function(folder = "~/Downloads/",
                                    credentials_folder = NULL,
                                    uid = 1,
@@ -882,22 +872,24 @@ create_monkeys_project <- function(folder = "~/Downloads/",
 
       cli::cli_h1("Copying credentials")
 
-      OS = Sys.info()["sysname"]
+      # OS = Sys.info()["sysname"]
 
-      if (OS == "Linux" | OS == "Darwin" | OS == "macOS") {
+      # if (OS == "Linux" | OS == "Darwin" | OS == "macOS") {
         FILES_temp =  c("SERVER_PATH.R", ".credentials")
-        FILES_to_COPY = c(paste0(credentials_folder, "/", FILES_temp))
-        FILES_DESTINATION = c(paste0(folder, "/.vault/", FILES_temp))
+        FILES_to_COPY = here::here(c(paste0(credentials_folder, "/", FILES_temp)))
+        FILES_DESTINATION = here::here(c(paste0(folder, "/.vault/", FILES_temp)))
 
-      } else if (OS == "Windows") {
+        # fs::path_abs(c(paste0(credentials_folder, "/", FILES_temp)))
 
-        FILES_temp =  c("SERVER_PATH.R", ".credentials")
-        FILES_to_COPY = c(paste0(credentials_folder, "/", FILES_temp)) #|> normalizePath()
-        FILES_DESTINATION = c(paste0(folder, "/.vault/", FILES_temp)) #|> normalizePath()
-
-      } else {
-        stop("Not sure about your operative system.")
-      }
+      # } else if (OS == "Windows") {
+      #
+      #   FILES_temp =  c("SERVER_PATH.R", ".credentials")
+      #   FILES_to_COPY = c(paste0(credentials_folder, "/", FILES_temp)) #|> normalizePath()
+      #   FILES_DESTINATION = c(paste0(folder, "/.vault/", FILES_temp)) #|> normalizePath()
+      #
+      # } else {
+      #   stop("Not sure about your operative system.")
+      # }
 
       cli::cli_inform("FILES_to_COPY: {FILES_to_COPY} \n
                       FILES_DESTINATION: {FILES_DESTINATION}")
@@ -988,12 +980,36 @@ list_data_server <- function(pid, list_credentials = NULL) {
 
   # CHECKS we have credentials and necessary software ---
 
-  # Get server credentials
+  # If list_credentials is null, try to get the .credentials file from .vault
   if (is.null(list_credentials)) {
-    list_credentials = source(here::here(".vault/.credentials"))
-    credentials_exist = file.exists(here::here(".vault/.credentials"))
+
+    cli::cli_h1("GETTING .credentials")
+    file_credentials = here::here(".vault/.credentials")
+    credentials_exist = file.exists(file_credentials)
+    if (credentials_exist) {
+      list_credentials = source(file_credentials)
+    } else {
+
+      cli::cli_alert_danger("file_credentials NOT FOUND in: {file_credentials}")
+
+      # file_credentials = "/tmp/Rtmp8ICoRD/file1a3952477191a/jsPsychMonkeys.Rcheck/00_pkg_src/jsPsychMonkeys/.vault/.credentials"
+      testing_package_credentials_location = paste0(dirname(dirname(dirname(dirname(file_credentials)))), "/00_pkg_src/jsPsychMonkeys/.vault/.credentials")
+      cli::cli_alert_info("Trying in: {testing_package_credentials_location}")
+      credentials_exist = file.exists(testing_package_credentials_location)
+      if (credentials_exist) list_credentials = source(testing_package_credentials_location)
+
+
+    }
+    cli::cli_h1("END GETTING .credentials")
+
+  # A list of credentials was passed
   } else {
-    credentials_exist = TRUE
+
+    if (!is.null(list_credentials$IP) &
+        !is.null(list_credentials$user) &
+        !is.null(list_credentials$password) &
+        !is.null(list_credentials$main_FOLDER)) credentials_exist = TRUE
+
   }
 
 

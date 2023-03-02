@@ -5,10 +5,8 @@
 #' @param links Links to complete
 #' @param remote_driver remote_driver output
 #'
-#' @return
+#' @return Completes a task and returns a container name.
 #' @export
-#'
-#' @examples
 complete_task <-
   function(parameters_monkeys,
            uid,
@@ -31,7 +29,7 @@ complete_task <-
   # Check which parameters were entered in parameters_monkeys -----------------
 
     # If the parameter was entered in the parameters_monkeys list, use it
-    source("R/main_parameters.R", local = TRUE)
+    source(here::here("R/main_parameters.R"), local = TRUE)
 
     container_name = remote_driver$container_name
     remDr = remote_driver$remDr
@@ -201,6 +199,7 @@ complete_task <-
                   # If we are in consent form, reset forced_seed_final to 1
                   # if (grepl("Consentimiento informado", list_get_elements$name_contents$content)) forced_seed_final = 1
 
+              check_accept_alert(0.2, remDr, DEBUG)
               interact_with_element_safely(list_get_elements, DEBUG = DEBUG, index = index, seed = (forced_seed_final + index_task + index)) #interact_with_element
 
               # FORCED WAIT ---
