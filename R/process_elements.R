@@ -6,7 +6,7 @@ process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
   # DIV_names = list_get_elements$DIV_names
   DF_elements_options = list_get_elements$DF_elements_options
   list_elements = list_get_elements$list_elements
-  content_screen = DF_elements_options |> as_tibble() |> pull(content)
+  content_screen = DF_elements_options |> tibble::as_tibble() |> dplyr::pull(content)
 
   # cli::cli_alert_info("CONTENT: {DF_elements_options$content}")
 

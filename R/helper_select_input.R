@@ -4,7 +4,7 @@
 #' @param DEBUG TRUE / FALSE
 #' @param seed numeric random seed
 #'
-#' @return
+#' @return list with selected input and the text of the selected element
 #' @export
 select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
 
@@ -43,7 +43,7 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
 
     # CATCH ALL condition: When we can't extract an input type, try everything (?)
     # TODO: CREATE SAFE ClearElement helper function to be able to include ALL types in the ALL
-    if (all(list_get_elements$name_inputs %>% filter(id == selected_input_name) %>% pull(type_extracted) == "ALL")) {
+    if (all(list_get_elements$name_inputs %>% dplyr::filter(id == selected_input_name) %>% dplyr::pull(type_extracted) == "ALL")) {
 
       cat(crayon::bgYellow(" WARNING: Unknown type of input. Trying ALL\n"))
 
@@ -51,8 +51,8 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
       # ERRORS: "date", "html-form" "number", "text",  "slider",
       types_of_input = c("radio", "multi-select")
       selected_input = 1:length(types_of_input) %>%
-        map_df(~ list_get_elements$name_inputs %>% filter(id == selected_input_name) %>%
-                 mutate(type_extracted = types_of_input[.x]))
+        purrr::map_df(~ list_get_elements$name_inputs %>% dplyr::filter(id == selected_input_name) %>%
+                 dplyr::mutate(type_extracted = types_of_input[.x]))
     }
 
 
@@ -198,20 +198,20 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
 
     selected_input = 1:length(radio_groups) %>%
       purrr::map_df( ~ {
-        temp_list_get_elements = list_get_elements$name_inputs %>% filter(name == radio_groups[.x])
+        temp_list_get_elements = list_get_elements$name_inputs %>% dplyr::filter(name == radio_groups[.x])
 
         selected_input = temp_list_get_elements[sample(1:nrow(temp_list_get_elements), 1),]
         selected_input_name = selected_input$id
         input_text_human_readable = selected_input$value
         list_get_elements$list_elements[[selected_input_name]]$clickElement()
 
-        selected_input |> mutate(input_text = selected_input_name,
+        selected_input |> dplyr::mutate(input_text = selected_input_name,
                                  input_text_human_readable = input_text_human_readable)
 
       })
 
-    input_text = selected_input |> pull(input_text)
-    input_text_human_readable = selected_input |> pull(input_text_human_readable)
+    input_text = selected_input |> dplyr::pull(input_text)
+    input_text_human_readable = selected_input |> dplyr::pull(input_text_human_readable)
 
 
 
@@ -315,8 +315,8 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
       }
     }
 
-    final_vector = stringr::str_replace_all(path_slider, setNames(c("left_arrow", "b", "right_arrow"), c(-1, 0, 1)))
-    input_text = 1:length(final_vector) %>% purrr::map(~ list(key = final_vector[.x])) %>% flatten()
+    final_vector = stringr::str_replace_all(path_slider, stats::setNames(c("left_arrow", "b", "right_arrow"), c(-1, 0, 1)))
+    input_text = 1:length(final_vector) %>% purrr::map(~ list(key = final_vector[.x])) %>% purrr::flatten()
     list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(sendKeys = input_text)
 
     input_table = table(input_text |> unlist())

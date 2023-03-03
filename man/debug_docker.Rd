@@ -9,9 +9,12 @@ debug_docker(uid_participant)
 \arguments{
 \item{uid_participant}{uid of participant}
 }
+\value{
+Loads in GlobalEnv the vars necessary to debug a docker container
+}
 \description{
 debug_docker
 }
 \examples{
-debug_docker(24000)
+try(debug_docker(24000))
 }

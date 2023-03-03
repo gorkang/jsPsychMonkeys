@@ -7,9 +7,9 @@
 create_docker(uid = "test", parameters_monkeys = NULL)
 }
 \arguments{
-\item{parameters_monkeys}{parameters_monkeys list of parameters}
+\item{uid}{user id}
 
-\item{container_name}{Container name}
+\item{parameters_monkeys}{parameters_monkeys list of parameters}
 }
 \value{
 A list with the parameters of the newly created docker container

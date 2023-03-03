@@ -13,6 +13,9 @@ select_input(list_get_elements, DEBUG = FALSE, seed = 1)
 
 \item{seed}{numeric random seed}
 }
+\value{
+list with selected input and the text of the selected element
+}
 \description{
 Helper to select and interact with input fields
 }

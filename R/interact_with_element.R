@@ -28,7 +28,7 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
 
     } else {
 
-      output_select_input = list(selected_input = tibble(name = "NO input element found"),
+      output_select_input = list(selected_input = tibble::tibble(name = "NO input element found"),
                                  input_text = "''",
                                  input_text_human_readable = "''")
 
@@ -55,7 +55,7 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
       button_value_columns = c("value", "content")
       button_value_columns_n = which(button_value_columns %in% colnames(list_get_elements$name_buttons))
       if (length(button_value_columns_n) > 0) {
-        temp_list = button_value_columns[button_value_columns_n] |> purrr::map(~list_get_elements$name_buttons |> pull(.x))
+        temp_list = button_value_columns[button_value_columns_n] |> purrr::map(~list_get_elements$name_buttons |> dplyr::pull(.x))
         selected_button_value = temp_list[temp_list != ""] |> unlist()
       }
 

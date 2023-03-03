@@ -98,7 +98,7 @@ DELETE_data_server <- function(pid = NULL) {
     cli::cli_h1("PROCEED (?)")
     cli::cli_end()
     
-    response_prompt = menu(choices = c("Yes", "NO"), 
+    response_prompt = utils::menu(choices = c("Yes", "NO"), 
                            title = 
                              cli::cli(
                                {

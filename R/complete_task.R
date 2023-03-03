@@ -127,11 +127,8 @@ complete_task <-
           while (!continue_elements) {
 
             # Increase wait with each retry
-            wait_retry_loop = wait_retry_loop + (try_number/10)
+            wait_retry_loop = wait_retry_loop + (try_number/20)
             if (try_number > 1) Sys.sleep(wait_retry_loop)
-
-            # Last chance, take 3 extra seconds to give things time to load
-            # if (try_number == 9) Sys.sleep(wait_retry_loop + 3)
 
             # Make sure there are no alerts before retrying
             check_accept_alert(wait_retry_loop, remDr, DEBUG)
@@ -151,9 +148,10 @@ complete_task <-
 
             # Last try, show console errors
             if (continue_elements == FALSE & try_number == 10) {
-              if (DEBUG == TRUE) cli::cli_alert_danger("Tried {try_number} times but could not find elements. Stopping")
+              if (DEBUG == TRUE) cli::cli_alert_danger("Tried {try_number} times but could not find elements. Stopping.\n
+                                                       - If the protocol is slow and this should not happen, you can increase `wait_retry` to make the monkeys more patient.")
               browser_console = remDr$log(type = "browser")
-              if (length(browser_console) > 0) browser_console_clean = browser_console |> bind_rows() |> filter(level == "SEVERE") |> pull(message)
+              if (length(browser_console) > 0) browser_console_clean = browser_console |> dplyr::bind_rows() |> dplyr::filter(level == "SEVERE") |> dplyr::pull(message)
               if (length(browser_console_clean) > 0) cli::cli_alert_danger("Browser console: \n{.code {browser_console_clean}}")
               continue_elements = TRUE # Get out of the while loop # TODO: Shouldn't this be FALSE?: while (!continue_elements) seems to be reversed
               continue = FALSE # Stop the task
@@ -226,8 +224,8 @@ complete_task <-
 
           # } else {
           #   already_completed_strings = c("El participante ya completó el protocolo|The participant already completed the protocol")
-          #   already_completed = any(grepl(already_completed_strings, list_get_elements$DF_elements_options |> as_tibble() |> pull(content)))
-          #   if (DEBUG == TRUE & already_completed == TRUE) cli::cli_h1(cli::col_green("[[FINISH PROTOCOL]]: {DF_elements_options |> as_tibble() |> pull(content)}"))
+          #   already_completed = any(grepl(already_completed_strings, list_get_elements$DF_elements_options |> tibble::as_tibble() |> dplyr::pull(content)))
+          #   if (DEBUG == TRUE & already_completed == TRUE) cli::cli_h1(cli::col_green("[[FINISH PROTOCOL]]: {DF_elements_options |> tibble::as_tibble() |> dplyr::pull(content)}"))
 
           }
 
@@ -243,9 +241,9 @@ complete_task <-
       if (console_logs == TRUE & length(console_logs_list) > 0) {
 
         # Store browser console logs
-        numbered_console_logs = console_logs_list %>% setNames(seq_along(.))
-        DF_console_logs = 1:length(numbered_console_logs) %>% map_df(~ numbered_console_logs[[.x]] %>% bind_rows %>% mutate(page_number = .x)) %>% tidyr::drop_na(message)
-        write_csv(DF_console_logs, paste0("outputs/log/", uid, "_console_logs", "_", gsub(":", "-", Sys.time()), ".csv"))
+        numbered_console_logs = console_logs_list %>% stats::setNames(seq_along(.))
+        DF_console_logs = 1:length(numbered_console_logs) %>% purrr::map_df(~ numbered_console_logs[[.x]] %>% dplyr::bind_rows %>% dplyr::mutate(page_number = .x)) %>% tidyr::drop_na(message)
+        readr::write_csv(DF_console_logs, paste0("outputs/log/", uid, "_console_logs", "_", gsub(":", "-", Sys.time()), ".csv"))
         }
 
       # links while loop

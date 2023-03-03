@@ -7,9 +7,14 @@
 check_Downloads(parameters_monkeys, uid = "", links_tar = "")
 }
 \arguments{
-\item{pid}{project id}
+\item{parameters_monkeys}{parameter_monkeys list}
 
-\item{download_folder}{}
+\item{uid}{user id}
+
+\item{links_tar}{targets object dependency to control when this target runs}
+}
+\value{
+A list of csv files
 }
 \description{
 Check csv files in a folder

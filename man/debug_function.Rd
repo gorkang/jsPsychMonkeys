@@ -8,6 +8,11 @@ debug_function(name_function, uid = NULL)
 }
 \arguments{
 \item{name_function}{Name of function to debug}
+
+\item{uid}{User id}
+}
+\value{
+Loads in GlobalEnv the parameters of a function present in _targets.R
 }
 \description{
 Loads the parameters used in the functions present in _targets.R to make debugging easier

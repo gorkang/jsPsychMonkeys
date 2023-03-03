@@ -7,3 +7,8 @@
 dev/
 TODO.Rmd
 docs
+_targets/
+.Renviron
+tests/jspsych-6_3_1.zip
+tests/megatron.zip
+.Rprofile

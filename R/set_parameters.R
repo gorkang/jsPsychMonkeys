@@ -34,16 +34,18 @@
 #' @param disable_web_security Run with CORS disabled? Needed for local protocols that load videos: FALSE / TRUE
 #' @param forced_refresh Force a full refresh for some of the monkeys?
 #' This is useful to test if the monkey's can continue a protocol after they exit.
+#' @param credentials_folder folder where files "SERVER_PATH.R" and ".credentials" are. Usually .vault/
 #'
 #' @return a list of parameters for the rest of the jsPsychMonkeys functions
 #' @export
 #'
 #' @examples
-#' set_parameters(parameters_monkeys = list(uid = 888, uid_URL = TRUE, forced_seed = 11,
+#' try(set_parameters(parameters_monkeys = list(uid = 888, uid_URL = TRUE, forced_seed = 11,
 #'                                        local_folder_tasks = "~/Downloads/protocol999",
 #'                                        screenshot = FALSE, forced_refresh = FALSE,
-#'                                        debug = TRUE, open_VNC = TRUE))
+#'                                        debug = TRUE, open_VNC = TRUE)))
 set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minimal,
+                           credentials_folder = ".vault/",
                            uid = 1,
                            browserName = "chrome",
                            big_container = FALSE,
@@ -119,10 +121,6 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
         cli::cli_abort("You need to set either 'local_folder_tasks' or 'server_folder_tasks' in parameters_monkeys_minimal \n")
       }
 
-      # if (!is.null(parameters_monkeys$local_folder_tasks)) local_folder_tasks = parameters_monkeys$local_folder_tasks
-      # if (!is.null(parameters_monkeys$server_folder_tasks)) server_folder_tasks = parameters_monkeys$server_folder_tasks
-      # if (!is.null(parameters_monkeys$local_or_server)) local_or_server = parameters_monkeys$local_or_server
-
       # Disable parameters not compatible with non-chrome browsers
       if (browserName != "chrome") console_logs = FALSE
       if (browserName != "chrome") disable_web_security = FALSE
@@ -160,7 +158,8 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
         browserName = browserName,
         big_container = big_container,
         keep_alive = keep_alive,
-        folder_downloads = folder_downloads
+        folder_downloads = folder_downloads,
+        credentials_folder = credentials_folder
       ),
 
       debug = list(

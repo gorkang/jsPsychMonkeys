@@ -48,7 +48,7 @@
 
   # Documentation
   devtools::spell_check() # Spell check
-  pkgdown::build_site() # Create documentation! # pkgdown::build_news()
+  pkgdown::build_site() # Create documentation!
 
   # Only one time?
   # usethis::use_pkgdown() # build-ignore the docs directory and _pkgdown.yml file to avoid NOTE in CRAN checks
@@ -72,8 +72,9 @@
   devtools::build()
   renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys_0.2.5.tar.gz") # Install package from file
 
+  devtools::check() # Check package (~230s)
+  # system.file("templates", package = "jsPsychMonkeys")
   # devtools::test() # Packages tests  (~180s) [ FAIL 0 | WARN 0 | SKIP 0 | PASS 3 ]
-  # devtools::check() # Check package (~230s)
 
 
 
@@ -85,7 +86,7 @@
   jsPsychMaker::create_protocol(canonical_tasks = "AIM", folder_output = "~/Downloads/new_protocol_999/", launch_browser = FALSE)
 
   # Test local protocol
-  jsPsychMonkeys::release_the_monkeys(uid = "1", local_folder_tasks = "~/Downloads/new_protocol_999/", DEBUG = TRUE)
+  jsPsychMonkeys::release_the_monkeys(uid = "1", local_folder_tasks = "~/Downloads/new_protocol_999/", DEBUG = TRUE, open_VNC = FALSE)
 
   # Test parallel monkeys
   jsPsychMonkeys::release_the_monkeys(uid = "18:20", open_VNC = FALSE,
@@ -93,16 +94,17 @@
                                       DEBUG = TRUE, sequential_parallel = "parallel", # number_of_cores = 2,
                                       clean_up_targets = TRUE)
 
+  if (!require('remotes')) utils::install.packages('remotes'); remotes::install_github('gorkang/jsPsychMonkeys')
 
-  uid_random = round(runif(1, 1, 10000), 0)
   # Test online protocol "test/protocols_DEV/test9999" is a simple protocol with AIM
+
+  uid_random = round(stats::runif(1, 1, 10000), 0)
   jsPsychMonkeys::release_the_monkeys(uid = uid_random, open_VNC = TRUE,
                                       server_folder_tasks = "test/protocols_DEV/test9999",
-                                      clean_up_targets = TRUE,
                                       credentials_folder = "~/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys/.vault/")
 
 
-  uid_random = round(runif(1, 1, 10000), 0)
+  uid_random = round(stats::runif(1, 1, 10000), 0)
   # Test online protocol "test/protocols_DEV/test9999" is a simple protocol with AIM
   jsPsychMonkeys::release_the_monkeys(uid = uid_random, open_VNC = TRUE,
                                       server_folder_tasks = "test/protocols_DEV/999new",
@@ -114,8 +116,11 @@
 
 
 # WARNING: some of the tests KILL ALL THE DOCKER CONTAINERS
+  active_containers = system('docker ps -q', intern = TRUE)
+  active_containers |> purrr::walk(~system(paste0('docker stop ', .x)))
+  system("docker system prune -f") # Cleans up system (stopped containers, etc.)
 
-devtools::check() # Check package (~30s)
+devtools::check() # Check package (~200s)
 devtools::test() # Run all tests for the package (183.2 s): [ FAIL 1 | WARN 0 | SKIP 0 | PASS 2 ]
   # Package Tests are in tests/testthat/
   # Protocol tests are in inst/templates/tests/testthat/

@@ -6,4 +6,5 @@ utils::globalVariables(
     ".", "browserName", "big_container", "uid_URL", "server_path",
     "driver_name", "command", "name", "style", "tag_name", "hidden",
     "type", "required", "id", "type_extracted", "files", "content",
-    "remDr"))
+    "remDr", "forced_random_wait", "disable_web_security", "remoteDriver",
+    "parameters_monkeys", "container_name"))

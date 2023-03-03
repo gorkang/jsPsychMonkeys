@@ -6,6 +6,7 @@
 \usage{
 set_parameters(
   parameters_monkeys_minimal = parameters_monkeys_minimal,
+  credentials_folder = ".vault/",
   uid = 1,
   browserName = "chrome",
   big_container = FALSE,
@@ -32,6 +33,8 @@ set_parameters(
 \arguments{
 \item{parameters_monkeys_minimal}{A list with the main input parameters. See parameters_monkeys_minimal in _targets.R.
 If the parameter is entered in this list, use it. You can also enter the parameter directly}
+
+\item{credentials_folder}{folder where files "SERVER_PATH.R" and ".credentials" are. Usually .vault/}
 
 \item{uid}{User id for the monkey}
 
@@ -97,9 +100,8 @@ a list of parameters for the rest of the jsPsychMonkeys functions
 Process the parameters_monkeys_minimal parameters so a minimal set of input parameters can be used. Also, tries to take into account dependencies between parameters.
 }
 \examples{
-
-set_parameters(parameters_monkeys = list(uid = 888, uid_URL = TRUE, forced_seed = 11,
+try(set_parameters(parameters_monkeys = list(uid = 888, uid_URL = TRUE, forced_seed = 11,
                                        local_folder_tasks = "~/Downloads/protocol999",
                                        screenshot = FALSE, forced_refresh = FALSE,
-                                       debug = TRUE, open_VNC = TRUE))
+                                       debug = TRUE, open_VNC = TRUE)))
 }

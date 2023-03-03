@@ -29,7 +29,7 @@ check_trialids <- function(local_folder_protocol) {
   }
 
 
-  DF_all_trialids = map_df(scripts, find_trialids)
+  DF_all_trialids = purrr::map_df(scripts, find_trialids)
 
   rule_check_trialids = "^[a-zA-Z0-9]{1,100}_[0-9]{2,3}$|^[a-zA-Z0-9]{1,100}_[0-9]{2,3}_[0-9]{1,3}$" # NAME_001, NAMEexperiment_001_1
   DF_problematic_trialids =
@@ -194,23 +194,23 @@ debug_docker <- function(uid_participant) {
   # uid_participant = 92
   # parameters_monkeys = parameters_monkeys
 
-  # suppressMessages(source(shrtcts::locate_shortcuts_source()))
-  suppressMessages(source(here::here("_targets.R")))
-
-  targets::tar_load(parameters_monkeys)
-  source(here::here("R/main_parameters.R"), local = TRUE)
-
-  # Extract parameters from parameters_monkeys
-  # DEBUG <<- parameters_debug$debug$DEBUG
-  # screenshot <<- parameters_debug$debug$screenshot
-  # debug_file <<- parameters_debug$debug$debug_file
-  # open_VNC <<- parameters_debug$debug$open_VNC
-  # parameters_task <<- parameters_debug
-  # uid <<- uid_participant
-
-
-  # targets::tar_manifest()
-  # targets::tar_meta()
+  # # suppressMessages(source(shrtcts::locate_shortcuts_source()))
+  # suppressMessages(source(here::here("_targets.R")))
+  #
+  # targets::tar_load(parameters_monkeys)
+  # source(here::here("R/main_parameters.R"), local = TRUE)
+  #
+  # # Extract parameters from parameters_monkeys
+  # # DEBUG <<- parameters_debug$debug$DEBUG
+  # # screenshot <<- parameters_debug$debug$screenshot
+  # # debug_file <<- parameters_debug$debug$debug_file
+  # # open_VNC <<- parameters_debug$debug$open_VNC
+  # # parameters_task <<- parameters_debug
+  # # uid <<- uid_participant
+  #
+  #
+  # # targets::tar_manifest()
+  # # targets::tar_meta()
 
   container_name_tar <- paste0("container_", uid_participant)
   container_name <<- paste0("container", uid_participant)
@@ -258,7 +258,7 @@ debug_function <- function(name_function, uid = NULL) {
     # A single parameter e.g. parameters_monkeys (must be an existing object)
     if (length(parameter) == 1) {
 
-      targets::tar_load(all_of(existing_object), envir = .GlobalEnv)
+      targets::tar_load(dplyr::all_of(existing_object), envir = .GlobalEnv)
 
     # A parameter with "=" e.g: pid = 999
     } else if (length(parameter) == 2) {
@@ -269,7 +269,7 @@ debug_function <- function(name_function, uid = NULL) {
       # If it's in tar_objects(), load
       if (length(existing_object) == 1) {
 
-        targets::tar_load(all_of(existing_object), envir = .GlobalEnv)
+        targets::tar_load(dplyr::all_of(existing_object), envir = .GlobalEnv)
         assign(parameter_1, eval(parse(text = parameter_2)), envir = .GlobalEnv)
 
       } else {
@@ -322,7 +322,7 @@ debug_function <- function(name_function, uid = NULL) {
     string_function = gsub(name_function, "", DF_function) %>% gsub(" |\\\\n|\\(|\\)", "", .)
     LOADME = stringr::str_extract_all(string_function, "=.*?[,\\$]", simplify = TRUE) %>% gsub("\\$|,|=", "", .) %>% as.vector() %>% unique()
     existing_objects = LOADME[LOADME %in% targets::tar_objects()]
-    if (length(existing_objects) > 0) targets::tar_load(all_of(existing_objects))
+    if (length(existing_objects) > 0) targets::tar_load(dplyr::all_of(existing_objects))
 
     parameters_function_separated = strsplit(string_function, ",") %>% unlist() %>% strsplit(., "=")
 
@@ -524,30 +524,32 @@ launch_task <- function(links, wait_retry, remDr, DEBUG) {
 #' @param pid project id
 #' @param folder protocol folder
 #' @param dont_ask do everything without asking for user input
-#' @param uid
-#' @param browserName
-#' @param big_container
-#' @param keep_alive
-#' @param folder_downloads
-#' @param DEBUG
-#' @param screenshot
-#' @param debug_file
-#' @param console_logs
-#' @param open_VNC
-#' @param uid_URL
-#' @param local_or_server
-#' @param local_folder_tasks
-#' @param server_folder_tasks
-#' @param disable_web_security
-#' @param initial_wait
-#' @param wait_retry
-#' @param forced_random_wait
-#' @param forced_refresh
-#' @param forced_seed
+#' @param uid .
+#' @param browserName .
+#' @param big_container .
+#' @param keep_alive .
+#' @param folder_downloads .
+#' @param DEBUG .
+#' @param screenshot .
+#' @param debug_file .
+#' @param console_logs .
+#' @param open_VNC .
+#' @param uid_URL .
+#' @param local_or_server .
+#' @param local_folder_tasks .
+#' @param server_folder_tasks .
+#' @param disable_web_security .
+#' @param initial_wait .
+#' @param wait_retry .
+#' @param forced_random_wait .
+#' @param forced_refresh .
+#' @param forced_seed .
+#' @param credentials_folder folder where files "SERVER_PATH.R" and ".credentials" are. Usually .vault/
 #'
-#' @return Creates a _targets.R file
+#' @return Creates a _targets.R file adding parameters_monkeys_minimal
 #' @export
 create_targets_file <- function(folder = "~/Downloads/",
+                                credentials_folder = ".vault/",
                                 uid = 1,
                                 browserName = "chrome",
                                 big_container = FALSE,
@@ -596,11 +598,11 @@ create_targets_file <- function(folder = "~/Downloads/",
   # folder = NULL
   # dont_ask = FALSE
 
-
   # Prepare all parameters
   if (!is.null(local_folder_tasks)) FOLDER_TASKS = glue::glue('local_folder_tasks = "{local_folder_tasks}"') # No comma at the end because will be the last element
   if (!is.null(server_folder_tasks)) FOLDER_TASKS = glue::glue('server_folder_tasks = "{server_folder_tasks}"')# No comma at the end because will be the last element
 
+  if (!is.null(credentials_folder)) string_credentials_folder = glue::glue('credentials_folder = "{credentials_folder}",')
   if (!is.null(uid)) string_uid = glue::glue('uid = {dput(uid)},')
   if (!is.null(browserName)) string_browserName = glue::glue('browserName = "{browserName}",')
   if (!is.null(big_container)) string_big_container = glue::glue('big_container = {big_container},')
@@ -623,6 +625,8 @@ create_targets_file <- function(folder = "~/Downloads/",
 
 
   # Make sure not parameter is empty
+  string_credentials_folder = ifelse(exists("string_credentials_folder"), string_credentials_folder, "")
+
   string_uid = ifelse(exists("string_uid"), string_uid, "")
   string_browserName = ifelse(exists("string_browserName"), string_browserName, "")
   string_big_container = ifelse(exists("string_big_container"), string_big_container, "")
@@ -652,6 +656,7 @@ create_targets_file <- function(folder = "~/Downloads/",
       glue::glue('
     parameters_monkeys_minimal = list(
                {string_uid}
+               {string_credentials_folder}
                {string_browserName}
                {string_big_container}
                {string_keep_alive}
@@ -687,7 +692,7 @@ create_targets_file <- function(folder = "~/Downloads/",
 
     if (dont_ask == FALSE) {
 
-      response_prompt = menu(choices = c("YES", "No"),
+      response_prompt = utils::menu(choices = c("YES", "No"),
                              title =  jsPsychHelpeR::cli_message(var_used = new_parameters_monkeys_minimal,
                                                  info = "{cli::style_bold((cli::col_yellow('Overwrite')))} file '_targets.R' to include the following parameters?",
                                                  details = "{new_parameters_monkeys_minimal}"))
@@ -760,10 +765,6 @@ setup_folders <- function(folder, extract_zip = FALSE) {
   }
 
   # Necessary folders
-  # necessary_folders = c(paste0("data/", pid), # data/manual_correction
-  #                       "outputs/backup", "outputs/data", "outputs/plots", "outputs/reliability", "outputs/reports", "outputs/tables", "outputs/tests_outputs",
-  #                       ".vault/data_vault", ".vault/Rmd", ".vault/outputs/data", ".vault/outputs/reports")
-  #
   necessary_folders = c(".vault", "outputs/DF", "outputs/errors", "outputs/log", "outputs/screenshots", "outputs/source")
 
 
@@ -785,33 +786,33 @@ setup_folders <- function(folder, extract_zip = FALSE) {
 #' @param pid project id
 #' @param dont_ask answer YES to all questions so the process runs uninterrupted. This will:
 #' @param folder location for the project
-#' @param uid
-#' @param browserName
-#' @param big_container
-#' @param keep_alive
-#' @param folder_downloads
-#' @param DEBUG
-#' @param screenshot
-#' @param debug_file
-#' @param console_logs
-#' @param open_VNC
-#' @param uid_URL
-#' @param local_or_server
-#' @param local_folder_tasks
-#' @param server_folder_tasks
-#' @param disable_web_security
-#' @param initial_wait
+#' @param uid .
+#' @param browserName .
+#' @param big_container .
+#' @param keep_alive .
+#' @param folder_downloads .
+#' @param DEBUG .
+#' @param screenshot .
+#' @param debug_file .
+#' @param console_logs .
+#' @param open_VNC .
+#' @param uid_URL .
+#' @param local_or_server .
+#' @param local_folder_tasks .
+#' @param server_folder_tasks .
+#' @param disable_web_security .
+#' @param initial_wait .
 #' @param wait_retry In seconds, how much to wait before retrying
-#' @param forced_random_wait
-#' @param forced_refresh
-#' @param forced_seed
+#' @param forced_random_wait .
+#' @param forced_refresh .
+#' @param forced_seed .
 #' @param open_rstudio Open RStudio with the new project TRUE / FALSE
-#' @param credentials_folder
+#' @param credentials_folder folder where files "SERVER_PATH.R" and ".credentials" are. Usually .vault/
 #'
 #' @return Creates a new project
 #' @export
 create_monkeys_project <- function(folder = "~/Downloads/",
-                                   credentials_folder = NULL,
+                                   credentials_folder = ".vault/",
                                    uid = 1,
                                    browserName = "chrome",
                                    big_container = FALSE,
@@ -843,13 +844,18 @@ create_monkeys_project <- function(folder = "~/Downloads/",
   # Make sure paths work on different OS
     # credentials_folder = r"(c:\Program files\R)"
   if (!is.null(folder_downloads)) folder_downloads = fs::path_abs(folder_downloads)
-  if (!is.null(credentials_folder)) credentials_folder = fs::path_abs(credentials_folder)
+  # if (!is.null(credentials_folder)) credentials_folder = fs::path_abs(credentials_folder)
   if (!is.null(folder)) folder = fs::path_abs(folder)
+
+  if (DEBUG == TRUE) cli::cli_alert_info("folder_downloads: {folder_downloads}")
+  # if (DEBUG == TRUE) cli::cli_alert_info("credentials_folder: {credentials_folder}")
+  if (DEBUG == TRUE) cli::cli_alert_info("folder: {folder}")
+
 
 
 
   # ASK FOR USER PERMISSION
-  if (dont_ask == FALSE)  response_prompt = menu(choices = c("Yes", "No"),
+  if (dont_ask == FALSE)  response_prompt = utils::menu(choices = c("Yes", "No"),
                                                  title =
                                                    jsPsychHelpeR::cli_message(h1_title = "Initial SETUP",
                                                                info = "Do you want to run the {.pkg initial setup}?",
@@ -864,38 +870,7 @@ create_monkeys_project <- function(folder = "~/Downloads/",
     # 1) Run to make sure you have all the necessary packages and folders -------
 
     jsPsychHelpeR::cli_message(h1_title = "Setup")
-    # setup_folders(pid = pid, folder = folder, extract_zip = TRUE)
     setup_folders(folder = folder, extract_zip = TRUE)
-
-    # Copy credentials files to new project
-    if (!is.null(credentials_folder)) {
-
-      cli::cli_h1("Copying credentials")
-
-      # OS = Sys.info()["sysname"]
-
-      # if (OS == "Linux" | OS == "Darwin" | OS == "macOS") {
-        FILES_temp =  c("SERVER_PATH.R", ".credentials")
-        FILES_to_COPY = here::here(c(paste0(credentials_folder, "/", FILES_temp)))
-        FILES_DESTINATION = here::here(c(paste0(folder, "/.vault/", FILES_temp)))
-
-        # fs::path_abs(c(paste0(credentials_folder, "/", FILES_temp)))
-
-      # } else if (OS == "Windows") {
-      #
-      #   FILES_temp =  c("SERVER_PATH.R", ".credentials")
-      #   FILES_to_COPY = c(paste0(credentials_folder, "/", FILES_temp)) #|> normalizePath()
-      #   FILES_DESTINATION = c(paste0(folder, "/.vault/", FILES_temp)) #|> normalizePath()
-      #
-      # } else {
-      #   stop("Not sure about your operative system.")
-      # }
-
-      cli::cli_inform("FILES_to_COPY: {FILES_to_COPY} \n
-                      FILES_DESTINATION: {FILES_DESTINATION}")
-
-      file.copy(from = FILES_to_COPY, to = FILES_DESTINATION)
-    }
 
 
     # 2) Create a _targets.R file for your data -------------------------------
@@ -903,6 +878,7 @@ create_monkeys_project <- function(folder = "~/Downloads/",
     jsPsychHelpeR::cli_message(var_used = folder, h1_title = "Create _targets.R file in {.code {folder}}")
 
     create_targets_file(folder = folder,
+                        credentials_folder = credentials_folder,
                         uid = uid,
                         browserName = browserName,
                         big_container = big_container,
@@ -929,6 +905,7 @@ create_monkeys_project <- function(folder = "~/Downloads/",
 
 
 
+    # This is from jsPsychMaker
     # Copy tests to tests/testthat/
     # tests_templates_origin = list.files(paste0(folder, "/inst/templates/tests"), full.names = TRUE, recursive = TRUE)
     # tests_templates_destination = gsub("inst/templates/", "", tests_templates_origin)
@@ -965,15 +942,10 @@ create_monkeys_project <- function(folder = "~/Downloads/",
 #' @export
 list_data_server <- function(pid, list_credentials = NULL) {
 
-  # pid = "999"
-
-  # list_credentials = NULL
-
   # Parameters ---
   dry_run = " --dry-run "
 
   # Check and prepare local folder and path
-  # if (!file.exists(local_folder)) dir.create(local_folder)
   local_folder = normalizePath(here::here("."))
   local_folder_terminal = gsub(" ", "\\\\ ", local_folder)
 
@@ -983,32 +955,24 @@ list_data_server <- function(pid, list_credentials = NULL) {
   # If list_credentials is null, try to get the .credentials file from .vault
   if (is.null(list_credentials)) {
 
-    cli::cli_h1("GETTING .credentials")
     file_credentials = here::here(".vault/.credentials")
     credentials_exist = file.exists(file_credentials)
     if (credentials_exist) {
       list_credentials = source(file_credentials)
     } else {
-
       cli::cli_alert_danger("file_credentials NOT FOUND in: {file_credentials}")
-
-      # file_credentials = "/tmp/Rtmp8ICoRD/file1a3952477191a/jsPsychMonkeys.Rcheck/00_pkg_src/jsPsychMonkeys/.vault/.credentials"
-      testing_package_credentials_location = paste0(dirname(dirname(dirname(dirname(file_credentials)))), "/00_pkg_src/jsPsychMonkeys/.vault/.credentials")
-      cli::cli_alert_info("Trying in: {testing_package_credentials_location}")
-      credentials_exist = file.exists(testing_package_credentials_location)
-      if (credentials_exist) list_credentials = source(testing_package_credentials_location)
-
-
+      credentials_exist = FALSE
     }
-    cli::cli_h1("END GETTING .credentials")
+
 
   # A list of credentials was passed
   } else {
 
-    if (!is.null(list_credentials$IP) &
-        !is.null(list_credentials$user) &
-        !is.null(list_credentials$password) &
-        !is.null(list_credentials$main_FOLDER)) credentials_exist = TRUE
+    if (!is.null(list_credentials$IP) & !is.null(list_credentials$user) & !is.null(list_credentials$password) & !is.null(list_credentials$main_FOLDER)) {
+      credentials_exist = TRUE
+    } else {
+      credentials_exist = FALSE
+    }
 
   }
 
@@ -1022,13 +986,17 @@ list_data_server <- function(pid, list_credentials = NULL) {
     # sshpass and rsync installed (?)
     if (SSHPASS != "" & RSYNC != "") {
 
+      RSYNC_COMMAND = paste0('sshpass -p ', list_credentials$password, ' rsync -av ', dry_run, ' --rsh=ssh ',
+                             list_credentials$user, "@", list_credentials$IP, ":", list_credentials$main_FOLDER, pid, '/.data/ ',
+                             here::here(local_folder_terminal), '/ ')
+
+      cli::cli_alert_info(RSYNC_COMMAND)
+
       OUT =
         suppressWarnings(
           system(
-            paste0('sshpass -p ', list_credentials$value$password, ' rsync -av ', dry_run, ' --rsh=ssh ',
-                   list_credentials$value$user, "@", list_credentials$value$IP, ":", list_credentials$value$main_FOLDER, pid, '/.data/ ',
-                   here::here(local_folder_terminal), '/ '
-            ), intern = TRUE
+            RSYNC_COMMAND
+            , intern = TRUE
           )
         )
 
@@ -1038,6 +1006,7 @@ list_data_server <- function(pid, list_credentials = NULL) {
     }
   } else {
     cli::cli_alert_warning("Can't find server credentials in '.vault/.credentials'")
+    OUT = NA
   }
 
 

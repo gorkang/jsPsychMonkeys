@@ -7,7 +7,16 @@
 copy_files_to_data(pre_existing_CSV, parameters_monkeys, uid, task = task)
 }
 \arguments{
-\item{task}{}
+\item{pre_existing_CSV}{vector with filenames from a previous call of check_Downloads()}
+
+\item{parameters_monkeys}{parameters_monkeys list}
+
+\item{uid}{User id}
+
+\item{task}{Last task in _targets pipeline}
+}
+\value{
+copies the new csv files to .data
 }
 \description{
 In local protocols, move the Downloaded csv to the data folder of the protocol

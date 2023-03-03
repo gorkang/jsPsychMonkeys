@@ -6,6 +6,7 @@
 \usage{
 create_targets_file(
   folder = "~/Downloads/",
+  credentials_folder = ".vault/",
   uid = 1,
   browserName = "chrome",
   big_container = FALSE,
@@ -33,14 +34,54 @@ create_targets_file(
 \arguments{
 \item{folder}{protocol folder}
 
+\item{credentials_folder}{folder where files "SERVER_PATH.R" and ".credentials" are. Usually .vault/}
+
+\item{uid}{.}
+
+\item{browserName}{.}
+
+\item{big_container}{.}
+
+\item{keep_alive}{.}
+
+\item{folder_downloads}{.}
+
+\item{DEBUG}{.}
+
+\item{screenshot}{.}
+
+\item{debug_file}{.}
+
+\item{console_logs}{.}
+
+\item{open_VNC}{.}
+
 \item{pid}{project id}
 
-\item{forced_seed}{}
+\item{uid_URL}{.}
+
+\item{local_or_server}{.}
+
+\item{local_folder_tasks}{.}
+
+\item{server_folder_tasks}{.}
+
+\item{disable_web_security}{.}
+
+\item{initial_wait}{.}
+
+\item{wait_retry}{.}
+
+\item{forced_random_wait}{.}
+
+\item{forced_refresh}{.}
+
+\item{forced_seed}{.}
 
 \item{dont_ask}{do everything without asking for user input}
 }
 \value{
-Creates a _targets.R file
+Creates a _targets.R file adding parameters_monkeys_minimal
 }
 \description{
 Create _targets.R file from a protocol folder

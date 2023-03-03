@@ -15,6 +15,9 @@ complete_task(parameters_monkeys, uid, links, remote_driver = NULL)
 
 \item{remote_driver}{remote_driver output}
 }
+\value{
+Completes a task and returns a container name.
+}
 \description{
 Completes a jsPsychMaker task
 }

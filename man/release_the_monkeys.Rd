@@ -35,11 +35,62 @@ release_the_monkeys(
 )
 }
 \arguments{
+\item{uid}{.}
+
+\item{credentials_folder}{folder where files "SERVER_PATH.R" and ".credentials" are. Usually .vault/}
+
+\item{sequential_parallel}{.}
+
+\item{number_of_cores}{.}
+
+\item{browserName}{.}
+
+\item{big_container}{.}
+
+\item{keep_alive}{.}
+
+\item{folder_downloads}{.}
+
+\item{DEBUG}{.}
+
+\item{screenshot}{.}
+
+\item{debug_file}{.}
+
+\item{console_logs}{.}
+
+\item{open_VNC}{.}
+
 \item{pid}{project id}
+
+\item{uid_URL}{.}
+
+\item{local_or_server}{.}
+
+\item{local_folder_tasks}{.}
+
+\item{server_folder_tasks}{.}
+
+\item{disable_web_security}{.}
+
+\item{initial_wait}{.}
 
 \item{wait_retry}{In seconds, how much to wait before retrying}
 
-\item{clean_up_targets}{}
+\item{forced_random_wait}{.}
+
+\item{forced_refresh}{.}
+
+\item{forced_seed}{.}
+
+\item{dont_ask}{.}
+
+\item{open_rstudio}{.}
+
+\item{clean_up_targets}{.}
+}
+\value{
+Releases monkeys to complete a jsPsychMaker protocol
 }
 \description{
 release a horde of Monkeys to complete a jsPsychMakeR protocol

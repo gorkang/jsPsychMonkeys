@@ -20,6 +20,9 @@ reconnect_to_VNC(
 
 \item{DEBUG}{TRUE/FALSE}
 }
+\value{
+Names of containers available or opens one
+}
 \description{
 reconnect_to_VNC
 }

@@ -7,7 +7,10 @@
 check_trialids(local_folder_protocol)
 }
 \arguments{
-\item{local_folder_tasks}{local folders where the tasks are}
+\item{local_folder_protocol}{path to local folder with protocol}
+}
+\value{
+A message
 }
 \description{
 Checks that trialid's of an experiment in a folder follow the standard expected rules

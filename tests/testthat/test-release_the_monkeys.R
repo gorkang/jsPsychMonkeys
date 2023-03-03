@@ -8,7 +8,7 @@ test_that("local and server protocol runs", {
 
 
 
-  # Simple protocol ---------------------------------------------------------
+  # Create Simple protocol --------------------------------------------------
 
   temp_folder = tempdir(check = TRUE)
   FOLDER = paste0(temp_folder, "/test_protocol999")
@@ -22,7 +22,8 @@ test_that("local and server protocol runs", {
   if (!write_permission) system(paste0("chmod 777 ", temp_folder, " * -R"))
 
 
-  # Launch monkey
+  # Simple protocol sequential ----------------------------------------------
+
   OUTPUT_simple = jsPsychMonkeys::release_the_monkeys(uid = "1", local_folder_tasks = FOLDER, clean_up_targets = TRUE,
                                       open_VNC = FALSE, DEBUG = FALSE, keep_alive = FALSE)
 
@@ -40,7 +41,6 @@ test_that("local and server protocol runs", {
   testthat::expect_equal(object = OUTPUT_simple_parallel$message_out, expected = "The Monkeys completed 6 tasks.")
 
 
-
   # Online protocol ---------------------------------------------------------
 
   # "test/protocols_DEV/test9999" is a simple protocol with AIM
@@ -48,7 +48,7 @@ test_that("local and server protocol runs", {
   OUTPUT_simple_online = jsPsychMonkeys::release_the_monkeys(uid = uid_random,
                                                              open_VNC = FALSE,
                                                              server_folder_tasks = "test/protocols_DEV/test9999",
-                                                             clean_up_targets = TRUE,
+                                                             clean_up_targets = FALSE,
                                                              credentials_folder = "~/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys/.vault/")
 
 

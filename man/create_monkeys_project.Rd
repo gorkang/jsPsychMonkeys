@@ -6,7 +6,7 @@
 \usage{
 create_monkeys_project(
   folder = "~/Downloads/",
-  credentials_folder = NULL,
+  credentials_folder = ".vault/",
   uid = 1,
   browserName = "chrome",
   big_container = FALSE,
@@ -35,27 +35,58 @@ create_monkeys_project(
 \arguments{
 \item{folder}{location for the project}
 
-\item{credentials_folder}{}
+\item{credentials_folder}{folder where files "SERVER_PATH.R" and ".credentials" are. Usually .vault/}
+
+\item{uid}{.}
+
+\item{browserName}{.}
+
+\item{big_container}{.}
+
+\item{keep_alive}{.}
+
+\item{folder_downloads}{.}
+
+\item{DEBUG}{.}
+
+\item{screenshot}{.}
+
+\item{debug_file}{.}
+
+\item{console_logs}{.}
+
+\item{open_VNC}{.}
 
 \item{pid}{project id}
 
+\item{uid_URL}{.}
+
+\item{local_or_server}{.}
+
+\item{local_folder_tasks}{.}
+
+\item{server_folder_tasks}{.}
+
+\item{disable_web_security}{.}
+
+\item{initial_wait}{.}
+
 \item{wait_retry}{In seconds, how much to wait before retrying}
+
+\item{forced_random_wait}{.}
+
+\item{forced_refresh}{.}
+
+\item{forced_seed}{.}
 
 \item{dont_ask}{answer YES to all questions so the process runs uninterrupted. This will:}
 
 \item{open_rstudio}{Open RStudio with the new project TRUE / FALSE}
 }
 \value{
-Opens a new RStudio project
+Creates a new project
 }
 \description{
-run_initial_setup() will read your data and create a jsPsychMonkeys project
-tailoring the _targets.R file to the tasks included in the data.
-}
-\examples{
-run_initial_setup(pid = 999, download_files = FALSE,
-data_location = system.file("extdata", package = "jsPsychMonkeys"),
-download_task_script = FALSE,
-folder = tempdir(),
-sensitive_tasks = c(""), dont_ask = TRUE, open_rstudio = FALSE)
+create_monkeys_project() will create a jsPsychMonkeys project adapted to
+the parameters you entered
 }

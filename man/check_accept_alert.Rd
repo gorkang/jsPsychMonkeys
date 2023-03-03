@@ -14,6 +14,9 @@ check_accept_alert(wait_retry = 0.5, remDr, DEBUG)
 
 \item{DEBUG}{TRUE/FALSE}
 }
+\value{
+Accepts an alert, if present
+}
 \description{
 check_accept_alert
 Safely checks if there in an alert and accepts it

@@ -36,7 +36,7 @@ clean_up_docker <-
 
       # Stop and remove containers:
       # If container is running stop it
-      if (!is_empty(system(sprintf('docker ps -q -f name=%s', container_name), intern = TRUE))) {
+      if (!purrr::is_empty(system(sprintf('docker ps -q -f name=%s', container_name), intern = TRUE))) {
         # Stop and remove container
         system(sprintf('docker stop %s', container_name)) # kill container_name
       }

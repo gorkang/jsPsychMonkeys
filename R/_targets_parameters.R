@@ -1,18 +1,12 @@
 
 # Libraries ---------------------------------------------------------------
 
+
 suppressMessages(suppressWarnings({
-  if (!require('targets')) install.packages('targets'); library('targets')
-  if (!require('tarchetypes')) install.packages('tarchetypes'); library('tarchetypes')
-  if (!require('dplyr')) install.packages('dplyr'); library('dplyr')
-  if (!require("purrr")) install.packages("purrr"); library("purrr")
-#   if (!require('dtplyr')) install.packages('dtplyr'); library('dtplyr')
-#   if (!require('future')) install.packages('future'); library('future')
-#   if (!require('future.callr')) install.packages('future.callr'); library('future.callr')
-#   if (!require("glue")) install.packages("glue"); library("glue")
-#   if (!require("assertthat")) install.packages("assertthat"); library("assertthat")
-#   if (!require('tidyr')) install.packages('tidyr'); library('tidyr')
-#   if (!require("RSelenium")) install.packages("RSelenium", dependencies = TRUE); library("RSelenium")
+  library('targets')
+  library('tarchetypes')
+  library('dplyr')
+  library("purrr")
 }))
 
 # List of packages to use

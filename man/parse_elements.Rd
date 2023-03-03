@@ -8,6 +8,11 @@ parse_elements(what, page_source_rvest)
 }
 \arguments{
 \item{what}{a html tag such as c("p", "textarea", "input", "div", ...)}
+
+\item{page_source_rvest}{page source rvest object}
+}
+\value{
+A DF
 }
 \description{
 Parse website elements to extract and tabulate all the properties

@@ -96,7 +96,7 @@ create_remDr <-
 
       return(remDr)
     }
-    create_remDr_safely = safely(create_remDr)
+    create_remDr_safely = purrr::safely(create_remDr)
     
     CREATE_REMOTE_DRIVER = create_remDr_safely(container_port = container_port, browserName = browserName, time_wait = 1)
 
@@ -129,7 +129,7 @@ create_remDr <-
       
     }
     
-    clean_open_safely = safely(clean_open)
+    clean_open_safely = purrr::safely(clean_open)
     
     
     # Open new browser -------------------------------------------------------

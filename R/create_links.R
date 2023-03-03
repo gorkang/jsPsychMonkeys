@@ -58,7 +58,9 @@ create_links <-
 
     if (parameters_monkeys$task$local_or_server == "server") {
 
-      source(here::here(".vault/SERVER_PATH.R")) # server:path
+      credentials_location = paste0(parameters_monkeys$docker$credentials_folder, "/SERVER_PATH.R")
+      source(credentials_location) # loads variable: server_path
+
       parameters_monkeys$task$server_path = server_path
       links_tasks = paste0(parameters_monkeys$task$server_path, parameters_monkeys$task$server_folder_tasks, "/index.html?pid=", parameters_monkeys$task$pid,uid_string)
 

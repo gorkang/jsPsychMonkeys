@@ -1,37 +1,35 @@
 #' release a horde of Monkeys to complete a jsPsychMakeR protocol
 #'
-#' @param uid
-#' @param browserName
-#' @param big_container
-#' @param keep_alive
-#' @param folder_downloads
-#' @param DEBUG
-#' @param screenshot
-#' @param debug_file
-#' @param console_logs
-#' @param open_VNC
+#' @param uid .
+#' @param browserName .
+#' @param big_container .
+#' @param keep_alive .
+#' @param folder_downloads .
+#' @param DEBUG .
+#' @param screenshot .
+#' @param debug_file .
+#' @param console_logs .
+#' @param open_VNC .
 #' @param pid project id
-#' @param uid_URL
-#' @param local_or_server
-#' @param local_folder_tasks
-#' @param server_folder_tasks
-#' @param disable_web_security
-#' @param initial_wait
+#' @param uid_URL .
+#' @param local_or_server .
+#' @param local_folder_tasks .
+#' @param server_folder_tasks .
+#' @param disable_web_security .
+#' @param initial_wait .
 #' @param wait_retry In seconds, how much to wait before retrying
-#' @param forced_random_wait
-#' @param forced_refresh
-#' @param forced_seed
-#' @param dont_ask
-#' @param open_rstudio
-#' @param credentials_folder
-#' @param sequential_parallel
-#' @param number_of_cores
-#' @param clean_up_targets
+#' @param forced_random_wait .
+#' @param forced_refresh .
+#' @param forced_seed .
+#' @param dont_ask .
+#' @param open_rstudio .
+#' @param credentials_folder folder where files "SERVER_PATH.R" and ".credentials" are. Usually .vault/
+#' @param sequential_parallel .
+#' @param number_of_cores .
+#' @param clean_up_targets .
 #'
-#' @return
+#' @return Releases monkeys to complete a jsPsychMaker protocol
 #' @export
-#'
-#' @examples
 release_the_monkeys <- function(uid = 1,
                                 credentials_folder = NULL,
                                 sequential_parallel = "sequential",
@@ -64,7 +62,6 @@ release_the_monkeys <- function(uid = 1,
 
 
   # CHECKS ---
-
   if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("To run tasks on server I need `credentials_folder`")
 
 
@@ -100,17 +97,22 @@ release_the_monkeys <- function(uid = 1,
                                          open_rstudio = open_rstudio)
 
 
-
   make_and_clean_monkeys <- function(FOLDER, clean_up_targets, credentials_folder, sequential_parallel, number_of_cores, current_WD) {
 
     cli::cli_alert_info("Changing WD to {.code {FOLDER}}")
     setwd(dir = FOLDER)
 
-    # TODO: see if list_data_server() below works on Windows
+    # list_data_server() does not work on Windows because rsync is not available
     if(!is.null(server_folder_tasks)) {
+
+      # Get credentials
+      CREDENTIALS <- get_credentials(credentials_folder)
+
+
       pid = paste0(server_folder_tasks)
       cli::cli_alert_info("Checking files for pid = {pid}")
-      INITIAL_files = list_data_server(pid = pid) |> dplyr::pull(files)
+      INITIAL_files = list_data_server(pid = pid, list_credentials = CREDENTIALS$credentials$value) |> dplyr::pull(files)
+
     } else {
       INITIAL_files = list.files(paste0(local_folder_tasks, "/.data"), pattern = "csv")
     }
@@ -131,7 +133,7 @@ release_the_monkeys <- function(uid = 1,
 
     # Files in .data after the Monkeys finish
     if(!is.null(server_folder_tasks)) {
-      FINAL_files = list_data_server(pid = pid) |> dplyr::pull(files)
+      FINAL_files = list_data_server(pid = pid, list_credentials = CREDENTIALS$credentials$value) |> dplyr::pull(files)
     } else {
       FINAL_files = list.files(paste0(local_folder_tasks, "/.data"), pattern = "csv")
     }
@@ -143,16 +145,6 @@ release_the_monkeys <- function(uid = 1,
       targets::tar_destroy(ask = FALSE)
       FILES = list.files(paste0(FOLDER, "/_targets/"), recursive = TRUE, full.names = TRUE)
       file.remove(FILES)
-
-      if (!is.null(credentials_folder)) {
-
-        FILES_temp =  c("SERVER_PATH.R", ".credentials")
-        FILES_DESTINATION = here::here(c(paste0(FOLDER, "/.vault/", FILES_temp)))
-
-        file.remove(FILES_DESTINATION)
-      }
-
-
     }
 
     cli::cli_alert_info("Changing WD back to {.code {current_WD}}")
@@ -177,11 +169,7 @@ release_the_monkeys <- function(uid = 1,
     message_out = paste0("The Monkeys completed ", length(OUTPUT$result), " tasks.")
   }
 
-  # For the server
-  # if (!is.null(server_folder_tasks) & is.null(OUTPUT$error)) message_out = paste0("The Monkeys completed the protocol.")
-
   cli::cli_alert_info(message_out)
-
 
   OUTPUT_fun = list(message_out = message_out,
                     output = OUTPUT$result,

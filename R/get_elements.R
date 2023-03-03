@@ -62,27 +62,27 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
       dplyr::bind_rows(parse_elements("button", page_source_rvest)) |> 
       
       # Filter out invisible things
-      filter(is.na(style) | style != "display: none;")
+      dplyr::filter(is.na(style) | style != "display: none;")
     
     if (nrow(DF_elements_options_raw) == 0) cli::cli_alert_danger(" ERROR: No elements found in source")
     
 
-    # Columns that we don't have in all the items but that are used in the case_when() below
+    # Columns that we don't have in all the items but that are used in the dplyr::case_when() below
     cols <- c(list = NA_character_)
     
     
     DF_elements_options = 
       DF_elements_options_raw %>% 
       
-      # If columns in cols do not exist, create them. Avoids warnings in case_when() below
+      # If columns in cols do not exist, create them. Avoids warnings in dplyr::case_when() below
       tibble::add_column(., !!!cols[setdiff(names(cols), names(.))]) %>%
       
       # Use data.table to speed up things
       dtplyr::lazy_dt() %>%
     
       # Some hand-made plugins are missing the tag_name. ADD HERE
-      mutate(tag_name = 
-               case_when(
+      dplyr::mutate(tag_name = 
+               dplyr::case_when(
                  id == "jspsych-html-keyboard-response-stimulus" ~ "input",
                  id == "jspsych-audio-button-response-button-0" ~ "input",
                  
@@ -90,21 +90,21 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
                )) %>% 
       
       # FILTERING
-      filter(tag_name %in% c("input", "button") | class == "jspsych-content") %>%
-      filter(is.na(hidden)) %>%  # Avoid hidden elements
-      filter(is.na(type) | type != "hidden") %>% # Avoid hidden elements
+      dplyr::filter(tag_name %in% c("input", "button") | class == "jspsych-content") %>%
+      dplyr::filter(is.na(hidden)) %>%  # Avoid hidden elements
+      dplyr::filter(is.na(type) | type != "hidden") %>% # Avoid hidden elements
       
       # REQUIRED
-      mutate(required = ifelse(grepl("", required), TRUE, FALSE)) %>% 
+      dplyr::mutate(required = ifelse(grepl("", required), TRUE, FALSE)) %>% 
       
       # TRY TO GET NON-STANDARD INPUTS (inputs without id) and assign an id and class
-      mutate(id = 
-               case_when(
+      dplyr::mutate(id = 
+               dplyr::case_when(
                  tag_name == "input" & is.na(id)  & !is.na(name) ~ name,
                  tag_name == "button" & is.na(id)  & !is.na(class) ~ class,
                  TRUE ~ id),
              class = 
-               case_when(
+               dplyr::case_when(
                  tag_name == "input" & is.na(class) & "jspsych-survey-text-0" %in% DF_elements_options_raw$id ~ "jspsych-survey-text-question",
                  TRUE ~ class)
       ) %>% 
@@ -112,8 +112,8 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
       # TODO: if required == FALSE: sample between assigning a type_extracted or not. This way we can detect inputs without validation
       
       # EXHAUSTIVE LIST PLUGINS
-      mutate(type_extracted = 
-               case_when(
+      dplyr::mutate(type_extracted = 
+               dplyr::case_when(
                  
                  # No buttons or inputs, needs an keyboard input 
                  id == "jspsych-html-keyboard-response-stimulus" ~ "keyboard_response",
@@ -151,8 +151,8 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
                  TRUE ~ NA_character_)
       ) %>% 
       
-      mutate(type_extracted = 
-               case_when(
+      dplyr::mutate(type_extracted = 
+               dplyr::case_when(
                  # If they are record buttons, are inputs, not buttons
                  class == "jspsych-btn start-recording-button" ~ "input_button",
                  class == "jspsych-btn stop-recording-button" ~ "input_button",
@@ -163,24 +163,24 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
                )) 
       
     # Store table for DEBUG
-    # if (DEBUG == TRUE) write_csv(DF_elements_options, paste0("outputs/DF/EXTRACTED_", index, "_NEW.csv"))
+    # if (DEBUG == TRUE) readr::write_csv(DF_elements_options, paste0("outputs/DF/EXTRACTED_", index, "_NEW.csv"))
     
     
   # Extract remDr elements --------------------------------------------------
 
     # Get only IDs of inputs and buttons
-    ID_names = DF_elements_options %>% filter(tag_name %in% c("input", "button")) %>% tidyr::drop_na(id) %>% pull(id) 
-    DIV_names = DF_elements_options %>% filter(tag_name %in% c("div")) %>% tidyr::drop_na(id) %>% pull(id) 
+    ID_names = DF_elements_options %>% dplyr::filter(tag_name %in% c("input", "button")) %>% tidyr::drop_na(id) %>% dplyr::pull(id) 
+    DIV_names = DF_elements_options %>% dplyr::filter(tag_name %in% c("div")) %>% tidyr::drop_na(id) %>% dplyr::pull(id) 
     # Now we are getting id, name and class using DF_elements_options$id. Maybe try to actually use name and class
     # This could be problematic for Consent, and because of some empty elements, elements with repated id's etc.
-      # Name_names = DF_elements_options %>% filter(tag_name %in% c("input", "button")) %>% tidyr::drop_na(name) %>% pull(name)
-      # Class_names = DF_elements_options %>% filter(tag_name %in% c("input", "button")) %>% tidyr::drop_na(class) %>% pull(class)
+      # Name_names = DF_elements_options %>% dplyr::filter(tag_name %in% c("input", "button")) %>% tidyr::drop_na(name) %>% dplyr::pull(name)
+      # Class_names = DF_elements_options %>% dplyr::filter(tag_name %in% c("input", "button")) %>% tidyr::drop_na(class) %>% dplyr::pull(class)
       
     
     # Extract all elements with an id. We look for it in the "id", "name" and "class"
-    if (length(ID_names) != 0) list_elements_ids = 1:length(ID_names) %>% map(~ remDr$findElements(using = 'id', value = ID_names[.x])) %>% setNames(ID_names) %>% unlist()
-    if (length(ID_names) != 0) list_elements_names = 1:length(ID_names) %>% map(~ remDr$findElements(using = 'name', value = ID_names[.x])) %>% setNames(ID_names) %>% unlist()
-    if (length(ID_names) != 0) list_elements_class = 1:length(ID_names) %>% map(~ remDr$findElements(using = 'class', value = ID_names[.x])) %>% setNames(ID_names) %>% unlist()
+    if (length(ID_names) != 0) list_elements_ids = 1:length(ID_names) %>% purrr::map(~ remDr$findElements(using = 'id', value = ID_names[.x])) %>% stats::setNames(ID_names) %>% unlist()
+    if (length(ID_names) != 0) list_elements_names = 1:length(ID_names) %>% purrr::map(~ remDr$findElements(using = 'name', value = ID_names[.x])) %>% stats::setNames(ID_names) %>% unlist()
+    if (length(ID_names) != 0) list_elements_class = 1:length(ID_names) %>% purrr::map(~ remDr$findElements(using = 'class', value = ID_names[.x])) %>% stats::setNames(ID_names) %>% unlist()
 
     
     # Combine all elements in a single list: list_elements
@@ -192,7 +192,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     } else if (length(DIV_names) > 0 & !any(exists("list_elements_ids") | exists("list_elements_names") | exists("list_elements_class"))) {
       
       # cli::cli_alert_info("Only a DIV element found: {.code {DIV_names}}\nThis usually means the protocol is starting or has finished")
-      list_elements = 1:length(DIV_names) %>% map(~ remDr$findElements(using = 'id', value = DIV_names[.x])) %>% setNames(DIV_names) %>% unlist()
+      list_elements = 1:length(DIV_names) %>% purrr::map(~ remDr$findElements(using = 'id', value = DIV_names[.x])) %>% stats::setNames(DIV_names) %>% unlist()
 
     } else {
       
@@ -207,12 +207,12 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
   # Inputs, buttons, status -------------------------------------------------
     
     # Filter inputs, buttons and status to end up with a clean list of known names we know how to interact with.
-    name_contents = DF_elements_options %>% filter(type_extracted %in% c("content")) |> as_tibble()
-    name_inputs = DF_elements_options %>% filter(tag_name == "input" & type_extracted %in% c("checkbox", "date", "email", "html-form", "keyboard_response", "input_button", "list", "multi-select", "text", "number", "radio", "slider", "ALL")) |> as_tibble()
-    name_buttons = DF_elements_options %>% filter(tag_name == "button" | type_extracted %in% c("button")) |> as_tibble()
+    name_contents = DF_elements_options %>% dplyr::filter(type_extracted %in% c("content")) |> tibble::as_tibble()
+    name_inputs = DF_elements_options %>% dplyr::filter(tag_name == "input" & type_extracted %in% c("checkbox", "date", "email", "html-form", "keyboard_response", "input_button", "list", "multi-select", "text", "number", "radio", "slider", "ALL")) |> tibble::as_tibble()
+    name_buttons = DF_elements_options %>% dplyr::filter(tag_name == "button" | type_extracted %in% c("button")) |> tibble::as_tibble()
     
     # Back to tibble so we can look inside
-    DF_elements_options = DF_elements_options |> as_tibble()
+    DF_elements_options = DF_elements_options |> tibble::as_tibble()
     
    
     
