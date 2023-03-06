@@ -1,11 +1,10 @@
 test_that("local and server protocol runs", {
 
-  # Clean up containers
+  # Clean up monkeys' containers
   active_containers = system('docker ps -q', intern = TRUE)
-  active_containers |> purrr::walk(~system(paste0('docker stop ', .x)))
-  system("docker system prune -f") # Cleans up system (stopped containers, etc.)
-
-
+  active_monkeys = active_containers[grepl("monkey", active_containers)]
+  if (length(active_monkeys) > 0) system("docker ps --filter name=monkey* --filter status=running -aq | xargs docker stop")
+  # system("docker system prune -f") # Cleans up system (stopped containers, etc.)
 
 
   # Create Simple protocol --------------------------------------------------
@@ -54,9 +53,10 @@ test_that("local and server protocol runs", {
 
   testthat::expect_equal(object = OUTPUT_simple_online$message_out, expected = "The Monkeys completed 3 tasks.")
 
+  # Clean up monkeys' containers
   active_containers = system('docker ps -q', intern = TRUE)
-  active_containers |> purrr::walk(~system(paste0('docker stop ', .x)))
-  system("docker system prune -f") # Cleans up system (stopped containers, etc.)
-
+  active_monkeys = active_containers[grepl("monkey", active_containers)]
+  if (length(active_monkeys) > 0) system("docker ps --filter name=monkey* --filter status=running -aq | xargs docker stop")
+    # system("docker system prune -f") # Cleans up system (stopped containers, etc.)
 
 })
