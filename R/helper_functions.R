@@ -96,7 +96,7 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
   # DEBUG
   # targets::tar_load_globals()
   # debug_function("complete_task")
-  # container_name = paste0("container", uid)
+  # container_name = paste0("monkey_", uid)
   # just_check = TRUE
   # port = NULL
   # DEBUG = TRUE
@@ -115,15 +115,18 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
       containers_available = system('docker ps -a --format "{{.Names}}"', intern = TRUE) # Print container names
 
       if (!container_name %in% containers_available) {
+        cli::cli_alert_danger("{container_name} does not exist")
         NULL
       } else {
-        container_name
+        cli::cli_alert_success("{container_name} exists")
       }
 
 
     } else {
       # Connect to container
+
       # If container is a debug container, we can connect
+      # TODO: When we update to latest chrome, this is not necessary
       if (any(grepl("debug", system('docker ps -a --format "{{.Image}}"', intern = TRUE)))) {
 
         if (!is.null(port)) {
@@ -131,6 +134,11 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
           container_port = port
 
         } else {
+
+          # Check container is available
+          containers_available = system('docker ps -a --format "{{.Names}}"', intern = TRUE) # Print container names
+
+          if (!container_name %in% containers_available) cli::cli_abort("{.code {container_name}} not available. We found: {.code {containers_available}}")
 
           # Get container port
           container_port_raw <- system(sprintf('docker port %s', container_name), intern = TRUE)
@@ -157,7 +165,7 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
 
 
         # cat(crayon::yellow(paste0("\nOpen VNC | localhost:", container_port, " | pwd: secret\n"), crayon::black(vnc_command, "\n")))
-        cli::cli_alert_info("Open VNC | localhost: {container_port} | pwd: secret")
+        cli::cli_alert_info("Open {.code {container_name}} VNC | localhost:{container_port} | pwd: secret")
         cli::cli_alert_info("In a terminal: {.code {vnc_command}}")
 
         # if (DEBUG == TRUE) cat(crayon::silver(" \nDEBUG:", container_port_raw), "\n\n")
@@ -192,28 +200,9 @@ debug_docker <- function(uid_participant) {
 
   # DEBUG
   # uid_participant = 92
-  # parameters_monkeys = parameters_monkeys
-
-  # # suppressMessages(source(shrtcts::locate_shortcuts_source()))
-  # suppressMessages(source(here::here("_targets.R")))
-  #
-  # targets::tar_load(parameters_monkeys)
-  # source(here::here("R/main_parameters.R"), local = TRUE)
-  #
-  # # Extract parameters from parameters_monkeys
-  # # DEBUG <<- parameters_debug$debug$DEBUG
-  # # screenshot <<- parameters_debug$debug$screenshot
-  # # debug_file <<- parameters_debug$debug$debug_file
-  # # open_VNC <<- parameters_debug$debug$open_VNC
-  # # parameters_task <<- parameters_debug
-  # # uid <<- uid_participant
-  #
-  #
-  # # targets::tar_manifest()
-  # # targets::tar_meta()
 
   container_name_tar <- paste0("container_", uid_participant)
-  container_name <<- paste0("container", uid_participant)
+  container_name <<- paste0("monkey_", uid_participant)
   driver_name <<- paste0("remote_driver_", uid_participant)
   targets::tar_load(eval(container_name_tar))
   targets::tar_load(eval(driver_name))

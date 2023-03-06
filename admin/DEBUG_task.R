@@ -14,7 +14,7 @@ list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_element
 # list_get_elements$DF_elements_options |> View()
 # list_get_elements$name_contents |> View()
 # list_get_elements$name_buttons |> View()
-# 
+#
 # FINALIZAR ESTUDIO >
 
 # # In complete_task.R
@@ -45,7 +45,7 @@ participant_to_debug = parameters_monkeys$participants$uid
 # participant_to_debug = 1
 
 debug_docker(uid_participant = participant_to_debug, parameters_debug = parameters_monkeys)
-reconnect_to_VNC(container_name = paste0("container", participant_to_debug))
+reconnect_to_VNC(container_name = paste0("monkey_", participant_to_debug))
 
 
 list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_elements

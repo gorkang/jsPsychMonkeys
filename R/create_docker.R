@@ -27,7 +27,7 @@ create_docker <-
   if (DEBUG == TRUE) cli::cli_h1("UID: {uid}")
 
   # VARS
-  container_name = paste0("container", uid)
+  container_name = paste0("monkey_", uid)
 
 
 
