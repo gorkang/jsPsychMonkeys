@@ -118,7 +118,7 @@ complete_task <-
 
         ### Get elements of website ----------------------------
 
-          if (DEBUG == TRUE) cli::cli_h2("Getting elements")
+          if (DEBUG == TRUE) cli::cli_h2("Loop elements")
           try_number = 1
           wait_retry_loop = wait_retry # Reset to initial value
           continue_elements = FALSE
@@ -130,6 +130,7 @@ complete_task <-
             wait_retry_loop = wait_retry_loop + (try_number/20)
             if (try_number > 1) Sys.sleep(wait_retry_loop)
 
+            if (DEBUG == TRUE) cli::cli_h3("Get elements")
             # Make sure there are no alerts before retrying
             check_accept_alert(wait_retry_loop, remDr, DEBUG)
             list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = try_number, DEBUG = DEBUG)
@@ -137,6 +138,7 @@ complete_task <-
             # When there is not an error, the content is in result
             list_get_elements = list_get_elements$result
 
+            if (DEBUG == TRUE) cli::cli_h3("Process elements [{list_get_elements$percentage_completed}%]")
             # Check list_get_elements, show messages, and determine if we should continue getting elements and/or move to the next task
             OUTPUT_process_elements = process_elements(list_get_elements = list_get_elements, try_number = try_number, DEBUG = DEBUG)
             continue_elements = OUTPUT_process_elements$continue_elements

@@ -7,6 +7,8 @@ process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
   DF_elements_options = list_get_elements$DF_elements_options
   list_elements = list_get_elements$list_elements
   content_screen = DF_elements_options |> tibble::as_tibble() |> dplyr::pull(content)
+  percentage_completed = list_get_elements$percentage_completed
+
 
   # cli::cli_alert_info("CONTENT: {DF_elements_options$content}")
 
@@ -55,6 +57,12 @@ process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
     continue_elements = TRUE
     continue = FALSE
 
+  } else if (percentage_completed == 100){
+
+    if (DEBUG == TRUE) cli::cli_h1(cli::col_magenta("[[END OF EXPERIMENT - 100%]]"))
+
+    continue_elements = TRUE
+    continue = FALSE
 
   # Initial FULLSCREEN
   } else if (length(ID_names) == 1 & all(ID_names == c("jspsych-fullscreen-btn"))) {
@@ -73,7 +81,7 @@ process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
   } else if (try_number == 10 & (length(list_elements) == 0 | length(ID_names) == 0)) {
 
     if (DEBUG == TRUE) cli::cli_h1(cli::col_green("[[END OF EXPERIMENT]]"))
-    continue_elements = FALSE
+    continue_elements = FALSE # TODO: Should this be TRUE?
     continue = FALSE
 
   } else if (length(ID_names) == 1 & "jspsych-html-keyboard-response-stimulus" %in% DF_elements_options$id & !"button" %in% DF_elements_options$type_extracted) {
@@ -87,7 +95,7 @@ process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
 
   } else {
 
-    # Keep going!
+    # Keep going! Move to the next screen
     continue_elements = TRUE
 
   }
