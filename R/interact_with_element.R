@@ -44,20 +44,21 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
     paste0(., "...")
 
 
+
+# CHECK DISABLED ----------------------------------------------------------
+
+  # Wait a bit in EmpaTom to avoid retying too fast
+  if ("disabled" %in% colnames(list_get_elements$name_buttons) & "He visto el video" %in% list_get_elements$name_buttons$content) {
+    cli::cli_alert_warning("Button is disabled (?) waiting 5 seconds")
+    Sys.sleep(5)
+  }
+
+
   # BUTTONS -----------------------------------------------------------------
 
     if (length(list_get_elements$name_buttons$id) == 1) {
 
       selected_button_id = list_get_elements$name_buttons$id
-
-      # Get button's value
-      selected_button_value = "" # Default
-      button_value_columns = c("value", "content")
-      button_value_columns_n = which(button_value_columns %in% colnames(list_get_elements$name_buttons))
-      if (length(button_value_columns_n) > 0) {
-        temp_list = button_value_columns[button_value_columns_n] |> purrr::map(~list_get_elements$name_buttons |> dplyr::pull(.x))
-        selected_button_value = temp_list[temp_list != ""] |> unlist()
-      }
 
       # Click!
       list_get_elements$list_elements[[selected_button_id]]$clickElement()
@@ -111,7 +112,18 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
     }
 
 
+
   # MESSAGE -----------------------------------------------------------------
+
+  # Get button's value
+  selected_button_value = "" # Default
+  button_value_columns = c("value", "content") # Button's text appears in one of these columns
+  button_value_columns_n = which(button_value_columns %in% colnames(list_get_elements$name_buttons))
+  if (length(button_value_columns_n) > 0) {
+    temp_list = button_value_columns[button_value_columns_n] |> purrr::map(~list_get_elements$name_buttons |> filter(id == selected_button_id) |> dplyr::pull(.x))
+    selected_button_value = temp_list[temp_list != ""] |> unlist()
+  }
+
 
   # Instructions screen
   # if (DEBUG == TRUE & length(list_get_elements$name_buttons$id) %in% c(1,2) & all(list_get_elements$name_buttons$id %in% c("jspsych-instructions-back", "jspsych-instructions-next"))) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bold("[Instructions]:", gsub("\n", "", list_get_elements$name_contents$content), "\n")))
@@ -147,7 +159,7 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
                                         )
 
   if (grepl("FINALIZAR ESTUDIO", selected_button_value)) {
-    cli::cli_h1("-- ENDING -- ")
+    if (DEBUG == TRUE) cli::cli_h1("-- ENDING -- ")
     Sys.sleep(1)
   }
 
