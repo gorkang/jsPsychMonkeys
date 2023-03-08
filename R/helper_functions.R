@@ -1008,6 +1008,57 @@ list_data_server <- function(pid, list_credentials = NULL) {
 }
 
 
+#' Generate random numbers from a trimmed normal distribution
+#'
+#' @param n number of random numbers to generate
+#' @param min min value
+#' @param max max value
+#' @param mean mean of normal distribution
+#' @param sd standard deviation of normal distribution
+#' @param round TRUE / FALSE
+#' @param distrib One of c("normal", "uniform")
+#'
+#' @return Random numbers from a trimmed normal distribution
+#' @export
+#'
+#' @examples hist(rnorm_trimmed(n = 1000, mean= 80))
+random_number_trimmed <- function(n = 1, min = 0, max = 100, mean = NULL, sd = NULL, shape = min, round = TRUE, distrib = "normal") {
+
+  # n = 1
+  # min = 1000000
+  # max = 90000000
+  # mean = 50
+  # sd = 20
+  # shape = min
+  # round = TRUE
+  # distrib = "gamma"
+
+  if (is.null(mean)) mean = (max + min) /2
+  if (is.null(sd)) sd = mean / 3
+
+  out = NULL
+
+  for(i in 1:n) {# ~ 10x faster than map
+    if (distrib == "normal") x <- stats::rnorm(1, mean = mean, sd = sd)
+    if (distrib == "uniform") x <- stats::runif(1, min = min, max = max)
+
+    while (x < min | x > max) {
+      if (distrib == "normal") x <- stats::rnorm(1, mean = mean, sd = sd)
+      if (distrib == "uniform") x <- stats::runif(1, min = min, max = max)
+    }
+
+    out[i] = x
+  }
+
+  if (round == TRUE) out = round(out, 0)
+  return(out)
+}
+
+
 # SAFELY functions ----
 
 # In z_safely_helper_functions.R so it's the last function to load
+
+
+
+

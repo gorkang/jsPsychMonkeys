@@ -14,7 +14,8 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
   # debug_docker(uid_participant = uid)
   # reconnect_to_VNC(container_name = container_name)
   # list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_elements
-
+  # DEBUG = TRUE
+  # seed = 1
 
   # SET SEED ----------------------------------------------------------------
 
@@ -228,25 +229,23 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
     content_text = list_get_elements$name_contents$content
     if (length(content_text) == 0) content_text = ""
 
-    if (grepl("Rut Completo| rut |celular", content_text)) {
-      min_num = 100000000
-      max_num = 999999999
-    }
-
-    if (grepl("How old are you|edad", content_text)) {
-      min_num = 11
-      max_num = 90
-    }
-
+    # Hardcoded conditions
+    if (grepl("Rut Completo| rut ", content_text)) input_text = random_number_trimmed(1, sd = 100000000 * 20, min = 100000000, max = 999999999)
+    if (grepl("celular", content_text)) input_text = random_number_trimmed(1, min = 900000000, max = 999999999, distrib = "uniform")
+    if (grepl("How old are you|edad", content_text)) input_text = random_number_trimmed(1, mean = 20, sd = 10, min = 17, max = 90)
 
     # If max and min exist, replace default limits
     if (all(!is.na(list_get_elements$name_inputs$min))) min_num = as.numeric(list_get_elements$name_inputs$min)
     if (all(!is.na(list_get_elements$name_inputs$max))) max_num = as.numeric(list_get_elements$name_inputs$max)
 
-    input_text = as.character(sample(min_num:max_num, number_textboxes))
+    # input_text = as.character(sample(min_num:max_num, number_textboxes))
+    if (!exists("input_text")) {
+      input_text = as.character(random_number_trimmed(number_textboxes, min = min_num, max = max_num))
+    } else {
+      input_text = as.character(input_text)
+    }
 
-    #   list_get_elements$list_elements[[selected_input_name]]$clearElement()
-    #   list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
+    cli::cli_alert_info("NUMBER: {format(as.numeric(input_text), nsmall = 0, big.mark = ',')}")
 
     1:number_textboxes %>%
       purrr::walk(~ {
