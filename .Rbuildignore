@@ -6,7 +6,7 @@
 ^docs$
 ^pkgdown$
 run.R
-_targets
+^_targets$
 _targets.R
 _targets_packages.R
 

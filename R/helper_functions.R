@@ -1021,17 +1021,17 @@ list_data_server <- function(pid, list_credentials = NULL) {
 #' @return Random numbers from a trimmed normal distribution
 #' @export
 #'
-#' @examples hist(rnorm_trimmed(n = 1000, mean= 80))
-random_number_trimmed <- function(n = 1, min = 0, max = 100, mean = NULL, sd = NULL, shape = min, round = TRUE, distrib = "normal") {
+#' @examples hist(random_number_trimmed(n = 1000, mean = 80))
+random_number_trimmed <- function(n = 1, min = 0, max = 100, mean = NULL, sd = NULL, round = TRUE, distrib = "normal") {
 
   # n = 1
   # min = 1000000
   # max = 90000000
   # mean = 50
   # sd = 20
-  # shape = min
   # round = TRUE
-  # distrib = "gamma"
+  # distrib = "normal"
+  ## stats::rgamma()
 
   if (is.null(mean)) mean = (max + min) /2
   if (is.null(sd)) sd = mean / 3

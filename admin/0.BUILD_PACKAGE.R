@@ -23,23 +23,19 @@
 # Prepare files -----------------------------------------------------------
 
   # .Rprofile: make sure source("renv/activate.R") is UNCOMMENTED
-  rstudioapi::navigateToFile(".Rprofile")
+  # rstudioapi::navigateToFile(".Rprofile")
 
   # DO THIS ALWAYS so jsPsychHelpeR.zip is updated!
   # Create jsPsychHelpeR.zip
   source("admin/helper-scripts-admin.R")
-
-  # add_renv_cache = TRUE creates a zip file with the renv cache (initially ~ 230MB package, after cleaning up a loot, 75.6MB)
-  # Very useful to avoid downloading all renv cache again, to build the docker image much faster...
-  # MAX Github uploads 100MB
-  create_jsPsychHelpeR_zip(add_renv_cache = FALSE)
+  create_jsPsychHelpeR_zip(add_renv_cache = FALSE) # 20230308: 47KB
 
 
 
 # Build package -----------------------------------------------------------
 
   # .Rprofile: make sure source("renv/activate.R") is COMMENTED
-  rstudioapi::navigateToFile(".Rprofile")
+  # rstudioapi::navigateToFile(".Rprofile")
 
   # Build and install
   devtools::document()
@@ -58,7 +54,8 @@
 # Install package ---------------------------------------------------------
 
   # Build
-  devtools::build()
+  devtools::build() # 20230308: 0 errors ✔ | 1 warning ✖ | 4 notes ✖
+
 
   # devtools::install()
   renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys_0.2.5.tar.gz") # Install package from file
@@ -69,6 +66,7 @@
   create_jsPsychHelpeR_zip(add_renv_cache = FALSE)
   devtools::document()
   devtools::load_all()
+  pkgdown::build_site() # Create documentation!
   devtools::build()
   renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys_0.2.5.tar.gz") # Install package from file
 

@@ -11,6 +11,7 @@ Major updates
 * DEBUG messages improved
 * Works in Windows
 * ~90 tasks run fine
+* random_number_trimmed() to sample from a trimmed normal or uniform distribution in numeric responses
 * lots of small improvements
 
 

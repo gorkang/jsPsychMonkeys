@@ -72,7 +72,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     # Percentage completed
 
     if (nrow(DF_elements_options_raw) > 0) {
-      pct_raw = DF_elements_options_raw |> filter(id == "jspsych-progressbar-inner") |> pull(style)
+      pct_raw = DF_elements_options_raw |> dplyr::filter(id == "jspsych-progressbar-inner") |> dplyr::pull(style)
       percentage_completed = ifelse (length(pct_raw) > 0, stringr::str_extract(pct_raw, pattern = "[0-9]{1,3}"), "")
       if (is.na(percentage_completed)) percentage_completed = ""
       # percentage_completed = stringr::str_extract(pct_raw, pattern = "[0-9]{1,3}")
