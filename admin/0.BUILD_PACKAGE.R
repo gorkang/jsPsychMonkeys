@@ -6,7 +6,7 @@
   # To have a minimal renv cache:
 
   # .Rprofile: make sure source("renv/activate.R") is UNCOMMENTED
-  rstudioapi::navigateToFile(".Rprofile") # If this fails, it is uncommented
+  # rstudioapi::navigateToFile(".Rprofile") # If this fails, it is uncommented
 
     # 1) Delete renv/cache and renv/lib folders
     # 2) Only install the packages explicitly mentionened in _targets_options.R main_packages
