@@ -6,7 +6,7 @@
 #'
 #' @return list with selected input and the text of the selected element
 #' @export
-select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
+select_input <- function(list_get_elements, remDr = NULL, DEBUG = FALSE, seed = 1) {
 
   # DEBUG
   # targets::tar_load_globals()
@@ -48,12 +48,15 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
 
       cat(crayon::bgYellow(" WARNING: Unknown type of input. Trying ALL\n"))
 
-      # Anything with ClearElement errors.
+      # Anything with ClearElement errors (?)
       # ERRORS: "date", "html-form" "number", "text",  "slider",
       types_of_input = c("radio", "multi-select")
       selected_input = 1:length(types_of_input) %>%
-        purrr::map_df(~ list_get_elements$name_inputs %>% dplyr::filter(id == selected_input_name) %>%
-                 dplyr::mutate(type_extracted = types_of_input[.x]))
+        purrr::map_df(~
+                        list_get_elements$name_inputs %>%
+                        dplyr::filter(id == selected_input_name) %>%
+                        dplyr::mutate(type_extracted = types_of_input[.x])
+                      )
     }
 
 
@@ -266,6 +269,12 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
   } else if (any(selected_input$type_extracted %in% c("text"))) {
 
     number_textboxes = length(list_get_elements$name_inputs$name)
+    # if (DEBUG == TRUE) cli::cli_alert_info("number_textboxes: {.code {number_textboxes}}")
+
+    # Get content
+    content_text = list_get_elements$name_contents$content
+    if (length(content_text) == 0) content_text = ""
+    if (DEBUG == TRUE) cli::cli_alert_info("content_text: {.code {content_text}}")
 
     # Default characters limits
     min_chars = 0
@@ -277,8 +286,31 @@ select_input <- function(list_get_elements, DEBUG = FALSE, seed = 1) {
 
     input_text = as.character(stringi::stri_rand_strings(n = number_textboxes, length = sample(min_chars:max_chars, number_textboxes)))
 
-    # list_get_elements$list_elements[[selected_input_name]]$clearElement()
-    # list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
+
+    # IF there is an ID in the URL, and the input asked is an ID ---
+
+      # This is used to get participants to repeat the same protocol multiple times matching them by the ID
+      # We use the times_repeat_protocol parameter in create_links() to build URLs with ID in them
+
+      # Use the URL ID to fill the input
+      ID_input = grepl("ID", content_text)
+      CURRENT_URL = remDr$getCurrentUrl()
+      ID_url = stringr::str_extract(CURRENT_URL, "ID=.*")
+      # if (DEBUG == TRUE) cli::cli_alert_info("ID_input = {.code {ID_input}}")
+      # if (DEBUG == TRUE) cli::cli_alert_info("remDr$getCurrentUrl() = {.code {CURRENT_URL}}")
+      # if (DEBUG == TRUE) cli::cli_alert_info("ID_url = {.code {ID_url}}")
+
+      if (!is.na(ID_url) & ID_input) {
+        input_text = gsub("ID=(.*)", "\\1", ID_url)
+        if (DEBUG == TRUE) cli::cli_alert_info("input_text = {.code {input_text}}")
+      } else {
+        if (DEBUG == TRUE) cli::cli_alert_info("ID not found in URL")
+      }
+
+
+    if (DEBUG == TRUE) cli::cli_alert_info("input_text: {.code {input_text}}")
+
+    # Fill all the textboxes
 
     1:number_textboxes %>%
       purrr::walk(~ {

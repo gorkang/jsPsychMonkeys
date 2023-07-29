@@ -37,23 +37,41 @@ create_links <-
       stop()
     }
 
-
     # Critical variables exist?
     if (!exists("uid")) uid = 0
 
 
-
-    # Maybe necessary (?)
-    # remDr <<- remDr
-
-
-
     # Create link -------------------------------------------------------------
 
-    if (uid_URL == FALSE) {
-      uid_string = ""
+    if (parameters_monkeys$links_tar$times_repeat_protocol > 1) {
+
+      # ID with 3 numbers and 3 letters
+      ID_char = rep(paste0(sample.int(999, 1),
+                           sample(LETTERS, size = 1), sample(LETTERS, size = 1), sample(LETTERS, size = 1)),
+                    times_repeat_protocol)
+
+      # Create a uid modifier so the same uid does not repeat the experiment
+        # We create A1, B1,... A2, B2,... uid modifiers
+        repetitions = ceiling(parameters_monkeys$links_tar$times_repeat_protocol/26)
+        LETTERS_ALL = rep(LETTERS[1:26], repetitions)
+        numeric_SUFFIX = rep(1:repetitions, each  = 26)
+        uid_modifier = paste0(LETTERS_ALL, numeric_SUFFIX)[1:parameters_monkeys$links_tar$times_repeat_protocol]
+
+
+      if (uid_URL == FALSE) {
+        uid_string = paste0("", "&ID=", ID_char)
+      } else {
+        uid_string = paste0("&uid=", uid, uid_modifier,  "&ID=", ID_char)
+      }
+
     } else {
-      uid_string = paste0("&uid=", uid)
+
+      if (uid_URL == FALSE) {
+        uid_string = ""
+      } else {
+        uid_string = paste0("&uid=", uid)
+      }
+
     }
 
     if (parameters_monkeys$task$local_or_server == "server") {

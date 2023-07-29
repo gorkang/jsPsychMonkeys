@@ -75,11 +75,22 @@ complete_task <-
   continue_links = TRUE
   index_links = 1
 
+  if (DEBUG == TRUE) cli::cli_alert_info("continue_links = {continue_links} ")
+  if (DEBUG == TRUE) cli::cli_alert_info("index_links = {index_links} ")
+
+
   while (continue_links) {
+
+    # How much the participant should wait after completing the task and before proceeding to repeat it?
+    if (index_links > 1 & parameters_monkeys$links_tar$times_repeat_protocol > 1) {
+      cli::cli_h1("Sleeping for {parameters_monkeys$links_tar$time_to_sleep_before_repeating_protocol} before repeating protocol")
+      Sys.sleep(parameters_monkeys$links_tar$time_to_sleep_before_repeating_protocol)
+    }
+
 
     # Go to task --------------------------------------------------------------
 
-    if (DEBUG == TRUE) cli::cli_alert_info("Opening link: {links}")
+    if (DEBUG == TRUE) cli::cli_alert_info("Opening link: {links[index_links]}")
     LAUNCH_TASK = launch_task_safely(links[index_links], wait_retry = wait_retry, remDr = remDr, DEBUG = DEBUG)
 
     # INITIAL WAIT FOR PAGE TO LOAD
@@ -87,6 +98,7 @@ complete_task <-
     Sys.sleep(initial_wait)
 
     if (length(LAUNCH_TASK$error) > 0) cli::cli_alert_danger("ERROR: opening link [launch_task()] \n {LAUNCH_TASK$error}")
+
 
 
     ## Loop through items of a task --------------------------------------------
@@ -110,7 +122,13 @@ complete_task <-
         if (screenshot == TRUE) {
           output_folder = paste0("outputs/screenshots/", parameters_monkeys$task$pid, "/", uid, "/")
           if (!dir.exists(output_folder)) dir.create(output_folder, recursive = TRUE, showWarnings = FALSE)
+
+          # Image screenshot
           remDr$screenshot(file = paste0(output_folder, parameters_monkeys$task$pid, "_", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".png"))
+
+          # HTML screenshot
+          writeLines(text = remDr$getPageSource()[[1]], con = paste0(output_folder, parameters_monkeys$task$pid, "_", uid, "_screenshot_", sprintf("%03d", index), "_", as.Date(Sys.Date(), format = "%Y-%m-%d"), ".html"))
+
         }
 
         if (console_logs == TRUE) console_logs_list[[index]] = remDr$log(type = "browser")
@@ -121,9 +139,10 @@ complete_task <-
           if (DEBUG == TRUE) cli::cli_h2("Loop elements")
           try_number = 1
           wait_retry_loop = wait_retry # Reset to initial value
-          continue_elements = FALSE
+          continue_elements = FALSE # we don't have an element to interact with yet
 
-
+          # Continue and go to interact with elements of a website
+          # Default is FALSE, because we need to first found the elements and then interact with them
           while (!continue_elements) {
 
             # Increase wait with each retry
@@ -138,14 +157,24 @@ complete_task <-
             # When there is not an error, the content is in result
             list_get_elements = list_get_elements$result
 
+            if (DEBUG == TRUE) cli::cli_alert_info("{length(list_get_elements)} elements found")
+
             if (DEBUG == TRUE) cli::cli_h3("Process elements [{list_get_elements$percentage_completed}%]")
-            # Check list_get_elements, show messages, and determine if we should continue getting elements and/or move to the next task
+
+            # Check list_get_elements, show messages, and determine if we should continue trying to get elements and/or move to the next task
             OUTPUT_process_elements = process_elements(list_get_elements = list_get_elements, try_number = try_number, DEBUG = DEBUG)
-            continue_elements = OUTPUT_process_elements$continue_elements
-            continue = OUTPUT_process_elements$continue
+            continue_elements = OUTPUT_process_elements$continue_elements # Go to interact with element?
+            continue = OUTPUT_process_elements$continue # Go to next screen?
+
+            if (DEBUG == TRUE) cli::cli_alert_info("AFTER Process elements")
+            if (DEBUG == TRUE) cli::cli_alert_info("continue_elements = {continue_elements} ")
+            if (DEBUG == TRUE) cli::cli_alert_info("continue = {continue} ")
+
 
             # CHECKS
             if (!is.null(list_get_elements$error)) cli::cli_alert_danger("ERROR on get_elements_safely()")
+
+            # Tries 1 to 9
             if (DEBUG == TRUE & continue_elements == FALSE & try_number < 10) cli::cli_alert_warning("WARNING: No input|button elements extracted on try {try_number}/10. Retrying in {wait_retry_loop} sec.")
 
             # Last try, show console errors
@@ -155,7 +184,7 @@ complete_task <-
               browser_console = remDr$log(type = "browser")
               if (length(browser_console) > 0) browser_console_clean = browser_console |> dplyr::bind_rows() |> dplyr::filter(level == "SEVERE") |> dplyr::pull(message)
               if (length(browser_console_clean) > 0) cli::cli_alert_danger("Browser console: \n{.code {browser_console_clean}}")
-              continue_elements = TRUE # Get out of the while loop # TODO: Shouldn't this be FALSE?: while (!continue_elements) seems to be reversed
+              continue_elements = TRUE # Gets out of the while loop if TRUE. while(!continue_elements) is reversed ()
               continue = FALSE # Stop the task
               }
 
@@ -182,13 +211,10 @@ complete_task <-
                     # We can force a seed based on forced_seed + uid
                     if (!is.null(forced_seed) & is.numeric(uid)) {
                       forced_seed_final = forced_seed + uid
-                      # set.seed(forced_seed_final)
                     } else if (is.numeric(uid)) {
                       forced_seed_final = uid
-                      # set.seed(forced_seed_final)
                     } else {
                       forced_seed_final = 1
-                      # set.seed(forced_seed_final)
                     }
 
                   } else {
@@ -200,7 +226,7 @@ complete_task <-
                   # if (grepl("Consentimiento informado", list_get_elements$name_contents$content)) forced_seed_final = 1
 
               check_accept_alert(0.2, remDr, DEBUG)
-              interact_with_element_safely(list_get_elements, DEBUG = DEBUG, index = index, seed = (forced_seed_final + index_task + index)) #interact_with_element
+              interact_with_element_safely(list_get_elements, remDr = remDr, DEBUG = DEBUG, index = index, seed = (forced_seed_final + index_task + index)) #interact_with_element
 
               # FORCED WAIT ---
                 if (forced_random_wait == TRUE) {
@@ -244,19 +270,23 @@ complete_task <-
 
         # Store browser console logs
         numbered_console_logs = console_logs_list %>% stats::setNames(seq_along(.))
-        DF_console_logs = 1:length(numbered_console_logs) %>% purrr::map_df(~ numbered_console_logs[[.x]] %>% dplyr::bind_rows %>% dplyr::mutate(page_number = .x)) %>% tidyr::drop_na(message)
+        DF_console_logs = 1:length(numbered_console_logs) %>% purrr::map_df(~ numbered_console_logs[[.x]] %>% dplyr::bind_rows() %>% dplyr::mutate(page_number = .x)) %>% tidyr::drop_na(message)
         readr::write_csv(DF_console_logs, paste0("outputs/log/", uid, "_console_logs", "_", gsub(":", "-", Sys.time()), ".csv"))
         }
 
       # links while loop
       index_links = index_links + 1
+      if (DEBUG == TRUE) cli::cli_alert_info("index_links end while loop = {index_links} ")
+
 
       # Exit condition for links while loop
       if (is.na(links[index_links])) continue_links = FALSE
 
   }
   ## END of while links
-
+#   index_links = index_links + 1
+#   if (DEBUG == TRUE) cli::cli_alert_info("index_links = {index_links} ")
+# } # END of for loop
 
   # END LOG -----------------------------------------------------------------
 

@@ -102,7 +102,11 @@ There are a few parameters that can be useful:
 
 - `uid_URL = TRUE`: The uid is passed in the URL (e.g. `&uid=1`)  
 
-- `local_folder_tasks = rep("Downloads/tests/test_prototol", 25)`: Passing a vector of multiple tasks will make the monkeys to complete all of them.  
+- `local_folder_tasks = rep("Downloads/tests/test_prototol", 25)`: Passing a vector of multiple tasks will make the monkeys to complete all of them.
+
+- `times_repeat_protocol`: How many times a monkey should complete the same protocol (useful for longitudinal protocols or to speed up things)  
+
+- `time_to_sleep_before_repeating_protocol`: How many seconds to wait before reattempting to complete the protocol  
 
 - `keep_alive = TRUE` Keep the docker container alive after completing the tasks  
 

@@ -540,6 +540,8 @@ launch_task <- function(links, wait_retry, remDr, DEBUG) {
 create_targets_file <- function(folder = "~/Downloads/",
                                 credentials_folder = ".vault/",
                                 uid = 1,
+                                times_repeat_protocol = 1,
+                                time_to_sleep_before_repeating_protocol = 1,
                                 browserName = "chrome",
                                 big_container = FALSE,
                                 keep_alive = FALSE,
@@ -565,6 +567,8 @@ create_targets_file <- function(folder = "~/Downloads/",
 
   # folder = "~/Downloads/"
   # uid = 1
+  # times_repeat_protocol = 1,
+  # time_to_sleep_before_repeating_protocol = 1,
   # browserName = "chrome"
   # big_container = FALSE
   # keep_alive = FALSE
@@ -593,6 +597,10 @@ create_targets_file <- function(folder = "~/Downloads/",
 
   if (!is.null(credentials_folder)) string_credentials_folder = glue::glue('credentials_folder = "{credentials_folder}",')
   if (!is.null(uid)) string_uid = glue::glue('uid = {dput(uid)},')
+
+  if (!is.null(times_repeat_protocol)) string_times_repeat_protocol = glue::glue('times_repeat_protocol = "{times_repeat_protocol}",')
+  if (!is.null(time_to_sleep_before_repeating_protocol)) string_time_to_sleep_before_repeating_protocol = glue::glue('time_to_sleep_before_repeating_protocol = "{time_to_sleep_before_repeating_protocol}",')
+
   if (!is.null(browserName)) string_browserName = glue::glue('browserName = "{browserName}",')
   if (!is.null(big_container)) string_big_container = glue::glue('big_container = {big_container},')
   if (!is.null(keep_alive)) string_keep_alive = glue::glue('keep_alive = {keep_alive},')
@@ -617,6 +625,10 @@ create_targets_file <- function(folder = "~/Downloads/",
   string_credentials_folder = ifelse(exists("string_credentials_folder"), string_credentials_folder, "")
 
   string_uid = ifelse(exists("string_uid"), string_uid, "")
+
+  string_times_repeat_protocol = ifelse(exists("string_times_repeat_protocol"), string_times_repeat_protocol, "")
+  string_time_to_sleep_before_repeating_protocol = ifelse(exists("string_time_to_sleep_before_repeating_protocol"), string_time_to_sleep_before_repeating_protocol, "")
+
   string_browserName = ifelse(exists("string_browserName"), string_browserName, "")
   string_big_container = ifelse(exists("string_big_container"), string_big_container, "")
   string_keep_alive = ifelse(exists("string_keep_alive"), string_keep_alive, "")
@@ -645,6 +657,8 @@ create_targets_file <- function(folder = "~/Downloads/",
       glue::glue('
     parameters_monkeys_minimal = list(
                {string_uid}
+               {string_times_repeat_protocol}
+               {string_time_to_sleep_before_repeating_protocol}
                {string_credentials_folder}
                {string_browserName}
                {string_big_container}
@@ -776,6 +790,8 @@ setup_folders <- function(folder, extract_zip = FALSE) {
 #' @param dont_ask answer YES to all questions so the process runs uninterrupted. This will:
 #' @param folder location for the project
 #' @param uid .
+#' @param times_repeat_protocol if different than 1, creates an URL parameter ID and multiple links changing the uid
+#' @param time_to_sleep_before_repeating_protocol In seconds, how long to sleep before repeating protocol
 #' @param browserName .
 #' @param big_container .
 #' @param keep_alive .
@@ -803,6 +819,8 @@ setup_folders <- function(folder, extract_zip = FALSE) {
 create_monkeys_project <- function(folder = "~/Downloads/",
                                    credentials_folder = ".vault/",
                                    uid = 1,
+                                   times_repeat_protocol = 1,
+                                   time_to_sleep_before_repeating_protocol = 1,
                                    browserName = "chrome",
                                    big_container = FALSE,
                                    keep_alive = FALSE,
@@ -861,6 +879,16 @@ create_monkeys_project <- function(folder = "~/Downloads/",
     jsPsychHelpeR::cli_message(h1_title = "Setup")
     setup_folders(folder = folder, extract_zip = TRUE)
 
+    # If it's a server run, copy SERVER_PATH from credentials_folder
+    if (!is.null(server_folder_tasks)) {
+      server_path_file = paste0(credentials_folder, "/SERVER_PATH.R")
+      if(file.exists(server_path_file)) {
+        file.copy(from = server_path_file, to = paste0(folder, "/.vault/SERVER_PATH.R"))
+      } else {
+        cli::cli_abort("SERVER_PATH.R not found in credentials_folder {.code {credentials_folder}}.\n\n See {.url https://gorkang.github.io/jsPsychR-manual/qmd/04-jsPsychMonkeys.html#launch-monkeys-on-a-server}")
+      }
+    }
+
 
     # 2) Create a _targets.R file for your data -------------------------------
 
@@ -869,6 +897,8 @@ create_monkeys_project <- function(folder = "~/Downloads/",
     create_targets_file(folder = folder,
                         credentials_folder = credentials_folder,
                         uid = uid,
+                        times_repeat_protocol = times_repeat_protocol,
+                        time_to_sleep_before_repeating_protocol = time_to_sleep_before_repeating_protocol,
                         browserName = browserName,
                         big_container = big_container,
                         keep_alive = keep_alive,
@@ -979,7 +1009,8 @@ list_data_server <- function(pid, list_credentials = NULL) {
                              list_credentials$user, "@", list_credentials$IP, ":", list_credentials$main_FOLDER, pid, '/.data/ ',
                              here::here(local_folder_terminal), '/ ')
 
-      cli::cli_alert_info(RSYNC_COMMAND)
+      passwordless_RSYNC_COMMAND = gsub(list_credentials$password, "PASSWORD", RSYNC_COMMAND)
+      cli::cli_alert_info(passwordless_RSYNC_COMMAND)
 
       OUT =
         suppressWarnings(

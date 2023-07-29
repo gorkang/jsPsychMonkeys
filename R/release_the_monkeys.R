@@ -1,6 +1,8 @@
 #' release a horde of Monkeys to complete a jsPsychMakeR protocol
 #'
 #' @param uid .
+#' @param times_repeat_protocol if different than 1, creates an URL parameter ID and multiple links changing the uid
+#' @param time_to_sleep_before_repeating_protocol In seconds, how long to sleep before repeating protocol
 #' @param browserName .
 #' @param big_container .
 #' @param keep_alive .
@@ -31,6 +33,8 @@
 #' @return Releases monkeys to complete a jsPsychMaker protocol
 #' @export
 release_the_monkeys <- function(uid = 1,
+                                times_repeat_protocol = 1,
+                                time_to_sleep_before_repeating_protocol = 1,
                                 credentials_folder = NULL,
                                 sequential_parallel = "sequential",
                                 number_of_cores = ceiling(future::availableCores()/2), # Half of available cores
@@ -62,7 +66,13 @@ release_the_monkeys <- function(uid = 1,
 
 
   # CHECKS ---
+  if(is.null(server_folder_tasks) & is.null(local_folder_tasks)) cli::cli_abort("You need to input either `server_folder_tasks` or `local_folder_tasks`")
+
   if(!is.null(server_folder_tasks) & is.null(credentials_folder)) cli::cli_abort("To run tasks on server I need `credentials_folder`")
+
+  if(sequential_parallel == "parallel" & open_VNC == TRUE) cli::cli_abort("Running monkeys in parallel with `open_VNC = TRUE` is not allowed")
+
+
 
 
 
@@ -73,6 +83,8 @@ release_the_monkeys <- function(uid = 1,
   jsPsychMonkeys::create_monkeys_project(folder = FOLDER,
                                          credentials_folder = credentials_folder,
                                          uid = uid,
+                                         times_repeat_protocol = times_repeat_protocol,
+                                         time_to_sleep_before_repeating_protocol = time_to_sleep_before_repeating_protocol,
                                          browserName = browserName,
                                          big_container = big_container,
                                          keep_alive = keep_alive,

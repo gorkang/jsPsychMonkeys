@@ -3,6 +3,8 @@
 #' @param parameters_monkeys_minimal A list with the main input parameters. See parameters_monkeys_minimal in _targets.R.
 #' If the parameter is entered in this list, use it. You can also enter the parameter directly
 #' @param uid User id for the monkey
+#' @param times_repeat_protocol if different than 1, creates an URL parameter ID and multiple links changing the uid
+#' @param time_to_sleep_before_repeating_protocol In seconds, how long to sleep before repeating protocol
 #' @param browserName In which browser should the monkey run the protocol? c("chrome", "firefox")
 #' @param big_container Big containers are needed for big protocols: FALSE / TRUE
 #' @param keep_alive Keep the docker container alive after finishing the protocol?
@@ -47,6 +49,8 @@
 set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minimal,
                            credentials_folder = ".vault/",
                            uid = 1,
+                           times_repeat_protocol = 1,
+                           time_to_sleep_before_repeating_protocol = 1,
                            browserName = "chrome",
                            big_container = FALSE,
                            keep_alive = FALSE,
@@ -71,6 +75,7 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
   # DEBUG
   # parameters_monkeys = parameters_monkeys_minimal
   # uid = 1
+  # times_repeat_protocol = 1
   # browserName = "chrome"
   # big_container = FALSE
   # keep_alive = FALSE
@@ -153,6 +158,9 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
     parameters_monkeys = list(
 
       participants = list(uid = uid),
+
+      links_tar = list(times_repeat_protocol = times_repeat_protocol,
+                       time_to_sleep_before_repeating_protocol = time_to_sleep_before_repeating_protocol),
 
       docker = list(
         browserName = browserName,

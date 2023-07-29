@@ -7,6 +7,11 @@ if (exists("parameters_monkeys_minimal")) {
   # participants
   # if (!is.null(parameters_monkeys_minimal$uid)) uid = parameters_monkeys_minimal$uid
 
+  # links
+  if (!is.null(parameters_monkeys_minimal$times_repeat_protocol)) times_repeat_protocol = parameters_monkeys_minimal$times_repeat_protocol
+  if (!is.null(parameters_monkeys_minimal$time_to_sleep_before_repeating_protocol)) time_to_sleep_before_repeating_protocol = parameters_monkeys_minimal$time_to_sleep_before_repeating_protocol
+
+
   # docker
   if (!is.null(parameters_monkeys_minimal$browserName)) browserName = parameters_monkeys_minimal$browserName
   if (!is.null(parameters_monkeys_minimal$big_container)) big_container = parameters_monkeys_minimal$big_container
@@ -44,6 +49,9 @@ if (exists("parameters_monkeys")) {
   # participants
   # if (!is.null(parameters_monkeys$participants$uid)) uid = parameters_monkeys$participants$uid
 
+  # links
+  if (!is.null(parameters_monkeys$links_tar$times_repeat_protocol)) times_repeat_protocol = parameters_monkeys$links_tar$times_repeat_protocol
+  if (!is.null(parameters_monkeys$links_tar$time_to_sleep_before_repeating_protocol)) time_to_sleep_before_repeating_protocol = parameters_monkeys$links_tar$time_to_sleep_before_repeating_protocol
   # docker
   if (!is.null(parameters_monkeys$docker$browserName)) browserName = parameters_monkeys$docker$browserName
   if (!is.null(parameters_monkeys$docker$big_container)) big_container = parameters_monkeys$docker$big_container

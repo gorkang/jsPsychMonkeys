@@ -28,7 +28,7 @@ process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
   # Already completed -------------------------------------------------------
 
   # TODO: We have this here, "Detect last screen" above join all this in a single chunk
-  already_completed_strings = c("El participante ya completó el protocolo|The participant already completed the protocol")
+  already_completed_strings = c("El participante ya completó el protocolo|The participant already completed the protocol|Ya has completado todas las tareas de este protocolo")
   already_completed = any(grepl(already_completed_strings, content_screen))
 
 
@@ -81,7 +81,7 @@ process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
   } else if (try_number == 10 & (length(list_elements) == 0 | length(ID_names) == 0)) {
 
     if (DEBUG == TRUE) cli::cli_h1(cli::col_green("[[END OF EXPERIMENT]]"))
-    continue_elements = FALSE # TODO: Should this be TRUE?
+    continue_elements = TRUE # Go to interact with elements, next step towards finishing protocol
     continue = FALSE
 
   } else if (length(ID_names) == 1 & "jspsych-html-keyboard-response-stimulus" %in% DF_elements_options$id & !"button" %in% DF_elements_options$type_extracted) {
@@ -90,12 +90,12 @@ process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
   } else if (length(ID_names) == 1 & "jspsych-content" %in% DF_elements_options$id & !"button" %in% DF_elements_options$type_extracted) {
 
     if (DEBUG == TRUE) cli::cli_h1(cli::col_magenta("[[END OF EXPERIMENT - B]]"))
-    continue_elements = FALSE
+    continue_elements = TRUE # Go to interact with elements, next step towards finishing protocol
     continue = FALSE
 
   } else {
 
-    # Keep going! Move to the next screen
+    # Keep going and go to interact with the elements!
     continue_elements = TRUE
 
   }

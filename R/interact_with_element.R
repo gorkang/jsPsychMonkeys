@@ -1,4 +1,4 @@
-interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL, seed = 1) {
+interact_with_element <- function(list_get_elements, remDr = NULL, DEBUG = FALSE, index = NULL, seed = 1) {
 
   # DEBUG
   # targets::tar_load_globals()
@@ -24,7 +24,7 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
     if (length(list_get_elements$name_inputs$id) > 0) {
 
       # source("R/helper_select_input.R")
-      output_select_input = select_input(list_get_elements = list_get_elements, DEBUG = DEBUG, seed = seed)
+      output_select_input = select_input(list_get_elements = list_get_elements, remDr = remDr, DEBUG = DEBUG, seed = seed)
 
     } else {
 
@@ -34,24 +34,26 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
 
     }
 
-  # The <big>TITLE</big> is lost in rvest::html_text2() in parse_elements()
-  content_str =
-    # substr(gsub(".*?(\\n.*$)", "\\1", list_get_elements$name_contents$content),  1, 120) %>% # Only first 120 chars
-    substr(gsub("(\\.jspsych.*\\n)(.*?)(.*$)", "\\2\\3", list_get_elements$name_contents$content),  1, 120) %>% # Only first 120 chars. Do not get all the Initial .jspsych-***
-    gsub("\\\n\\\n", "\\\n", .) %>% # Double \n by single \n
-    gsub("\\\n", " | ", .) %>% # Use | as a mark for line jump
-    gsub("^ \\| (.*)$", "\\1", .) %>%
-    paste0(., "...")
+
+  # EXTRACT content ---------------------------------------------------------
+
+    # The <big>TITLE</big> is lost in rvest::html_text2() in parse_elements()
+    content_str =
+      substr(gsub("(\\.jspsych.*\\n)(.*?)(.*$)", "\\2\\3", list_get_elements$name_contents$content),  1, 120) %>% # Only first 120 chars. Do not get all the Initial .jspsych-***
+      gsub("\\\n\\\n", "\\\n", .) %>% # Double \n by single \n
+      gsub("\\\n", " | ", .) %>% # Use | as a mark for line jump
+      gsub("^ \\| (.*)$", "\\1", .) %>%
+      paste0(., "...")
 
 
 
-# CHECK DISABLED ----------------------------------------------------------
+  # CHECK DISABLED ----------------------------------------------------------
 
-  # Wait a bit in EmpaTom to avoid retying too fast
-  if ("disabled" %in% colnames(list_get_elements$name_buttons) & "He visto el video" %in% list_get_elements$name_buttons$content) {
-    cli::cli_alert_warning("Button is disabled (?) waiting 5 seconds")
-    Sys.sleep(5)
-  }
+    # Wait a bit in EmpaTom to avoid retying too fast
+    if ("disabled" %in% colnames(list_get_elements$name_buttons) & "He visto el video" %in% list_get_elements$name_buttons$content) {
+      cli::cli_alert_warning("Button is disabled (?) waiting 5 seconds")
+      Sys.sleep(5)
+    }
 
 
   # BUTTONS -----------------------------------------------------------------
@@ -66,7 +68,7 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
       # If button was Fullscreen, wait a couple seconds so the interface is responsive
       if (selected_button_id == "jspsych-fullscreen-btn") Sys.sleep(3)
 
-    } else if (length(list_get_elements$name_buttons$id) > 1) {
+    } else if (length(list_get_elements$name_buttons$id) == 2) {
 
         # IF WE ARE IN consentHTML: always start
         if (all(list_get_elements$name_buttons$id == c("start", "end"))) {
@@ -78,23 +80,18 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
           selected_button_id = c("jspsych-btn1")
           list_get_elements$list_elements[[selected_button_id]]$clickElement()
 
-          # If we are in instructions with Back/Forward buttons, always Forward
-
+        # Other consent, always agree
         } else if (all(list_get_elements$name_buttons$content == c("I agree to participate", "I refuse to participate"))) {
           selected_button_id = c("jspsych-btn1")
           list_get_elements$list_elements[[selected_button_id]]$clickElement()
 
-          # If we are in instructions with Back/Forward buttons, always Forward
-
         # If we are in instructions with Back/Forward buttons, always Forward
         } else if (all(list_get_elements$name_buttons$id == c("jspsych-instructions-back", "jspsych-instructions-next"))) {
-
           selected_button_id = c("jspsych-instructions-next")
           list_get_elements$list_elements[[selected_button_id]]$clickElement()
 
           # If we are in BART, make it more likely to push inflate
         } else if (all(list_get_elements$name_buttons$id == c("inflate_button", "collect_button"))) {
-
           selected_button_id = sample(c("inflate_button", "collect_button"), size = 1, prob = c(.8, .2))
           list_get_elements$list_elements[[selected_button_id]]$clickElement()
 
@@ -104,6 +101,34 @@ interact_with_element <- function(list_get_elements, DEBUG = FALSE, index = NULL
           list_get_elements$list_elements[[selected_button_id]]$clickElement()
 
         }
+
+    } else if (length(list_get_elements$name_buttons$id) > 2) {
+
+      # Probably a numeric keyboard (e.g. WAIS WM)
+      if (length(list_get_elements$name_buttons$id) == 11 & any(list_get_elements$name_buttons$id %in% "jspsych-btn jspsych-survey-numbers-next")) {
+
+        # Select between 1 and 5 numbers
+        names_buttons = unique(names(list_get_elements$list_elements))
+        number_pushes = sample(1:5, 1)
+        selected_button_id = names_buttons[sample(1:10, number_pushes)]
+
+        1:number_pushes %>%
+          purrr::walk(~ {
+            list_get_elements$list_elements[[selected_button_id[.x]]]$clickElement()
+          })
+
+        # Click green tick
+        list_get_elements$list_elements[[names_buttons[11]]]$clickElement()
+
+      # If more than one, but not 11, we try to click one
+      } else {
+        cli::cli_alert_warning("More than 2 buttons, clicking one at random")
+
+        names_buttons = unique(names(list_get_elements$list_elements))
+        selected_button_id = names_buttons[sample(1:10, 1)]
+        list_get_elements$list_elements[[selected_button_id[1]]]$clickElement()
+
+      }
 
     } else {
 
