@@ -2,7 +2,7 @@
 #'
 #' @param parameters_monkeys_minimal A list with the main input parameters. See parameters_monkeys_minimal in _targets.R.
 #' If the parameter is entered in this list, use it. You can also enter the parameter directly
-#' @param uid User id for the monkey
+#' @param uid user id's for the monkeys. Can be a single number (e.g. 55) or a numeric vector (e.g. 1:10). Determines the number of monkeys that will be released
 #' @param times_repeat_protocol if different than 1, creates an URL parameter ID and multiple links changing the uid
 #' @param time_to_sleep_before_repeating_protocol In seconds, how long to sleep before repeating protocol
 #' @param browserName In which browser should the monkey run the protocol? c("chrome", "firefox")

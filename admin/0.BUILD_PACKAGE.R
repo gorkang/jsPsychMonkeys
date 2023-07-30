@@ -28,8 +28,9 @@
   # DO THIS ALWAYS so jsPsychHelpeR.zip is updated!
   # Create jsPsychHelpeR.zip
   # source("admin/helper-scripts-admin.R")
-  jsPsychAdmin::create_jsPsychMonkeys_zip(add_renv_cache = FALSE) # 20230308: 47KB
-
+  jsPsychAdmin::create_jsPsychMonkeys_zip(add_renv_cache = FALSE)
+  # 20230308: 47KB
+  # 20230730: 50KB
 
 
 # Build package -----------------------------------------------------------
@@ -53,10 +54,10 @@
 
 # CHECK -------------------------------------------------------------------
 
-  # testthat::test_local() # [ FAIL 0 | WARN 0 | SKIP 0 | PASS 4 ]
+  testthat::test_local() # [ FAIL 0 | WARN 0 | SKIP 0 | PASS 5 ]
   # test_check("jsPsychMonkeys")
 
-  devtools::check() # Check package (~230s)
+  devtools::check() # Check package (Duration: 5m 43.2s)
   # 20230308: 0 errors ✔ | 1 warning ✖ | 4 notes ✖
   # 20230730: 0 errors ✔ | 1 warnings ✖ | 3 notes ✖
 

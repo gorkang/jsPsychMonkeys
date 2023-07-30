@@ -25,16 +25,16 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
   # iframes -----------------------------------------------------------------
 
   # This is for jsPsychMaker v0.1. Should be safe to delete now. CHECK
-  find_elements <- function() {
-    check_accept_alert()
-    remDr$findElements(using = "tag name", "iframe")
-  }
-  # If we find an iframe after page 1, enter in it
-  if (index > 1) {
-     webElems <- find_elements() #remDr$findElements(using = "tag name", "iframe")
-     iframes = sapply(webElems, function(x){x$getElementAttribute("src")}) %>% unlist(); iframes
-     if (length(webElems) > 0) remDr$switchToFrame(webElems[[1]])
-  }
+  # find_elements <- function() {
+  #   check_accept_alert()
+  #   remDr$findElements(using = "tag name", "iframe")
+  # }
+  # # If we find an iframe after page 1, enter in it
+  # if (index > 1) {
+  #    webElems <- find_elements() #remDr$findElements(using = "tag name", "iframe")
+  #    iframes = sapply(webElems, function(x){x$getElementAttribute("src")}) %>% unlist(); iframes
+  #    if (length(webElems) > 0) remDr$switchToFrame(webElems[[1]])
+  # }
 
   # GET source and elements -------------------------------------------------
 
@@ -196,6 +196,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     if (length(ID_names) != 0) list_elements_names = 1:length(ID_names) %>% purrr::map(~ remDr$findElements(using = 'name', value = ID_names[.x])) %>% stats::setNames(ID_names) %>% unlist()
     if (length(ID_names) != 0) list_elements_class = 1:length(ID_names) %>% purrr::map(~ remDr$findElements(using = 'class', value = ID_names[.x])) %>% stats::setNames(ID_names) %>% unlist()
 
+    if (DEBUG == TRUE & length(ID_names)) cli::cli_alert_info("remDr$findElements using id: {length(list_elements_ids)}; name: {length(list_elements_names)}; class: {length(list_elements_class)}")
 
     # Combine all elements in a single list: list_elements
     if (any(exists("list_elements_ids") | exists("list_elements_names") | exists("list_elements_class"))) {

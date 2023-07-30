@@ -50,6 +50,16 @@ test_that("local and server protocol runs", {
   testthat::expect_equal(object = OUTPUT_simple_parallel$message_out, expected = "The Monkeys completed 6 tasks.")
 
 
+  # Simple protocol parallel using number vector -----------------------------
+
+  OUTPUT_simple_parallel2 = jsPsychMonkeys::release_the_monkeys(uid = 4:5, local_folder_tasks = FOLDER, clean_up_targets = TRUE,
+                                                               sequential_parallel = "parallel", # number_of_cores = 2,
+                                                               open_VNC = FALSE, DEBUG = FALSE, keep_alive = FALSE)
+
+
+  testthat::expect_equal(object = OUTPUT_simple_parallel2$message_out, expected = "The Monkeys completed 6 tasks.")
+
+
   # Online protocol ---------------------------------------------------------
 
   # "test/protocols_DEV/test9999" is a simple protocol with AIM

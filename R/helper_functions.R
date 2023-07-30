@@ -8,10 +8,6 @@
 #' @export
 check_trialids <- function(local_folder_protocol) {
 
-  # suppressMessages(suppressWarnings(library(dplyr)))
-  # suppressMessages(suppressWarnings(library(purrr)))
-  # suppressMessages(suppressWarnings(library(readr)))
-
   scripts = dir(path = paste0(local_folder_protocol, "/tasks"), pattern = ".js", recursive = TRUE, full.names = TRUE)
   if (length(scripts) == 0) stop(paste("Can't find anything in ", local_folder_protocol))
 
@@ -346,8 +342,8 @@ tar_make_future_rowwise <- function(TARGETS, uids) {
   assign_priority <- function(uid, target_name) {
     # browser()
     uid_container = gsub(".*_(.*)", "\\1", TARGETS[[2]][[target_name]][[uid]][["settings"]][["name"]])
-    prioriry_container = as.numeric(uid_container) / max(uids)
-    TARGETS[[2]][[target_name]][[uid]][["settings"]][["priority"]] = prioriry_container
+    priority_container = as.numeric(uid_container) / max(as.numeric(uids))
+    TARGETS[[2]][[target_name]][[uid]][["settings"]][["priority"]] = priority_container
 
   }
 
@@ -617,7 +613,7 @@ create_targets_file <- function(folder = "~/Downloads/",
   if (!is.null(server_folder_tasks)) FOLDER_TASKS = glue::glue('server_folder_tasks = "{server_folder_tasks}"')# No comma at the end because will be the last element
 
   if (!is.null(credentials_folder)) string_credentials_folder = glue::glue('credentials_folder = "{credentials_folder}",')
-  if (!is.null(uid)) string_uid = glue::glue('uid = {dput(uid)},')
+  if (!is.null(uid)) string_uid = gsub('"', '', glue::glue('uid = {deparse(uid)},'))
 
   if (!is.null(times_repeat_protocol)) string_times_repeat_protocol = glue::glue('times_repeat_protocol = "{times_repeat_protocol}",')
   if (!is.null(time_to_sleep_before_repeating_protocol)) string_time_to_sleep_before_repeating_protocol = glue::glue('time_to_sleep_before_repeating_protocol = "{time_to_sleep_before_repeating_protocol}",')

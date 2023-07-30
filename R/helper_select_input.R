@@ -249,7 +249,7 @@ select_input <- function(list_get_elements, remDr = NULL, DEBUG = FALSE, seed = 
       input_text = as.character(input_text)
     }
 
-    cli::cli_alert_info("NUMBER: {format(as.numeric(input_text), nsmall = 0, big.mark = ',')}")
+    if (DEBUG == TRUE) cli::cli_alert_info("NUMBER: {format(as.numeric(input_text), nsmall = 0, big.mark = ',')}")
 
     1:number_textboxes %>%
       purrr::walk(~ {
@@ -303,7 +303,6 @@ select_input <- function(list_get_elements, remDr = NULL, DEBUG = FALSE, seed = 
 
       if (!is.na(ID_url) & ID_input) {
         input_text = gsub("ID=(.*)", "\\1", ID_url)
-        if (DEBUG == TRUE) cli::cli_alert_info("input_text = {.code {input_text}}")
       } else {
         if (DEBUG == TRUE) cli::cli_alert_info("ID not found in URL")
       }

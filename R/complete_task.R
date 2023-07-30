@@ -159,7 +159,8 @@ complete_task <-
             # When there is not an error, the content is in result
             list_get_elements = list_get_elements$result
 
-            if (DEBUG == TRUE) cli::cli_alert_info("{length(list_get_elements)} elements found")
+
+            if (DEBUG == TRUE) cli::cli_alert_info("{length(list_get_elements$ID_names)} elements found")
 
             if (DEBUG == TRUE) cli::cli_h3("Process elements [{list_get_elements$percentage_completed}%]")
 
@@ -168,10 +169,7 @@ complete_task <-
             continue_elements = OUTPUT_process_elements$continue_elements # Go to interact with element?
             continue = OUTPUT_process_elements$continue # Go to next screen?
 
-            if (DEBUG == TRUE) cli::cli_alert_info("AFTER Process elements")
-            if (DEBUG == TRUE) cli::cli_alert_info("continue_elements = {continue_elements} ")
-            if (DEBUG == TRUE) cli::cli_alert_info("continue = {continue} ")
-
+            if (DEBUG == TRUE) cli::cli_alert_info("continue_elements = {continue_elements} | continue = {continue}")
 
             # CHECKS
             if (!is.null(list_get_elements$error)) cli::cli_alert_danger("ERROR on get_elements_safely()")

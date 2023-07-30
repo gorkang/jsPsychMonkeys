@@ -25,7 +25,7 @@ if (!require('remotes')) utils::install.packages('remotes'); remotes::install_gi
 You are ready to release the monkeys! 
 
 ```
-jsPsychMonkeys::release_the_monkeys(uid = "1:10", 
+jsPsychMonkeys::release_the_monkeys(uid = 1:10, 
                                     local_folder_tasks = "~/Downloads/new_protocol/")
 
 ```
@@ -35,12 +35,12 @@ jsPsychMonkeys::release_the_monkeys(uid = "1:10",
 If you want to create and configure an RStudio project to release Monkeys:
 
 Use the `folder` parameter to select a specific folder for the RStudio project  
-Use the `uid` parameter to set a number of participants, e.g. `uid = "1:10"` would launch monkeys 1 to 10
+Use the `uid` parameter to set the participants' numeric id's, e.g. `uid = 1:10` would launch monkeys 1 to 10
 Use the `local_folder_tasks` parameter to indicate the location of the jsPsychMakeR protocol
 
 ```
 jsPsychMonkeys::create_monkeys_project(folder = "~/Downloads/Monkeys/", 
-                                       uid = "1:10", 
+                                       uid = 1:10, 
                                        local_folder_tasks = "~/Downloads/new_protocol/")
 
 ```

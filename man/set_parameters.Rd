@@ -38,7 +38,7 @@ If the parameter is entered in this list, use it. You can also enter the paramet
 
 \item{credentials_folder}{folder where files "SERVER_PATH.R" and ".credentials" are. Usually .vault/}
 
-\item{uid}{User id for the monkey}
+\item{uid}{user id's for the monkeys. Can be a single number (e.g. 55) or a numeric vector (e.g. 1:10). Determines the number of monkeys that will be released}
 
 \item{times_repeat_protocol}{if different than 1, creates an URL parameter ID and multiple links changing the uid}
 

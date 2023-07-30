@@ -1,34 +1,44 @@
 #' release a horde of Monkeys to complete a jsPsychMakeR protocol
 #'
-#' @param uid .
+#' @param uid user id's for the monkeys. Can be a single number (e.g. 55) or a numeric vector (e.g. 1:10). Determines the number of monkeys that will be released
 #' @param times_repeat_protocol if different than 1, creates an URL parameter ID and multiple links changing the uid
 #' @param time_to_sleep_before_repeating_protocol In seconds, how long to sleep before repeating protocol
-#' @param browserName .
-#' @param big_container .
-#' @param keep_alive .
-#' @param folder_downloads .
-#' @param DEBUG .
-#' @param screenshot .
-#' @param debug_file .
-#' @param console_logs .
-#' @param open_VNC .
-#' @param pid project id
-#' @param uid_URL .
-#' @param local_or_server .
-#' @param local_folder_tasks .
-#' @param server_folder_tasks .
-#' @param disable_web_security .
-#' @param initial_wait .
-#' @param wait_retry In seconds, how much to wait before retrying
-#' @param forced_random_wait .
-#' @param forced_refresh .
-#' @param forced_seed .
-#' @param dont_ask .
-#' @param open_rstudio .
+#' @param browserName In which browser should the monkey run the protocol? c("chrome", "firefox")
+#' @param big_container Big containers are needed for big protocols: FALSE / TRUE
+#' @param keep_alive Keep the docker container alive after finishing the protocol?
+#' This is useful to debug.
+#' @param folder_downloads Local folder where csv's will be downloaded:
+#' - On linux, can be something like ~/Download
+#' - On windows, can be something like: C:/Users/myusername/Downloads/protocol999
+#' If Monkeys are running OK but no csv's are downloaded, make sure the docker username has write access to the folder
+#' @param DEBUG Show debug messages: FALSE / TRUE
+#' @param screenshot Should the monkey's take screenshots of each screen they see?
+#' - The images will be in outputs/screenshots
+#' @param debug_file Store the debug info in a file in outputs/debug
+#' @param console_logs Store console logs of browser? Logs are stored in outputs/logs
+#' @param open_VNC Show the info to open VNC viewer to see what the monkey's are up to
+#' @param pid Protocol id
+#' @param uid_URL Include user id in the protocol URL? If true, the uid are predefined
+#' @param local_or_server Run the protocol locally or on server c("local", "server)
+#' This variable will be inferred from whichever of local_folder_tasks or server_folder_tasks
+#' has information.
+#' @param local_folder_tasks Local folder where the protocol is stored
+#' @param server_folder_tasks Location of the protocol in the server
+#' @param disable_web_security Run with CORS disabled? Needed for local protocols that load videos: FALSE / TRUE
+#' @param initial_wait Initial wait (in seconds) after entering the main protol page, before
+#' the monkeys start to complete the protocol. If the protocol has lots of images to pre-load
+#' should be a number big enough for them to download.
+#' @param wait_retry How many seconds to wait before retrying, after no elements are found in a page.
+#' @param forced_random_wait At some random point in the protocol, the monkey should wait for a random period of time? FALSE / TRUE
+#' @param forced_refresh Force a full refresh for some of the monkeys?
+#' This is useful to test if the monkey's can continue a protocol after they exit.
+#' @param forced_seed Random seed
+#' @param dont_ask Assume the responses to all questions are 'Yes'. Not recommended if you don't know what you are doing.
+#' @param open_rstudio Open the RStudio project
 #' @param credentials_folder folder where files "SERVER_PATH.R" and ".credentials" are. Usually .vault/
-#' @param sequential_parallel .
-#' @param number_of_cores .
-#' @param clean_up_targets .
+#' @param sequential_parallel Run monkeys sequentially or in parallel
+#' @param number_of_cores Number of cores to use then running in parallel
+#' @param clean_up_targets Clean up (i.e. targets::tar_destroy()) TRUE/FALSE
 #'
 #' @return Releases monkeys to complete a jsPsychMaker protocol
 #' @export
@@ -61,8 +71,6 @@ release_the_monkeys <- function(uid = 1,
                                 dont_ask = TRUE,
                                 open_rstudio = FALSE,
                                 clean_up_targets = FALSE) {
-
-
 
 
   # CHECKS ---
@@ -133,7 +141,7 @@ release_the_monkeys <- function(uid = 1,
 
     if (sequential_parallel == "parallel") {
 
-      cli::cli_alert_info("{number_of_cores} monkeys released")
+      cli::cli_alert_info("Using {number_of_cores} CPU cores")
 
       targets::tar_make_future(workers = number_of_cores)
 
