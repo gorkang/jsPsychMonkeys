@@ -85,7 +85,7 @@ complete_task <-
 
     # How much the participant should wait after completing the task and before proceeding to repeat it?
     if (index_links > 1 & parameters_monkeys$links_tar$times_repeat_protocol > 1) {
-      cli::cli_h1("Sleeping for {parameters_monkeys$links_tar$time_to_sleep_before_repeating_protocol} before repeating protocol")
+      cli::cli_h1("Sleeping for {parameters_monkeys$links_tar$time_to_sleep_before_repeating_protocol} s. before repeating protocol")
       Sys.sleep(parameters_monkeys$links_tar$time_to_sleep_before_repeating_protocol)
     }
 

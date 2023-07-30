@@ -418,7 +418,7 @@ check_Downloads <- function(parameters_monkeys, uid = "", links_tar, previous_ta
         cli::cli_alert_info("Ignoring pid = {pid}, I found {length(all_csv_found)} files: \n{all_csv_found}\n")
         cli::cli_alert_danger("You should rename the folder_protocol {.code {folder_protocol}} so the numeric part ({parameters_monkeys$task_params$pid}) matches the `pid` in config.js!")
       } else {
-        cli::cli_alert_warning("No csv files found using uid = {uid}")
+        cli::cli_alert_info("No csv files found using uid = {uid}")
       }
 
     }
@@ -432,8 +432,9 @@ check_Downloads <- function(parameters_monkeys, uid = "", links_tar, previous_ta
 #'
 #' @param pre_existing_CSV vector with filenames from a previous call of check_Downloads()
 #' @param parameters_monkeys parameters_monkeys list
-#' @param task Last task in _targets pipeline
 #' @param uid User id
+#' @param links_tar brings links_tar$uid_modifier, used when times_repeat_protocol > 1
+#' @param task Last task in _targets pipeline
 #'
 #' @return copies the new csv files to .data
 #' @export
@@ -528,6 +529,8 @@ launch_task <- function(links, wait_retry, remDr, DEBUG) {
 #' @param folder protocol folder
 #' @param dont_ask do everything without asking for user input
 #' @param uid .
+#' @param times_repeat_protocol if different than 1, creates an URL parameter ID and multiple links changing the uid
+#' @param time_to_sleep_before_repeating_protocol In seconds, how long to sleep before repeating protocol
 #' @param browserName .
 #' @param big_container .
 #' @param keep_alive .
@@ -549,6 +552,10 @@ launch_task <- function(links, wait_retry, remDr, DEBUG) {
 #' @param forced_seed .
 #' @param credentials_folder folder where files "SERVER_PATH.R" and ".credentials" are. Usually .vault/
 #'
+#' @import XML
+#' @importFrom future.callr callr
+#' @importFrom future plan tweak
+#' @importFrom tarchetypes tar_map
 #' @return Creates a _targets.R file adding parameters_monkeys_minimal
 #' @export
 create_targets_file <- function(folder = "~/Downloads/",
@@ -828,6 +835,7 @@ setup_folders <- function(folder, extract_zip = FALSE) {
 #' @param open_rstudio Open RStudio with the new project TRUE / FALSE
 #' @param credentials_folder folder where files "SERVER_PATH.R" and ".credentials" are. Usually .vault/
 #'
+#' @importFrom fs path_abs
 #' @return Creates a new project
 #' @export
 create_monkeys_project <- function(folder = "~/Downloads/",

@@ -30,6 +30,16 @@ test_that("local and server protocol runs", {
   testthat::expect_equal(object = OUTPUT_simple$message_out, expected = "The Monkeys completed 3 tasks.")
 
 
+  # Simple protocol sequential - times_repeat_protocol = 2 ------------------
+
+  OUTPUT_simple2 = jsPsychMonkeys::release_the_monkeys(uid = "1", times_repeat_protocol = 2, time_to_sleep_before_repeating_protocol = 2,
+                                                       local_folder_tasks = FOLDER, clean_up_targets = TRUE,
+                                                       open_VNC = FALSE, DEBUG = FALSE, keep_alive = FALSE)
+
+
+  testthat::expect_equal(object = OUTPUT_simple2$message_out, expected = "The Monkeys completed 6 tasks.")
+
+
   # Simple protocol parallel -----------------------------------------------
 
   OUTPUT_simple_parallel = jsPsychMonkeys::release_the_monkeys(uid = "2:3", local_folder_tasks = FOLDER, clean_up_targets = TRUE,

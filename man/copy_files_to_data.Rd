@@ -19,6 +19,8 @@ copy_files_to_data(
 
 \item{uid}{User id}
 
+\item{links_tar}{brings links_tar$uid_modifier, used when times_repeat_protocol > 1}
+
 \item{task}{Last task in _targets pipeline}
 }
 \value{

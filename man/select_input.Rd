@@ -9,6 +9,8 @@ select_input(list_get_elements, remDr = NULL, DEBUG = FALSE, seed = 1)
 \arguments{
 \item{list_get_elements}{list_get_elements}
 
+\item{remDr}{.}
+
 \item{DEBUG}{TRUE / FALSE}
 
 \item{seed}{numeric random seed}

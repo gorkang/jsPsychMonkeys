@@ -3,6 +3,7 @@
 #' @param list_get_elements list_get_elements
 #' @param DEBUG TRUE / FALSE
 #' @param seed numeric random seed
+#' @param remDr .
 #'
 #' @return list with selected input and the text of the selected element
 #' @export

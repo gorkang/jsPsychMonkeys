@@ -40,6 +40,10 @@ create_targets_file(
 
 \item{uid}{.}
 
+\item{times_repeat_protocol}{if different than 1, creates an URL parameter ID and multiple links changing the uid}
+
+\item{time_to_sleep_before_repeating_protocol}{In seconds, how long to sleep before repeating protocol}
+
 \item{browserName}{.}
 
 \item{big_container}{.}

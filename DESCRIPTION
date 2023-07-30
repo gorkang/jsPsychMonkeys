@@ -11,8 +11,6 @@ BugReports: https://github.com/gorkang/jsPsychMonkeys/issues
 Depends: 
     R (>= 4.2.0)
 Imports: 
-    assertthat,
-    callr,
     cli, 
     crayon,
     dplyr,
@@ -22,18 +20,13 @@ Imports:
     future.callr,
     glue,
     here, 
-    jsPsychMaker,
     jsPsychHelpeR,
     magrittr, 
     purrr, 
     readr,
-    renv, 
     rvest,
-    rlang,
-    rmarkdown, 
     RSelenium,
     rstudioapi,
-    shinyWidgets,
     stringr, 
     stringi,
     tarchetypes, 
@@ -44,7 +37,11 @@ Imports:
     XML,
     stats
 Suggests: 
+    jsPsychMaker,
     knitr,
+    renv,
+    rmarkdown, 
+    shinyWidgets,
     testthat (>= 3.0.0),
     visNetwork, 
     webshot,
