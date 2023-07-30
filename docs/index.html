@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="index.html">jsPsychMonkeys</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.6</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -128,6 +128,8 @@ Use the <code>uid</code> parameter to set a number of participants, e.g. <code>
 <ul>
 <li><p><code>uid_URL = TRUE</code>: The uid is passed in the URL (e.g. <code>&amp;uid=1</code>)</p></li>
 <li><p><code>local_folder_tasks = rep("Downloads/tests/test_prototol", 25)</code>: Passing a vector of multiple tasks will make the monkeys to complete all of them.</p></li>
+<li><p><code>times_repeat_protocol</code>: How many times a monkey should complete the same protocol (useful for longitudinal protocols or to speed up things)</p></li>
+<li><p><code>time_to_sleep_before_repeating_protocol</code>: How many seconds to wait before reattempting to complete the protocol</p></li>
 <li><p><code>keep_alive = TRUE</code> Keep the docker container alive after completing the tasks</p></li>
 <li><p><code>DEBUG = TRUE</code> Activate DEBUG mode. Lot’s of stuff will show up in the console.</p></li>
 <li><p><code>open_VNC = TRUE</code> Activate DEBUG mode and open a VNC container to see the monkey’s progress.</p></li>

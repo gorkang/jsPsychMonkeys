@@ -24,7 +24,8 @@ create_links <-
 
 
     container_name = remote_driver$container_name
-    remDr = remote_driver$remDr
+    times_repeat_protocol = as.numeric(parameters_monkeys$links_tar$times_repeat_protocol)
+    # remDr = remote_driver$remDr
 
 
     # CHECKS -----------------------------------------------------------------
@@ -43,7 +44,7 @@ create_links <-
 
     # Create link -------------------------------------------------------------
 
-    if (parameters_monkeys$links_tar$times_repeat_protocol > 1) {
+    if (times_repeat_protocol > 1) {
 
       # ID with 3 numbers and 3 letters
       ID_char = rep(paste0(sample.int(999, 1),
@@ -52,10 +53,10 @@ create_links <-
 
       # Create a uid modifier so the same uid does not repeat the experiment
         # We create A1, B1,... A2, B2,... uid modifiers
-        repetitions = ceiling(parameters_monkeys$links_tar$times_repeat_protocol/26)
+        repetitions = ceiling(times_repeat_protocol/26)
         LETTERS_ALL = rep(LETTERS[1:26], repetitions)
         numeric_SUFFIX = rep(1:repetitions, each  = 26)
-        uid_modifier = paste0(LETTERS_ALL, numeric_SUFFIX)[1:parameters_monkeys$links_tar$times_repeat_protocol]
+        uid_modifier = paste0(LETTERS_ALL, numeric_SUFFIX)[1:times_repeat_protocol]
 
 
       if (uid_URL == FALSE) {
@@ -71,6 +72,8 @@ create_links <-
       } else {
         uid_string = paste0("&uid=", uid)
       }
+
+      uid_modifier = ""
 
     }
 
@@ -132,9 +135,6 @@ create_links <-
 
 
       # By default, use local
-      # OLD: links_tasks = paste0("file:///home/seluser/", parameters_monkeys$task$local_folder_tasks, "/index.html?pid=", parameters_monkeys$task$pid, uid_string)
-
-      # Working
       links_tasks = paste0("file:///home/seluser/Downloads/", post_downloads_folder, "/index.html?pid=", parameters_monkeys$task$pid, uid_string)
 
       # Trying to implement (see create_docker(), and also create_remDr())
@@ -152,7 +152,8 @@ create_links <-
 
     # OUTPUT ------------------------------------------------------------------
 
-    output_list = list(links = links_tasks)
+    output_list = list(links = links_tasks,
+                       uid_modifier = uid_modifier)
 
     return(output_list)
 

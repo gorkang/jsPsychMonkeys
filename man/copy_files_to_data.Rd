@@ -4,7 +4,13 @@
 \alias{copy_files_to_data}
 \title{In local protocols, move the Downloaded csv to the data folder of the protocol}
 \usage{
-copy_files_to_data(pre_existing_CSV, parameters_monkeys, uid, task = task)
+copy_files_to_data(
+  pre_existing_CSV,
+  parameters_monkeys,
+  uid,
+  links_tar,
+  task = task
+)
 }
 \arguments{
 \item{pre_existing_CSV}{vector with filenames from a previous call of check_Downloads()}

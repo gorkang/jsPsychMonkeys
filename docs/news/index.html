@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">jsPsychMonkeys</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.6</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -44,6 +44,18 @@
       <small>Source: <a href="https://github.com/gorkang/jsPsychMonkeys/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.6" id="jspsychmonkeys-026">jsPsychMonkeys 0.2.6<a class="anchor" aria-label="anchor" href="#jspsychmonkeys-026"></a></h2>
+<p>Major updates</p>
+<ul><li>2 new parameters times_repeat_protocol and time_to_sleep_before_repeating_protocol so monkeys can complete more than 1 time the same task
+<ul><li>This can be used to speed up the monkeys (no need to recreate docker containers, etc.) and for longitudinal protocols</li>
+</ul></li>
+</ul><hr><p>en existing_CSV(links_tar = links_tar) y en copy_files_to_data(links_tar = links_tar) Necesitamos pasarle links_tar para poder extraer los uid reales usados De lo contrario no se rescatan los CSVs</p>
+<p>HAY QUE MODIFICAR el _targets_TEMPLATE.R!!! **************</p>
+<p>Minor updates</p>
+<ul><li>Fixed some issues with finishing tasks</li>
+<li>implemented WAIS WM response</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.5" id="jspsychmonkeys-025">jsPsychMonkeys 0.2.5<a class="anchor" aria-label="anchor" href="#jspsychmonkeys-025"></a></h2>
 <p>Major updates</p>

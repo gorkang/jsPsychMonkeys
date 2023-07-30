@@ -4,7 +4,7 @@
 \alias{select_input}
 \title{Helper to select and interact with input fields}
 \usage{
-select_input(list_get_elements, DEBUG = FALSE, seed = 1)
+select_input(list_get_elements, remDr = NULL, DEBUG = FALSE, seed = 1)
 }
 \arguments{
 \item{list_get_elements}{list_get_elements}

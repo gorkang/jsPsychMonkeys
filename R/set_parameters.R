@@ -157,7 +157,8 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
 
     parameters_monkeys = list(
 
-      participants = list(uid = uid),
+      # uid comes from tarchetypes::tar_map()
+      # participants = list(uid = uid),
 
       links_tar = list(times_repeat_protocol = times_repeat_protocol,
                        time_to_sleep_before_repeating_protocol = time_to_sleep_before_repeating_protocol),

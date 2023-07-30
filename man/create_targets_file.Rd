@@ -8,6 +8,8 @@ create_targets_file(
   folder = "~/Downloads/",
   credentials_folder = ".vault/",
   uid = 1,
+  times_repeat_protocol = 1,
+  time_to_sleep_before_repeating_protocol = 1,
   browserName = "chrome",
   big_container = FALSE,
   keep_alive = FALSE,

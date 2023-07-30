@@ -4,6 +4,7 @@
 #' @param uid User id
 #' @param links Links to complete
 #' @param remote_driver remote_driver output
+#' @param previous_target targets object dependency to control when this target runs
 #'
 #' @return Completes a task and returns a container name.
 #' @export
@@ -12,7 +13,8 @@ complete_task <-
            uid,
            links,
            # container_name = NULL,
-           remote_driver = NULL) {
+           remote_driver = NULL,
+           previous_target = "") {
 
   # DEBUG
     # targets::tar_load_globals()

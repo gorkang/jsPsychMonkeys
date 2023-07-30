@@ -8,6 +8,8 @@ create_monkeys_project(
   folder = "~/Downloads/",
   credentials_folder = ".vault/",
   uid = 1,
+  times_repeat_protocol = 1,
+  time_to_sleep_before_repeating_protocol = 1,
   browserName = "chrome",
   big_container = FALSE,
   keep_alive = FALSE,
@@ -38,6 +40,10 @@ create_monkeys_project(
 \item{credentials_folder}{folder where files "SERVER_PATH.R" and ".credentials" are. Usually .vault/}
 
 \item{uid}{.}
+
+\item{times_repeat_protocol}{if different than 1, creates an URL parameter ID and multiple links changing the uid}
+
+\item{time_to_sleep_before_repeating_protocol}{In seconds, how long to sleep before repeating protocol}
 
 \item{browserName}{.}
 

@@ -371,33 +371,43 @@ tar_make_future_rowwise <- function(TARGETS, uids) {
 #'
 #' @param parameters_monkeys parameter_monkeys list
 #' @param uid user id
-#' @param links_tar targets object dependency to control when this target runs
+#' @param links_tar brings links_tar$uid_modifier, used when times_repeat_protocol > 1
+#' @param previous_target targets object dependency to control when this target runs
 #'
 #' @return A list of csv files
 #' @export
-check_Downloads <- function(parameters_monkeys, uid = "", links_tar = "") {
+check_Downloads <- function(parameters_monkeys, uid = "", links_tar, previous_target) {
 
   # DEBUG
-  # parameters_monkeys
-  # uid = "3"
+  # targets::tar_load_globals()
+  # debug_function("check_Downloads")
+  # debug_docker(uid_participant = uid)
 
   pid = parameters_monkeys$task_params$pid
   download_folder = parameters_monkeys$docker$folder_downloads
   local_or_server = parameters_monkeys$task_params$local_or_server
   DEBUG = parameters_monkeys$debug$DEBUG
+  times_repeat_protocol = parameters_monkeys$links_tar$times_repeat_protocol
 
+  # If times_repeat_protocol > 1, we add suffixes to uid in create_links()
+  if (times_repeat_protocol > 1) {
+    uid = paste0(uid, links_tar)
+  }
 
   # Do this only in local protocols
   if (local_or_server == "local") {
+
+
 
     folder_protocol = basename(parameters_monkeys$task_params$local_folder_tasks)
 
     # uid is used in copy_files_to_data so only that participant's data is copyied
     if (DEBUG == TRUE) cli::cli_alert_info(paste0("Looking for files for pid = {pid} (/{folder_protocol}) and uid = {uid}"))
-    files_downloaded = list.files(download_folder, pattern = paste0("^", pid, ".*", uid, "\\.csv"))
+    files_downloaded = list.files(download_folder, pattern = paste(paste0("^", pid, ".*", uid, "\\.csv"), collapse = "|"))
 
     # If no files are found when looking for files for a specific uid, try harder
-    if (length(files_downloaded) == 0 & uid != "") {
+      # and give a suggestion
+    if (length(files_downloaded) == 0 & any(uid != "")) {
 
       all_csv_found = list.files(download_folder, pattern = paste0("^.*", uid, "\\.csv"))
 
@@ -406,7 +416,6 @@ check_Downloads <- function(parameters_monkeys, uid = "", links_tar = "") {
 
         cli::cli_h1("No csv files found using pid = {pid} and uid = {uid}")
         cli::cli_alert_info("Ignoring pid = {pid}, I found {length(all_csv_found)} files: \n{all_csv_found}\n")
-
         cli::cli_alert_danger("You should rename the folder_protocol {.code {folder_protocol}} so the numeric part ({parameters_monkeys$task_params$pid}) matches the `pid` in config.js!")
       } else {
         cli::cli_alert_warning("No csv files found using uid = {uid}")
@@ -428,7 +437,12 @@ check_Downloads <- function(parameters_monkeys, uid = "", links_tar = "") {
 #'
 #' @return copies the new csv files to .data
 #' @export
-copy_files_to_data <- function(pre_existing_CSV, parameters_monkeys, uid, task = task) {
+copy_files_to_data <- function(pre_existing_CSV, parameters_monkeys, uid, links_tar, task = task) {
+
+  # DEBUG
+  # targets::tar_load_globals()
+  # debug_function("copy_files_to_data")
+  # debug_docker(uid_participant = uid)
 
   if (parameters_monkeys$task_params$local_or_server == "local") {
 
@@ -437,7 +451,7 @@ copy_files_to_data <- function(pre_existing_CSV, parameters_monkeys, uid, task =
     if(!dir.exists(local_folder_tasks_data)) dir.create(local_folder_tasks_data)
 
     # Check final files in data folder
-    final_files = check_Downloads(parameters_monkeys = parameters_monkeys, uid = uid)
+    final_files = check_Downloads(parameters_monkeys = parameters_monkeys, uid = uid, links_tar = links_tar)
 
     # Prepare variables
     final_files_clean = final_files[!final_files %in% pre_existing_CSV]

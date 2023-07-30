@@ -4,7 +4,13 @@
 \alias{complete_task}
 \title{Completes a jsPsychMaker task}
 \usage{
-complete_task(parameters_monkeys, uid, links, remote_driver = NULL)
+complete_task(
+  parameters_monkeys,
+  uid,
+  links,
+  remote_driver = NULL,
+  previous_target = ""
+)
 }
 \arguments{
 \item{parameters_monkeys}{The parameters_monkeys list}
@@ -14,6 +20,8 @@ complete_task(parameters_monkeys, uid, links, remote_driver = NULL)
 \item{links}{Links to complete}
 
 \item{remote_driver}{remote_driver output}
+
+\item{previous_target}{targets object dependency to control when this target runs}
 }
 \value{
 Completes a task and returns a container name.

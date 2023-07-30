@@ -4,14 +4,16 @@
 \alias{check_Downloads}
 \title{Check csv files in a folder}
 \usage{
-check_Downloads(parameters_monkeys, uid = "", links_tar = "")
+check_Downloads(parameters_monkeys, uid = "", links_tar, previous_target)
 }
 \arguments{
 \item{parameters_monkeys}{parameter_monkeys list}
 
 \item{uid}{user id}
 
-\item{links_tar}{targets object dependency to control when this target runs}
+\item{links_tar}{brings links_tar$uid_modifier, used when times_repeat_protocol > 1}
+
+\item{previous_target}{targets object dependency to control when this target runs}
 }
 \value{
 A list of csv files

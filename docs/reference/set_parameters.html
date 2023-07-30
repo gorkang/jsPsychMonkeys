@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">jsPsychMonkeys</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.6</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,6 +55,8 @@
 <span>  parameters_monkeys_minimal <span class="op">=</span> <span class="va">parameters_monkeys_minimal</span>,</span>
 <span>  credentials_folder <span class="op">=</span> <span class="st">".vault/"</span>,</span>
 <span>  uid <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  times_repeat_protocol <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  time_to_sleep_before_repeating_protocol <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  browserName <span class="op">=</span> <span class="st">"chrome"</span>,</span>
 <span>  big_container <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  keep_alive <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -91,6 +93,14 @@ If the parameter is entered in this list, use it. You can also enter the paramet
 
 <dt>uid</dt>
 <dd><p>User id for the monkey</p></dd>
+
+
+<dt>times_repeat_protocol</dt>
+<dd><p>if different than 1, creates an URL parameter ID and multiple links changing the uid</p></dd>
+
+
+<dt>time_to_sleep_before_repeating_protocol</dt>
+<dd><p>In seconds, how long to sleep before repeating protocol</p></dd>
 
 
 <dt>browserName</dt>
@@ -197,8 +207,11 @@ This is useful to test if the monkey's can continue a protocol after they exit.<
 <span class="r-in"><span>                                       local_folder_tasks <span class="op">=</span> <span class="st">"~/Downloads/protocol999"</span>,</span></span>
 <span class="r-in"><span>                                       screenshot <span class="op">=</span> <span class="cn">FALSE</span>, forced_refresh <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span>                                       debug <span class="op">=</span> <span class="cn">TRUE</span>, open_VNC <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $participants</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $participants$uid</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $links_tar</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $links_tar$times_repeat_protocol</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $links_tar$time_to_sleep_before_repeating_protocol</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
