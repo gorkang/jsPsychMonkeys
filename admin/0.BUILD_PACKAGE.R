@@ -27,8 +27,8 @@
 
   # DO THIS ALWAYS so jsPsychHelpeR.zip is updated!
   # Create jsPsychHelpeR.zip
-  source("admin/helper-scripts-admin.R")
-  create_jsPsychHelpeR_zip(add_renv_cache = FALSE) # 20230308: 47KB
+  # source("admin/helper-scripts-admin.R")
+  jsPsychAdmin::create_jsPsychMonkeys_zip(add_renv_cache = FALSE) # 20230308: 47KB
 
 
 
@@ -51,24 +51,34 @@
   # pkgdown::deploy_site_github() # CHECK HOWTO (only first time?)
 
 
+# CHECK -------------------------------------------------------------------
+
+  # testthat::test_local() # [ FAIL 0 | WARN 0 | SKIP 0 | PASS 4 ]
+  # test_check("jsPsychMonkeys")
+
+  devtools::check() # Check package (~230s)
+  # 20230308: 0 errors ✔ | 1 warning ✖ | 4 notes ✖
+  # 20230730: 0 errors ✔ | 1 warnings ✖ | 3 notes ✖
+
+
 # Install package ---------------------------------------------------------
 
   # Build
-  devtools::build() # 20230308: 0 errors ✔ | 1 warning ✖ | 4 notes ✖
+  devtools::build()
 
 
   # devtools::install()
-  renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys_0.2.5.tar.gz") # Install package from file
+  renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys_0.2.6.tar.gz") # Install package from file
 
 
   # QUICK
-  source("admin/helper-scripts-admin.R")
-  create_jsPsychHelpeR_zip(add_renv_cache = FALSE)
+  # source("admin/helper-scripts-admin.R")
+  jsPsychAdmin::create_jsPsychMonkeys_zip(add_renv_cache = FALSE)
   devtools::document()
   devtools::load_all()
   pkgdown::build_site() # Create documentation!
   devtools::build()
-  renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys_0.2.5.tar.gz") # Install package from file
+  renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys_0.2.6.tar.gz") # Install package from file
 
   devtools::check() # Check package (~230s)
   # system.file("templates", package = "jsPsychMonkeys")
@@ -84,7 +94,7 @@
   jsPsychMaker::create_protocol(canonical_tasks = "AIM", folder_output = "~/Downloads/new_protocol_999/", launch_browser = FALSE)
 
   # Test local protocol
-  jsPsychMonkeys::release_the_monkeys(uid = "1", local_folder_tasks = "~/Downloads/new_protocol_999/", DEBUG = TRUE, open_VNC = FALSE)
+  jsPsychMonkeys::release_the_monkeys(uid = "1", times_repeat_protocol = 1, time_to_sleep_before_repeating_protocol = 10, local_folder_tasks = "~/Downloads/new_protocol_999/", DEBUG = TRUE, open_VNC = FALSE)
 
   # Test parallel monkeys
   jsPsychMonkeys::release_the_monkeys(uid = "18:20", open_VNC = FALSE,
