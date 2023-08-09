@@ -30,7 +30,7 @@
   # source("admin/helper-scripts-admin.R")
   jsPsychAdmin::create_jsPsychMonkeys_zip(add_renv_cache = FALSE)
   # 20230308: 47KB
-  # 20230730: 50KB
+  # 20230809: 51KB
 
 
 # Build package -----------------------------------------------------------
@@ -66,8 +66,8 @@
 
   # Build
   BUILT = devtools::build()
-  # devtools::install()
-  renv::install(BUILT) # Install package from file
+  devtools::install()
+  # renv::install(BUILT) # Install package from file
 
 
   # QUICK

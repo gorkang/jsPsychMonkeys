@@ -16,6 +16,7 @@ Imports:
     dplyr,
     dtplyr,
     fs,
+    furrr,
     future,
     future.callr,
     glue,

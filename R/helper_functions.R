@@ -513,8 +513,10 @@ parse_elements <- function(what, page_source_rvest) {
 # Navigate to link
 launch_task <- function(links, wait_retry, remDr, DEBUG) {
   if (length(links) != 1) stop("links passed to remDr$navigate are != 1")
+  if (DEBUG == TRUE) cli::cli_alert_info("Sleeping {wait_retry} s.")
   Sys.sleep(wait_retry)
-  check_accept_alert(remDr = remDr, DEBUG = FALSE)
+  check_accept_alert(remDr = remDr, DEBUG = DEBUG)
+  if (DEBUG == TRUE) cli::cli_alert_info("Go to link")
   remDr$navigate(links)
 }
 
@@ -1102,6 +1104,36 @@ random_number_trimmed <- function(n = 1, min = 0, max = 100, mean = NULL, sd = N
 
   if (round == TRUE) out = round(out, 0)
   return(out)
+}
+
+
+#' clean_monkeys_containers
+#'
+#' Stops all containers named after monkeys
+#'
+#' @return NULL
+#' @export
+#' @importFrom furrr future_walk
+#' @importFrom future plan multisession
+clean_monkeys_containers <- function() {
+
+  # Clean up monkeys' containers
+  active_monkey_containers = system('docker ps -a --format "{{.ID}} {{.Names}}"', intern = TRUE) |>
+    dplyr::as_tibble() |> tidyr::separate(sep = " ", col = value, into = c("id", "name")) |>
+    dplyr::filter(grepl("monkey", name)) |> dplyr::pull(id)
+
+  # if (length(active_monkey_containers) > 0) system("docker ps --filter name=monkey* --filter status=running -aq | xargs docker stop")
+  # system("docker system prune -f") # Cleans up system (stopped containers, etc.)
+
+  if (length(active_monkey_containers) > 0) {
+    cli::cli_alert_info("Stopping {length(active_monkey_containers)} monkeys")
+    future::plan(future::multisession, workers = 10)
+    active_monkey_containers |> furrr::future_walk(~ system(paste0('docker stop ', .x)))
+    system("docker system prune -f") # Cleans up system (stopped containers, etc.)
+  } else {
+    cli::cli_alert_info("No monkeys active")
+  }
+
 }
 
 

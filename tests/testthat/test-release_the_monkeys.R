@@ -1,10 +1,7 @@
 test_that("local and server protocol runs", {
 
   # Clean up monkeys' containers
-  active_containers = system('docker ps -q', intern = TRUE)
-  active_monkeys = active_containers[grepl("monkey", active_containers)]
-  if (length(active_monkeys) > 0) system("docker ps --filter name=monkey* --filter status=running -aq | xargs docker stop")
-  # system("docker system prune -f") # Cleans up system (stopped containers, etc.)
+  jsPsychMonkeys::clean_monkeys_containers()
 
 
   # Create Simple protocol --------------------------------------------------
@@ -32,7 +29,7 @@ test_that("local and server protocol runs", {
 
   # Simple protocol sequential - times_repeat_protocol = 2 ------------------
 
-  OUTPUT_simple2 = jsPsychMonkeys::release_the_monkeys(uid = "1", times_repeat_protocol = 2, time_to_sleep_before_repeating_protocol = 2,
+  OUTPUT_simple2 = release_the_monkeys(uid = "1", times_repeat_protocol = 2, time_to_sleep_before_repeating_protocol = 2,
                                                        local_folder_tasks = FOLDER, clean_up_targets = TRUE,
                                                        open_VNC = FALSE, DEBUG = FALSE, keep_alive = FALSE)
 

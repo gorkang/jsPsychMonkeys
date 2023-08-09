@@ -35,6 +35,7 @@ complete_task <-
 
     container_name = remote_driver$container_name
     remDr = remote_driver$remDr
+    time_to_sleep_before_repeating_protocol = as.numeric(parameters_monkeys$links_tar$time_to_sleep_before_repeating_protocol)
 
 
   # CHECKS --------------------------------------------------------------
@@ -79,15 +80,15 @@ complete_task <-
 
     # How much the participant should wait after completing the task and before proceeding to repeat it?
     if (index_links > 1 & parameters_monkeys$links_tar$times_repeat_protocol > 1) {
-      cli::cli_h1("Sleeping for {parameters_monkeys$links_tar$time_to_sleep_before_repeating_protocol} s. before repeating protocol")
+      cli::cli_h1("Sleeping for {time_to_sleep_before_repeating_protocol} s. before repeating protocol")
 
       # We do it in a loop with 30s naps, because if the nap is too long, the monkeys die
       # time_to_sleep_before_repeating_protocol = 100
       seconds_each_nap = 30
-      times_to_do_loop = ceiling(parameters_monkeys$links_tar$time_to_sleep_before_repeating_protocol/seconds_each_nap)
+      times_to_do_loop = ceiling(time_to_sleep_before_repeating_protocol/seconds_each_nap)
 
       for(i in 1:times_to_do_loop) {
-        cli::cli_alert_info("loop {i} / {times_to_do_loop}")
+        if (DEBUG == TRUE) cli::cli_alert_info("loop {i} / {times_to_do_loop}")
         check_accept_alert(remDr = remDr, DEBUG = FALSE)
         remDr$refresh()
         Sys.sleep(seconds_each_nap)
@@ -294,7 +295,6 @@ complete_task <-
       # links while loop
       index_links = index_links + 1
       if (DEBUG == TRUE) cli::cli_alert_info("index_links end while loop = {index_links} ")
-
 
       # Exit condition for links while loop
       if (is.na(links[index_links])) continue_links = FALSE

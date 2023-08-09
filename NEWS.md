@@ -10,6 +10,7 @@ Minor updates
 * Fixed some issues with finishing tasks
 * implemented WAIS WM response
 * Working with lists now (selects one of the alternatives, and includes in the sample pool a random string)
+* New clean_monkeys_containers() function
 
 
 # jsPsychMonkeys 0.2.5
