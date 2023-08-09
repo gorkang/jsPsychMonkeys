@@ -65,11 +65,9 @@
 # Install package ---------------------------------------------------------
 
   # Build
-  devtools::build()
-
-
+  BUILT = devtools::build()
   # devtools::install()
-  renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys_0.2.6.tar.gz") # Install package from file
+  renv::install(BUILT) # Install package from file
 
 
   # QUICK

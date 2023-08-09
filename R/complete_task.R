@@ -36,8 +36,6 @@ complete_task <-
     container_name = remote_driver$container_name
     remDr = remote_driver$remDr
 
-    if (DEBUG == TRUE) cli::cli_h1("Completing tasks")
-
 
   # CHECKS --------------------------------------------------------------
 
@@ -77,26 +75,40 @@ complete_task <-
   continue_links = TRUE
   index_links = 1
 
-  if (DEBUG == TRUE) cli::cli_alert_info("continue_links = {continue_links} ")
-  if (DEBUG == TRUE) cli::cli_alert_info("index_links = {index_links} ")
-
-
   while (continue_links) {
 
     # How much the participant should wait after completing the task and before proceeding to repeat it?
     if (index_links > 1 & parameters_monkeys$links_tar$times_repeat_protocol > 1) {
       cli::cli_h1("Sleeping for {parameters_monkeys$links_tar$time_to_sleep_before_repeating_protocol} s. before repeating protocol")
-      Sys.sleep(parameters_monkeys$links_tar$time_to_sleep_before_repeating_protocol)
+
+      # We do it in a loop with 30s naps, because if the nap is too long, the monkeys die
+      # time_to_sleep_before_repeating_protocol = 100
+      seconds_each_nap = 30
+      times_to_do_loop = ceiling(parameters_monkeys$links_tar$time_to_sleep_before_repeating_protocol/seconds_each_nap)
+
+      for(i in 1:times_to_do_loop) {
+        cli::cli_alert_info("loop {i} / {times_to_do_loop}")
+        check_accept_alert(remDr = remDr, DEBUG = FALSE)
+        remDr$refresh()
+        Sys.sleep(seconds_each_nap)
+      }
+
+      # Sys.sleep(parameters_monkeys$links_tar$time_to_sleep_before_repeating_protocol)
     }
 
 
     # Go to task --------------------------------------------------------------
 
-    if (DEBUG == TRUE) cli::cli_alert_info("Opening link: {links[index_links]}")
+    if (DEBUG == TRUE) cli::cli_h1("[[START OF EXPERIMENT]] ")
+    if (DEBUG == TRUE) cli::cli_alert_info("{Sys.time()} Waiting  {initial_wait}s. | If it fails, increase initial_wait or wait_retry")
+    if (DEBUG == TRUE) cli::cli_alert_info("continue_links = {continue_links} | index_links = {index_links}")
+
+    if (DEBUG == TRUE) cli::cli_alert_info("Opening link: {links[index_links]}\n")
     LAUNCH_TASK = launch_task_safely(links[index_links], wait_retry = wait_retry, remDr = remDr, DEBUG = DEBUG)
 
     # INITIAL WAIT FOR PAGE TO LOAD
-    if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE), cat(crayon::bgGreen(paste0("[[START OF EXPERIMENT]] ", Sys.time(), " Waiting ", initial_wait, "s")), crayon::yellow("[If it fails, increase initial_wait or wait_retry]\n")))
+
+
     Sys.sleep(initial_wait)
 
     if (length(LAUNCH_TASK$error) > 0) cli::cli_alert_danger("ERROR: opening link [launch_task()] \n {LAUNCH_TASK$error}")
@@ -111,17 +123,20 @@ complete_task <-
       index_task = 1
       try_number = 1
 
-
       console_logs_list = list()
 
       # Which screen inside the task. jsPsychMaker creates a single big "task"
       while (continue) {
+
+        if (DEBUG == TRUE) cli::cli_h1("SCREEN [{index}]")
+        if (DEBUG == TRUE) cli::cli_alert_info("continue = {continue} | index = {index} | index_task = {index_task} | try_number = {try_number}")
 
         # If there is an alert, accept
         check_accept_alert(wait_retry, remDr, DEBUG)
 
         # Take screenshots
         if (screenshot == TRUE) {
+
           output_folder = paste0("outputs/screenshots/", parameters_monkeys$task$pid, "/", uid, "/")
           if (!dir.exists(output_folder)) dir.create(output_folder, recursive = TRUE, showWarnings = FALSE)
 
@@ -133,25 +148,29 @@ complete_task <-
 
         }
 
+
         if (console_logs == TRUE) console_logs_list[[index]] = remDr$log(type = "browser")
 
 
         ### Get elements of website ----------------------------
 
-          if (DEBUG == TRUE) cli::cli_h2("Loop elements")
           try_number = 1
           wait_retry_loop = wait_retry # Reset to initial value
           continue_elements = FALSE # we don't have an element to interact with yet
 
           # Continue and go to interact with elements of a website
           # Default is FALSE, because we need to first found the elements and then interact with them
+          if (DEBUG == TRUE) cli::cli_h2("\nLOOP GET/PROCESS ELEMENTS | !continue_elements")
           while (!continue_elements) {
 
-            # Increase wait with each retry
+            # Wait - Increase wait with each retry
             wait_retry_loop = wait_retry_loop + (try_number/20)
+            if (DEBUG == TRUE) cli::cli_alert_info("try_number = {try_number} | wait_retry_loop = {wait_retry_loop} | continue_elements = {continue_elements}")
             if (try_number > 1) Sys.sleep(wait_retry_loop)
 
-            if (DEBUG == TRUE) cli::cli_h3("Get elements")
+
+            # Get elements
+            if (DEBUG == TRUE) cli::cli_h3("GET ELEMENTS")
             # Make sure there are no alerts before retrying
             check_accept_alert(wait_retry_loop, remDr, DEBUG)
             list_get_elements = get_elements_safely(remDr = remDr, index = index, try_number = try_number, DEBUG = DEBUG)
@@ -159,10 +178,8 @@ complete_task <-
             # When there is not an error, the content is in result
             list_get_elements = list_get_elements$result
 
-
             if (DEBUG == TRUE) cli::cli_alert_info("{length(list_get_elements$ID_names)} elements found")
-
-            if (DEBUG == TRUE) cli::cli_h3("Process elements [{list_get_elements$percentage_completed}%]")
+            if (DEBUG == TRUE) cli::cli_h3("PROCESS ELEMENTS [{list_get_elements$percentage_completed}%]")
 
             # Check list_get_elements, show messages, and determine if we should continue trying to get elements and/or move to the next task
             OUTPUT_process_elements = process_elements(list_get_elements = list_get_elements, try_number = try_number, DEBUG = DEBUG)
@@ -198,7 +215,7 @@ complete_task <-
 
               ### Interact with the elements we found ------------------
 
-                if (DEBUG == TRUE) cli::cli_h2("Interacting with elements")
+                if (DEBUG == TRUE) cli::cli_h2("INTERACTING WITH ELEMENTS | continue_elements {continue_elements}")
                 # seed = (forced_seed_final + index) is critical so there is some variation in case a specific response is needed to continue (e.g. BART)
 
                   # SEED ---------
@@ -222,18 +239,23 @@ complete_task <-
                     if(!exists("forced_seed_final")) forced_seed_final = 1
 
                   }
+
+
                   # If we are in consent form, reset forced_seed_final to 1
                   # if (grepl("Consentimiento informado", list_get_elements$name_contents$content)) forced_seed_final = 1
 
+              if (DEBUG == TRUE) cli::cli_alert_info("forced_seed_final: {forced_seed_final} | interact_with_element_safely() seed = {(forced_seed_final + index_task + index)}")
+
               check_accept_alert(0.2, remDr, DEBUG)
-              interact_with_element_safely(list_get_elements, remDr = remDr, DEBUG = DEBUG, index = index, seed = (forced_seed_final + index_task + index)) #interact_with_element
+              interact_with_element_safely(list_get_elements, remDr = remDr, DEBUG = DEBUG, index = index, seed = (forced_seed_final + index_task + index))
 
               # FORCED WAIT ---
                 if (forced_random_wait == TRUE) {
                   if (index == 30) {
                     time_wait = sample(c(.2, 1, 5, 10), 1)
-                    # time_wait = sample(c(1, 10, 100, 200, 400, 500), 1)
-                    cat("[MONKEY]", paste0("[", index, "]"), "uid", uid,"waiting", time_wait, "seconds... \n")
+                    if (DEBUG == TRUE) cli::cli_alert_info("forced_seed_final: {forced_seed_final}")
+
+                    cli::cli_alert_info("[MONKEY][{index}] uid {uid} forced to wait {time_wait} seconds | forced_random_wait = {forced_random_wait} \n")
                     Sys.sleep(time_wait)
                   }
                 }
@@ -241,19 +263,14 @@ complete_task <-
               # FORCED REFRESH ---
                 # forced_refresh = TRUE
                 if (!is.null(forced_refresh)) {
-                  if (forced_refresh == TRUE) forced_refresh = sample(c(20, 30, 200, 500, 1000, 10000, 20000), 1)
-                  if (index == forced_refresh) {
-                    cat("\n[MONKEY]", paste0("[", index, "]"), "uid", uid,"REFRESHING PAGE... \n")
+                  forced_refresh_n = ifelse(forced_refresh == TRUE, ceiling(runif(1, 1, 1000)), 0)
+                  if (index == forced_refresh_n) {
+                    cli::cli_alert_info("[MONKEY][{index}] uid {uid} forced to refresh page | forced_refresh = {forced_refresh} \n")
+                    jsPsychMonkeys::check_accept_alert(wait_retry = 5, remDr = remDr, DEBUG = FALSE) # To avoid errors
                     remDr$refresh()
                     Sys.sleep(5)
                   }
                 }
-
-
-          # } else {
-          #   already_completed_strings = c("El participante ya completó el protocolo|The participant already completed the protocol")
-          #   already_completed = any(grepl(already_completed_strings, list_get_elements$DF_elements_options |> tibble::as_tibble() |> dplyr::pull(content)))
-          #   if (DEBUG == TRUE & already_completed == TRUE) cli::cli_h1(cli::col_green("[[FINISH PROTOCOL]]: {DF_elements_options |> tibble::as_tibble() |> dplyr::pull(content)}"))
 
           }
 
@@ -284,9 +301,6 @@ complete_task <-
 
   }
   ## END of while links
-#   index_links = index_links + 1
-#   if (DEBUG == TRUE) cli::cli_alert_info("index_links = {index_links} ")
-# } # END of for loop
 
   # END LOG -----------------------------------------------------------------
 

@@ -514,6 +514,7 @@ parse_elements <- function(what, page_source_rvest) {
 launch_task <- function(links, wait_retry, remDr, DEBUG) {
   if (length(links) != 1) stop("links passed to remDr$navigate are != 1")
   Sys.sleep(wait_retry)
+  check_accept_alert(remDr = remDr, DEBUG = FALSE)
   remDr$navigate(links)
 }
 

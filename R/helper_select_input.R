@@ -77,20 +77,28 @@ select_input <- function(list_get_elements, remDr = NULL, DEBUG = FALSE, seed = 
 
     } else {
 
-      # SAME AS IN text
+      # Extract all elements of the list
+      option <- remDr$findElements(using = 'xpath', "//*/option")
+      OPTIONS = 1:length(option) |> map(~ { option[[.x]]$getElementAttribute(attrName = "value")}) |> unlist()
 
-      # Default characters limits
-      min_chars = 0
-      max_chars = 100
+      # Create a random string, to include amongst the possible options (checks if you can write something out of the list)
+        # Default characters limits
+        min_chars = 0
+        max_chars = 100
 
-      # If minlength and maxlength exist, replace default limits
-      if (!is.na(list_get_elements$name_inputs$minlength)) min_chars = as.numeric(list_get_elements$name_inputs$minlength)
-      if (!is.na(list_get_elements$name_inputs$maxlength)) max_chars = as.numeric(list_get_elements$name_inputs$maxlength)
+        # If minlength and maxlength exist, replace default limits
+        if (!is.na(list_get_elements$name_inputs$minlength)) min_chars = as.numeric(list_get_elements$name_inputs$minlength)
+        if (!is.na(list_get_elements$name_inputs$maxlength)) max_chars = as.numeric(list_get_elements$name_inputs$maxlength)
 
-      input_text = as.character(stringi::stri_rand_strings(n = 1, length = sample(min_chars:max_chars, 1)))
+        input_text = as.character(stringi::stri_rand_strings(n = 1, length = sample(min_chars:max_chars, 1)))
 
+
+      # Choose one at random
+      selected_option = sample(c(OPTIONS, input_text), 1)
+
+      # Send it
       list_get_elements$list_elements[[selected_input_name]]$clearElement()
-      list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(input_text))
+      list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(list(selected_option))
 
     }
 
@@ -294,15 +302,15 @@ select_input <- function(list_get_elements, remDr = NULL, DEBUG = FALSE, seed = 
       # We use the times_repeat_protocol parameter in create_links() to build URLs with ID in them
 
       # Use the URL ID to fill the input
-      ID_input = grepl("ID", content_text)
+      ID_input = grepl("Ingrese el identificador que se le ha asignado:", content_text)
+
       CURRENT_URL = remDr$getCurrentUrl()
       ID_url = stringr::str_extract(CURRENT_URL, "ID=.*")
-      # if (DEBUG == TRUE) cli::cli_alert_info("ID_input = {.code {ID_input}}")
-      # if (DEBUG == TRUE) cli::cli_alert_info("remDr$getCurrentUrl() = {.code {CURRENT_URL}}")
-      # if (DEBUG == TRUE) cli::cli_alert_info("ID_url = {.code {ID_url}}")
+      if (DEBUG == TRUE) cli::cli_alert_info("ID_input = {.code {ID_input}}")
 
       if (!is.na(ID_url) & ID_input) {
         input_text = gsub("ID=(.*)", "\\1", ID_url)
+        if (DEBUG == TRUE) cli::cli_alert_info("Using ID in URL as input_text | ID_url = {.code {ID_url}}")
       } else {
         if (DEBUG == TRUE) cli::cli_alert_info("ID not found in URL")
       }

@@ -165,23 +165,33 @@ interact_with_element <- function(list_get_elements, remDr = NULL, DEBUG = FALSE
   }
 
   # Selected response
-  if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE),
-                                         cat(
-                                           # Screen
-                                           cli::style_bold("[SCREEN]"), glue::glue("[{index}]"), "\n",
+  if (DEBUG == TRUE) {
+    # Content
+    cli::cli_inform("[content]: {content_str}")
 
-                                           # Content
-                                           cli::col_silver("[content]:"), glue::glue("{content_str}"), "\n",
+    # Response
+    cli::cli_inform("[response]: {output_select_input$input_text_human_readable} | {paste(output_select_input$input_text, collapse = ", ")}")
 
-                                           # Response
-                                           cli::col_blue("[response]:"), glue::glue("{output_select_input$input_text_human_readable}"),
-                                                                      cli::col_white(paste(output_select_input$input_text, collapse = ", ")), "\n",
-
-                                           # Button
-                                           cli::col_magenta("[button]:"), glue::glue("{selected_button_value}"),
-                                                                                cli::col_white(paste(selected_button_id, collapse = ", ")), "\n"
-                                         )
-                                        )
+    # Button
+    cli::cli_inform("[button]: {selected_button_value} | {paste(selected_button_id, collapse = ', ')}")
+  }
+  # if (DEBUG == TRUE) withr::with_options(list(crayon.enabled = FALSE),
+  #                                        cat(
+  #                                          # Screen
+  #                                          cli::style_bold("[SCREEN]"), glue::glue("[{index}]"), "\n",
+  #
+  #                                          # Content
+  #                                          cli::col_silver("[content]:"), glue::glue("{content_str}"), "\n",
+  #
+  #                                          # Response
+  #                                          cli::col_blue("[response]:"), glue::glue("{output_select_input$input_text_human_readable}"),
+  #                                                                     cli::col_white(paste(output_select_input$input_text, collapse = ", ")), "\n",
+  #
+  #                                          # Button
+  #                                          cli::col_magenta("[button]:"), glue::glue("{selected_button_value}"),
+  #                                                                               cli::col_white(paste(selected_button_id, collapse = ", ")), "\n"
+  #                                        )
+  #                                       )
 
   if (grepl("FINALIZAR ESTUDIO", selected_button_value)) {
     if (DEBUG == TRUE) cli::cli_h1("-- ENDING -- ")
