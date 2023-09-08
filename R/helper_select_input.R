@@ -385,9 +385,49 @@ select_input <- function(list_get_elements, remDr = NULL, DEBUG = FALSE, seed = 
     content_responses = list_get_elements$name_inputs$content
     response_options = stringr::str_extract_all(content_responses, '\\"[:alnum:]\\"')[[1]] %>% gsub('\\"', "", .)
 
-    selected_response = tolower(sample(response_options, 1))
+    # In html-keyboard-response (https://www.jspsych.org/6.3/plugins/jspsych-html-keyboard-response/) and others,
+    # the allowed keys are stored in jsPsych.ALL_KEYS
+    if (length(response_options) == 0) {
+      # list_get_elements$DF_elements_options$id
+
+      # Get allowed keys
+      raw_ALL_KEYS = remDr$executeScript("return jsPsych.ALL_KEYS;")
+
+      # jsPsych.ALL_KEYS does not work? ALL_KEYS from jsPsych7.0. but it does not work?
+      # WE CAN acces the allowed choices if we know the questions index:
+            # questions[55].choices
+
+      # If we found them
+      if (length(raw_ALL_KEYS) > 0) {
+
+        cli::cli_alert_info("keyboard-response type of plugin detected: \n\n jsPsych.ALL_KEYS: {raw_ALL_KEYS[[1]]}")
+
+        ALL_KEYS = raw_ALL_KEYS[[1]]
+
+        # If the value is allkeys, any key should work
+        if (ALL_KEYS == "allkeys") {
+          selected_response = as.character(stringi::stri_rand_strings(n = 1, length = 1, pattern = "[0-9a-z]"))
+        # Else, try only the key indicated by ALL_KEYS
+        } else {
+          selected_response = ALL_KEYS
+        }
+
+        # If nothing in response_options and nothing in ALL_KEYS, not sure what is happening
+      } else {
+        cli::cli_alert_danger("Not sure what to do with plugin/s: \n\n {list_get_elements$DF_elements_options$id}")
+        # We try to send a single character, just in case
+        selected_response = as.character(stringi::stri_rand_strings(n = 1, length = 1))
+      }
+
+    } else {
+      selected_response = tolower(sample(response_options, 1))
+    }
+
+
 
     # list_get_elements$list_elements[[selected_input_name]]$sendKeysToElement(sendKeys = as.list(selected_response))
+
+    cli::cli_alert_info("Selected response: {selected_response}")
 
     webElem <- remDr$findElement("css", "html")
     webElem$sendKeysToElement(sendKeys = as.list(selected_response))

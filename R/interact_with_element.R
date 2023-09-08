@@ -26,6 +26,7 @@ interact_with_element <- function(list_get_elements, remDr = NULL, DEBUG = FALSE
       # source("R/helper_select_input.R")
       output_select_input = select_input(list_get_elements = list_get_elements, remDr = remDr, DEBUG = DEBUG, seed = seed)
 
+
     } else {
 
       output_select_input = list(selected_input = tibble::tibble(name = "NO input element found"),
@@ -97,8 +98,18 @@ interact_with_element <- function(list_get_elements, remDr = NULL, DEBUG = FALSE
 
         } else {
 
+          # Select button
           selected_button_id = list_get_elements$name_buttons[sample(1:nrow(list_get_elements$name_buttons), 1),]$id
-          list_get_elements$list_elements[[selected_button_id]]$clickElement()
+          existing_buttons = unique(names(list_get_elements$list_elements))
+
+          # If the button selected does not exist (REVIEW: WHY THIS HAPPENS???)
+          # list_get_elements$name_buttons has different buttons than names(list_get_elements$list_elements)
+          if (selected_button_id %in% existing_buttons) {
+            list_get_elements$list_elements[[selected_button_id]]$clickElement()
+          } else {
+            selected_button_id = existing_buttons[sample(1:length(existing_buttons), 1)]
+            list_get_elements$list_elements[[selected_button_id]]$clickElement()
+          }
 
         }
 

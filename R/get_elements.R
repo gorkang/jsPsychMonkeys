@@ -64,6 +64,14 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
       # Filter out invisible things
       dplyr::filter(is.na(style) | style != "display: none;")
 
+
+      # jspsych-same-different-stimulus DOES NOT HAVE id, only class???
+      # dplyr::mutate(id =
+      #                 dplyr::case_when(
+      #                   is.na(id) & !is.na(class) ~ class,
+      #                   TRUE ~ id
+      #                 ))
+
       # parse_elements("video", page_source_rvest)
 
 

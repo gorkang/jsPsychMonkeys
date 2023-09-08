@@ -1,4 +1,18 @@
+# Some of the plugins in Maker/admin/example_tasks fail
+  # - audio-button-response
+  # - html-keyboard-response
+# SEE helper_select_input 396
+# Maybe we need to send index to select_input() (from  interact_with_element), and
+# get the choices available for keyboard-response plugins with questions[index].choices
+
+
 # new -----------------------------------------------------------------
+# jsPsychMonkeys::clean_monkeys_containers()
+devtools::load_all()
+release_the_monkeys(uid = 1, local_folder_tasks = "/home/emrys/Downloads/protocolALL999", open_VNC = TRUE, disable_web_security = TRUE)
+
+
+
 targets::tar_load_globals()
 debug_function("complete_task")
 debug_docker(uid_participant = uid)
@@ -14,7 +28,8 @@ list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_element
 # list_get_elements$DF_elements_options |> View()
 # list_get_elements$name_contents |> View()
 # list_get_elements$name_buttons |> View()
-#
+
+
 # FINALIZAR ESTUDIO >
 
 # # In complete_task.R

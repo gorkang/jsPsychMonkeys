@@ -65,7 +65,7 @@
 # Install package ---------------------------------------------------------
 
   # Build
-  BUILT = devtools::build()
+  devtools::build()
   devtools::install()
   # renv::install(BUILT) # Install package from file
 
@@ -77,7 +77,9 @@
   devtools::load_all()
   pkgdown::build_site() # Create documentation!
   devtools::build()
-  renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys_0.2.6.tar.gz") # Install package from file
+  devtools::install()
+
+  # renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys_0.2.6.tar.gz") # Install package from file
 
   devtools::check() # Check package (~230s)
   # system.file("templates", package = "jsPsychMonkeys")
