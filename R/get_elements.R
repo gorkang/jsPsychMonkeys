@@ -52,7 +52,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
 
     # Gets html elements for div's, buttons, etc. using parse_elements() and joins all in a DF
     DF_elements_options_raw =
-      tibble::tibble(id = NA_character_, name = NA_character_, class = NA_character_, type = NA_character_, status = NA_character_,
+      tibble::tibble(id = NA_character_, name = NA_character_, class = NA_character_, style = NA_character_, type = NA_character_, status = NA_character_,
              required = NA_character_, hidden = NA_character_,
              min = NA_character_, max = NA_character_, minlength = NA_character_, maxlength = NA_character_) |>
       dplyr::bind_rows(parse_elements("p", page_source_rvest)) |>
