@@ -6,6 +6,11 @@
 # get the choices available for keyboard-response plugins with questions[index].choices
 
 
+# Clean -------------------------------------------------------------------
+jsPsychMonkeys::clean_monkeys_containers()
+targets::tar_destroy(ask = FALSE)
+
+
 # new -----------------------------------------------------------------
 # jsPsychMonkeys::clean_monkeys_containers()
 devtools::load_all()
@@ -16,6 +21,8 @@ release_the_monkeys(uid = 1, local_folder_tasks = "/home/emrys/Downloads/protoco
 targets::tar_load_globals()
 debug_function("complete_task")
 debug_docker(uid_participant = uid)
+# jsPsychMonkeys::reconnect_to_VNC()
+
 reconnect_to_VNC(container_name = container_name)
 
 # If No browser opened:
