@@ -1,3 +1,9 @@
+# jsPsychMonkeys 0.2.7
+
+Minor updates
+
+* Support for fancy datalist
+
 # jsPsychMonkeys 0.2.6
 
 Major updates  
