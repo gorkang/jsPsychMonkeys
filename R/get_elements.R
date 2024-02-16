@@ -105,6 +105,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
       # Some hand-made plugins are missing the tag_name. ADD HERE
       dplyr::mutate(tag_name =
                dplyr::case_when(
+                 class == "choices__item choices__item--choice choices__item--selectable" ~ "input",
                  id == "jspsych-html-keyboard-response-stimulus" ~ "input",
                  id == "jspsych-audio-button-response-button-0" ~ "input",
 
@@ -184,6 +185,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
                  TRUE ~ type_extracted
                ))
 
+    # DF_elements_options |> as_tibble() |> View()
     # Store table for DEBUG
     # if (DEBUG == TRUE) readr::write_csv(DF_elements_options, paste0("outputs/DF/EXTRACTED_", index, "_NEW.csv"))
 

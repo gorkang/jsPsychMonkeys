@@ -16,7 +16,7 @@
 # Load main targets parameters --------------------------------------------
 
 # Source all /R files
-lapply(list.files("./R", full.names = TRUE, pattern = ".R"), source) # Including "R/_targets_parameters.R"
+targets::tar_source()
 
 
 # Targets -----------------------------------------------------------------
@@ -31,7 +31,7 @@ TARGETS =  list(
   ),
 
 
-  # Creates as many branches as uid's
+  # Creates as many containers as uid's
   tarchetypes::tar_map(
     values = list(uid = parameters_monkeys_minimal$uid),
 
@@ -56,6 +56,10 @@ TARGETS =  list(
         ), priority = .5
       ),
 
+  # ONLY works for sequential monkeys
+  # Creates as many links, and then browsers as uid's
+  # tarchetypes::tar_map(
+  #   values = list(uid = parameters_monkeys_minimal$uid),
 
       # 4) Create links
       tar_target(

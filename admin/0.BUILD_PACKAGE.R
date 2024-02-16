@@ -1,3 +1,13 @@
+# Create pull request to merge changes -------------------------------------
+
+usethis::pr_init(branch = "NameOfTemporalBranch")
+usethis::pr_push()
+usethis::pr_finish() # After merging in Github
+
+# After approving others' pull requests
+# Need to delete local branch
+
+
 # Step by step instructions to build and test package
   # https://r-pkgs.org/structure.html
 

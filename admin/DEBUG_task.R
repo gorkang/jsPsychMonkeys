@@ -16,12 +16,17 @@ targets::tar_destroy(ask = FALSE)
 devtools::load_all()
 release_the_monkeys(uid = 1, local_folder_tasks = "/home/emrys/Downloads/protocolALL999", open_VNC = TRUE, disable_web_security = TRUE)
 
+devtools::load_all()
+release_the_monkeys(uid = "1",
+                    credentials_folder = ".vault/",
+                    server_folder_tasks = "999",
+                    open_VNC = TRUE, keep_alive = TRUE, debug_file = TRUE, console_logs = TRUE)
 
 
 targets::tar_load_globals()
 debug_function("complete_task")
 debug_docker(uid_participant = uid)
-# jsPsychMonkeys::reconnect_to_VNC()
+# container_name =  jsPsychMonkeys::reconnect_to_VNC(); container_name
 
 reconnect_to_VNC(container_name = container_name)
 
@@ -42,7 +47,12 @@ list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_element
 # # In complete_task.R
 # rstudioapi::navigateToFile("R/helper_select_input.R")
 # rstudioapi::navigateToFile("R/interact_with_element.R")
-# interact_with_element(list_get_elements = list_get_elements, index = 1, seed = 11)
+interact_with_element(list_get_elements = list_get_elements, index = 1, seed = 11)
+
+
+# If it is a new plugin, edit get_elements()
+
+
 
 
 targets::tar_load_globals()
