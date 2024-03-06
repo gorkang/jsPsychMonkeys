@@ -158,6 +158,7 @@ interact_with_element <- function(list_get_elements, remDr = NULL, DEBUG = FALSE
   if (length(button_value_columns_n) > 0) {
     temp_list = button_value_columns[button_value_columns_n] |> purrr::map(~list_get_elements$name_buttons |> filter(id == selected_button_id) |> dplyr::pull(.x))
     selected_button_value = temp_list[temp_list != ""] |> unlist()
+    if (length(selected_button_value) == 0) selected_button_value = ""
   }
 
 

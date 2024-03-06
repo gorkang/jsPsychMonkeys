@@ -105,7 +105,7 @@ select_input <- function(list_get_elements, remDr = NULL, DEBUG = FALSE, seed = 
 
   # checkbox -------------------------------------------------------------------
 
-  } else if (any(selected_input$type_extracted %in% c("checkbox")) & !grepl("multi-select", selected_input$id)) {
+  } else if (any(selected_input$type_extracted %in% c("checkbox")) & any(!grepl("multi-select", selected_input$id))) {
 
     input_text = selected_input_name
     # input_text_human_readable = destination_slider
