@@ -63,7 +63,7 @@ test_that("local and server protocol runs", {
   uid_random = round(stats::runif(1, 1, 10000), 0)
   OUTPUT_simple_online = jsPsychMonkeys::release_the_monkeys(uid = uid_random,
                                                              open_VNC = FALSE,
-                                                             server_folder_tasks = "test/protocols_DEV/test9999",
+                                                             server_folder_tasks = "protocols_DEV/test9999",
                                                              clean_up_targets = FALSE,
                                                              credentials_folder = "~/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys/.vault/")
 

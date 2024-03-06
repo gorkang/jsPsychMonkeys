@@ -127,8 +127,6 @@ release_the_monkeys <- function(uid = 1,
 
       # Get credentials
       CREDENTIALS <- get_credentials(credentials_folder)
-
-
       pid = paste0(server_folder_tasks)
       cli::cli_alert_info("Checking files for pid = {pid}")
       INITIAL_files = list_data_server(pid = pid, list_credentials = CREDENTIALS$credentials$value) |> dplyr::pull(files)

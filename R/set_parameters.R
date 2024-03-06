@@ -120,8 +120,21 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
       if (!is.null(local_folder_tasks)) {
         local_or_server = "local"
         if (is.null(folder_downloads)) folder_downloads = dirname(local_folder_tasks)
+
       } else if (!is.null(server_folder_tasks)) {
+
         local_or_server = "server"
+
+        # Load server_path and adapt if DEV protocol
+        credentials_location = here::here(paste0(credentials_folder, "/SERVER_PATH.R"))
+        source(credentials_location) # loads variable: server_path
+
+        # It it is a DEV protocol, adapt so the link points to the right place
+        # With the new structure, protocols/ and protocols_DEV/ are in the same folder
+        if (grepl("protocols_DEV", server_folder_tasks)) server_path = gsub("protocols/", "", server_path)
+        server_folder_tasks = paste0(server_path, server_folder_tasks)
+
+
       } else {
         cli::cli_abort("You need to set either 'local_folder_tasks' or 'server_folder_tasks' in parameters_monkeys_minimal \n")
       }
@@ -152,6 +165,8 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
       pid = stringr::str_extract_all(basename(FOLDER), pattern = "[0-9]{1,10}", simplify = TRUE) |> dplyr::last()
       if (length(pid) != 1) cli::cli_alert_warning("Something weird with the pid: {pid}")
     }
+
+
 
   # Create parameters_monkeys list -------------------------------------------
 

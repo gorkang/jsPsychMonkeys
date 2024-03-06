@@ -1026,6 +1026,8 @@ list_data_server <- function(pid, list_credentials = NULL) {
     # sshpass and rsync installed (?)
     if (SSHPASS != "" & RSYNC != "") {
 
+      if (grepl("protocols_DEV", pid)) list_credentials$main_FOLDER = gsub("protocols/", "", list_credentials$main_FOLDER)
+
       RSYNC_COMMAND = paste0('sshpass -p ', list_credentials$password, ' rsync -av ', dry_run, ' --rsh=ssh ',
                              list_credentials$user, "@", list_credentials$IP, ":", list_credentials$main_FOLDER, pid, '/.data/ ',
                              here::here(local_folder_terminal), '/ ')

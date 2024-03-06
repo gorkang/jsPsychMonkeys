@@ -31,7 +31,7 @@ release_the_monkeys(server_folder_tasks = "41", uid = "9991", open_VNC = TRUE, k
 targets::tar_load_globals()
 debug_function("complete_task")
 debug_docker(uid_participant = uid)
-# container_name =  jsPsychMonkeys::reconnect_to_VNC(); container_name
+container_name =  jsPsychMonkeys::reconnect_to_VNC(); container_name
 
 reconnect_to_VNC(container_name = container_name)
 
