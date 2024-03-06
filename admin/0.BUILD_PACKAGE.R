@@ -86,7 +86,7 @@ usethis::pr_finish() # After merging in Github
   devtools::document()
   devtools::load_all()
   pkgdown::build_site() # Create documentation!
-  devtools::build()
+  # devtools::build()
   devtools::install()
 
   # renv::install("/home/emrys/gorkang@gmail.com/RESEARCH/PROYECTOS-Code/jsPsychR/jsPsychMonkeys_0.2.6.tar.gz") # Install package from file

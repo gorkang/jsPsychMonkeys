@@ -7,20 +7,25 @@
 
 
 # Clean -------------------------------------------------------------------
+
 jsPsychMonkeys::clean_monkeys_containers()
 targets::tar_destroy(ask = FALSE)
 
 
 # new -----------------------------------------------------------------
+
+# If we make changes to the code
+jsPsychAdmin::create_jsPsychMonkeys_zip(add_renv_cache = FALSE)
+
 # jsPsychMonkeys::clean_monkeys_containers()
 devtools::load_all()
-release_the_monkeys(uid = 1, local_folder_tasks = "/home/emrys/Downloads/protocolALL999", open_VNC = TRUE, disable_web_security = TRUE)
 
-devtools::load_all()
-release_the_monkeys(uid = "1",
-                    credentials_folder = ".vault/",
-                    server_folder_tasks = "999",
-                    open_VNC = TRUE, keep_alive = TRUE, debug_file = TRUE, console_logs = TRUE)
+# uid can only be numeric
+# LOCAL
+release_the_monkeys(local_folder_tasks = "/home/emrys/Downloads/protocolALL999", uid = 1, open_VNC = TRUE, disable_web_security = TRUE)
+
+# SERVER
+release_the_monkeys(server_folder_tasks = "41", uid = "9991", open_VNC = TRUE, keep_alive = FALSE, debug_file = FALSE, console_logs = TRUE, credentials_folder = ".vault/")
 
 
 targets::tar_load_globals()
