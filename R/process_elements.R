@@ -61,8 +61,8 @@ process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
 
     if (DEBUG == TRUE) cli::cli_h1(cli::col_magenta("[[END OF EXPERIMENT - 100%]]"))
 
-    continue_elements = TRUE
-    continue = FALSE
+    continue_elements = FALSE
+    # continue = FALSE # With the new system, after consent they reach 100%
 
   # Initial FULLSCREEN
   } else if (length(ID_names) == 1 & all(ID_names == c("jspsych-fullscreen-btn"))) {
@@ -80,7 +80,7 @@ process_elements <- function(list_get_elements, try_number = 1, DEBUG = FALSE) {
   # END of experiment
   } else if (try_number == 10 & (length(list_elements) == 0 | length(ID_names) == 0)) {
 
-    if (DEBUG == TRUE) cli::cli_h1(cli::col_green("[[END OF EXPERIMENT]]"))
+    if (DEBUG == TRUE) cli::cli_h1(cli::col_green("[[END OF EXPERIMENT - try 10]]"))
     continue_elements = TRUE # Go to interact with elements, next step towards finishing protocol
     continue = FALSE
 
