@@ -107,7 +107,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
                dplyr::case_when(
                  class == "choices__item choices__item--choice choices__item--selectable" ~ "input",
                  id == "jspsych-html-keyboard-response-stimulus" ~ "input",
-                 id == "jspsych-audio-button-response-button-0" ~ "input",
+                 id == "jspsych-audio-button-response-button-0" ~ "button",
 
                  TRUE ~ tag_name
                )) %>%
@@ -179,8 +179,12 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
                  # If they are record buttons, are inputs, not buttons
                  class == "jspsych-btn start-recording-button" ~ "input_button",
                  class == "jspsych-btn stop-recording-button" ~ "input_button",
+                 class == "jspsych-audio-button-response-button" ~ "input_button",
 
-                 # Maybe we should implement a way to try ALL the type_extracted when we have an imput we don't recognize (WITH A WARNING)
+                 # Catch all
+                 grepl("-button", class) ~ "input_button",
+
+                 # Maybe we should implement a way to try ALL the type_extracted when we have an input we don't recognize (WITH A WARNING)
                  is.na(type_extracted) & tag_name == "input" & required == FALSE ~ "ALL",
                  TRUE ~ type_extracted
                ))
