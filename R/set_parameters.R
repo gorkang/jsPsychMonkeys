@@ -93,12 +93,11 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
   # wait_retry = 2
 
 
+  # Checks for uid -----------------------------------------------------------
 
-# Checks for uid -----------------------------------------------------------
-
-  max_seed = .Machine$integer.max
-  if (is.character(uid)) cli::cli_abort("`uid` needs to be an integer, as we use it to set the random seed.")
-  if (uid > max_seed) cli::cli_abort("`uid` maximum value is {max_seed} (max value of random seeds)")
+  # max_seed = .Machine$integer.max # 2147483647
+  if (is.character(parameters_monkeys_minimal$uid)) cli::cli_abort("`uid` needs to be an integer, as we use it to set the random seed.")
+  if (any(parameters_monkeys_minimal$uid > 2147483647)) cli::cli_abort("`uid` maximum value is 2147483647 (max value of random seeds)")
 
 
 
@@ -113,11 +112,11 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
   }
 
 
-
   # Check which parameters were entered in parameters_monkeys -----------------
 
   # If the parameter was entered in the parameters_monkeys list, use it
    source(here::here("R/main_parameters.R"), local = TRUE)
+
 
 
   # Parameters with dependencies --------------------------------------------

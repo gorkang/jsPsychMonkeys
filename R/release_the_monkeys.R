@@ -180,14 +180,12 @@ release_the_monkeys <- function(uid = 1,
 
   # Output message
   if (!is.null(OUTPUT$error)) {
-    message_out = paste0("Something went wrong", OUTPUT$error)
-    cli::cli_alert_info("Restoring WD back to {.code {current_WD}}")
+    message_out = paste0("Something went wrong") # , gsub("\\{|\\}", "", OUTPUT$error)
+    cli::cli_alert_info("Restoring WD back to {.code {current_WD}}\n\n")
     setwd(dir = current_WD)
   } else if (!is.null(OUTPUT$result)) {
     message_out = paste0("The Monkeys completed ", length(OUTPUT$result), " tasks.")
   }
-
-  cli::cli_alert_info(message_out)
 
   OUTPUT_fun = list(message_out = message_out,
                     output = OUTPUT$result,
