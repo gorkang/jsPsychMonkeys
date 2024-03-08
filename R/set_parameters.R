@@ -94,6 +94,14 @@ set_parameters <- function(parameters_monkeys_minimal = parameters_monkeys_minim
 
 
 
+# Checks for uid -----------------------------------------------------------
+
+  max_seed = .Machine$integer.max
+  if (is.character(uid)) cli::cli_abort("`uid` needs to be an integer, as we use it to set the random seed.")
+  if (uid > max_seed) cli::cli_abort("`uid` maximum value is {max_seed} (max value of random seeds)")
+
+
+
 # CHECK all folders exist -------------------------------------------------
 
   necessary_folders = c(".vault", "outputs/DF", "outputs/log", "outputs/screenshots", "outputs/source")

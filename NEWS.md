@@ -3,6 +3,7 @@
 Minor updates
 
 * Support for fancy datalist
+* Checks for uid. As it is used to set the random seed, we need it to be a number less than 2147483647
 
 # jsPsychMonkeys 0.2.6
 
