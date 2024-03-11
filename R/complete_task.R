@@ -199,9 +199,12 @@ complete_task <-
             if (continue_elements == FALSE & try_number == 10) {
               if (DEBUG == TRUE) cli::cli_alert_danger("Tried {try_number} times but could not find elements. Stopping.\n
                                                        - If the protocol is slow and this should not happen, you can increase `wait_retry` to make the monkeys more patient.")
-              browser_console = remDr$log(type = "browser")
-              if (length(browser_console) > 0) browser_console_clean = browser_console |> dplyr::bind_rows() |> dplyr::filter(level == "SEVERE") |> dplyr::pull(message)
-              if (length(browser_console_clean) > 0) cli::cli_alert_danger("Browser console: \n{.code {browser_console_clean}}")
+
+              # TODO: DEBUG WHY FAILS WITH PARALLEL MONKEYS
+              # browser_console = remDr$log(type = "browser")
+              # if (length(browser_console) > 0) browser_console_clean = browser_console |> dplyr::bind_rows() |> dplyr::filter(level == "SEVERE") |> dplyr::pull(message)
+              # if (length(browser_console_clean) > 0) cli::cli_alert_danger("Browser console: \n{.code {browser_console_clean}}")
+
               continue_elements = TRUE # Gets out of the while loop if TRUE. while(!continue_elements) is reversed ()
               continue = FALSE # Stop the task
               }
