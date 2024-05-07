@@ -125,11 +125,11 @@ release_the_monkeys <- function(uid = 1,
     # list_data_server() does not work on Windows because rsync is not available
     if(!is.null(server_folder_tasks)) {
 
-      # Get credentials
-      CREDENTIALS <- get_credentials(credentials_folder)
+      # Prepare parameters
+      credentials_file = paste0(credentials_folder, "/.credentials")
       pid = paste0(server_folder_tasks)
       cli::cli_alert_info("Checking files for pid = {pid}")
-      INITIAL_files = list_data_server(pid = pid, list_credentials = CREDENTIALS$credentials$value) |> dplyr::pull(files)
+      INITIAL_files = list_data_server(pid = pid, credentials_file = credentials_file) |> dplyr::pull(files)
 
     } else {
       INITIAL_files = list.files(paste0(local_folder_tasks, "/.data"), pattern = "csv")
@@ -151,7 +151,7 @@ release_the_monkeys <- function(uid = 1,
 
     # Files in .data after the Monkeys finish
     if(!is.null(server_folder_tasks)) {
-      FINAL_files = list_data_server(pid = pid, list_credentials = CREDENTIALS$credentials$value) |> dplyr::pull(files)
+      FINAL_files = list_data_server(pid = pid, credentials_file = credentials_file) |> dplyr::pull(files)
     } else {
       FINAL_files = list.files(paste0(local_folder_tasks, "/.data"), pattern = "csv")
     }

@@ -4,12 +4,12 @@
 \alias{list_data_server}
 \title{List files in the .data folder in the server}
 \usage{
-list_data_server(pid, list_credentials = NULL)
+list_data_server(pid, credentials_file = NULL)
 }
 \arguments{
 \item{pid}{protocol id}
 
-\item{list_credentials}{list with credentials}
+\item{credentials_file}{Path to .credentials file. Usually: \code{.vault/.credentials}}
 }
 \value{
 A tibble with a list of files

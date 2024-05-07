@@ -976,11 +976,11 @@ create_monkeys_project <- function(folder = "~/Downloads/",
 #' List files in the .data folder in the server
 #'
 #' @param pid protocol id
-#' @param list_credentials list with credentials
+#' @param credentials_file Path to .credentials file. Usually: `.vault/.credentials`
 #'
 #' @return A tibble with a list of files
 #' @export
-list_data_server <- function(pid, list_credentials = NULL) {
+list_data_server <- function(pid, credentials_file = NULL) {
 
   # Parameters ---
   dry_run = " --dry-run "
@@ -992,34 +992,20 @@ list_data_server <- function(pid, list_credentials = NULL) {
 
   # CHECKS we have credentials and necessary software ---
 
-  # If list_credentials is null, try to get the .credentials file from .vault
-  if (is.null(list_credentials)) {
-
-    file_credentials = here::here(".vault/.credentials")
-    credentials_exist = file.exists(file_credentials)
-    if (credentials_exist) {
-      list_credentials = source(file_credentials)
-    } else {
-      cli::cli_alert_danger("file_credentials NOT FOUND in: {file_credentials}")
-      credentials_exist = FALSE
-    }
-
-
-  # A list of credentials was passed
-  } else {
-
-    if (!is.null(list_credentials$IP) & !is.null(list_credentials$user) & !is.null(list_credentials$password) & !is.null(list_credentials$main_FOLDER)) {
-      credentials_exist = TRUE
-    } else {
-      credentials_exist = FALSE
-    }
-
-  }
-
-
   # credentials_exist = file.exists(here::here(".vault/.credentials"))
   SSHPASS = Sys.which("sshpass") # Check if sshpass is installed
   RSYNC = Sys.which("rsync") # Check if rsync is installed
+
+  # If credentials_file is null, try to get the .credentials file from .vault
+  if (is.null(credentials_file)) credentials_file = here::here(".vault/.credentials")
+  credentials_exist = file.exists(credentials_file)
+
+  if (credentials_exist) {
+    list_credentials = source(credentials_file)$value
+  } else {
+    cli::cli_alert_danger("credentials_file NOT FOUND in: {credentials_file}")
+    credentials_exist = FALSE
+  }
 
 
   if (credentials_exist) {

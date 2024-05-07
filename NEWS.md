@@ -1,8 +1,16 @@
+# jsPsychMonkeys 0.3.5.900
+
+Minor updates
+
+* Sync version number with admin, maker, monkeys and manual
+* All non-mysql credentials parameters are now credentials_file instead of list_credentials
+
+
 # jsPsychMonkeys 0.2.7
 
 Minor updates
 
-* Support for fancy datalist
+* Support for fancy datalist input
 * Checks for uid. As it is used to set the random seed, we need it to be a number less than 2147483647
 * Adapt to last _targets version for error printing
 
