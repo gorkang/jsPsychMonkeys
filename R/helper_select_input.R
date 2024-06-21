@@ -215,8 +215,18 @@ select_input <- function(list_get_elements, remDr = NULL, DEBUG = FALSE, seed = 
 
         selected_input = temp_list_get_elements[sample(1:nrow(temp_list_get_elements), 1),]
         selected_input_name = selected_input$id
+        selected_input_name_unique = selected_input$unique_id
+
         input_text_human_readable = selected_input$value
-        list_get_elements$list_elements[[selected_input_name]]$clickElement()
+
+        # clicky <- function(selected_input_name) {
+        #   list_get_elements$list_elements[[selected_input_name]]$clickElement()
+        # }
+        # clicky(selected_input_name)
+        # clicky_safely = safely(clicky)
+        # clicky_safely(selected_input_name)
+        # list_get_elements$list_elements[[selected_input_name]]$clickElement()
+        list_get_elements$list_elements[[selected_input_name_unique]]$clickElement()
 
         selected_input |> dplyr::mutate(input_text = selected_input_name,
                                  input_text_human_readable = input_text_human_readable)

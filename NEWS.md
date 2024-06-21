@@ -1,9 +1,10 @@
-# jsPsychMonkeys 0.3.5.900
+# jsPsychMonkeys 0.3.5.901
 
 Minor updates
 
 * Sync version number with admin, maker, monkeys and manual
 * All non-mysql credentials parameters are now credentials_file instead of list_credentials
+* Works with Likert scales
 
 
 # jsPsychMonkeys 0.2.7

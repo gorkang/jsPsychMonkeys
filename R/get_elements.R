@@ -54,7 +54,7 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
     DF_elements_options_raw =
       tibble::tibble(id = NA_character_, name = NA_character_, class = NA_character_, style = NA_character_, type = NA_character_, status = NA_character_,
              required = NA_character_, hidden = NA_character_,
-             min = NA_character_, max = NA_character_, minlength = NA_character_, maxlength = NA_character_) |>
+             min = NA_character_, max = NA_character_, minlength = NA_character_, maxlength = NA_character_, value = NA_character_) |>
       dplyr::bind_rows(parse_elements("p", page_source_rvest)) |>
       dplyr::bind_rows(parse_elements("div", page_source_rvest)) |>
       dplyr::bind_rows(parse_elements("input", page_source_rvest)) |>
@@ -187,6 +187,12 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
                  # Maybe we should implement a way to try ALL the type_extracted when we have an input we don't recognize (WITH A WARNING)
                  is.na(type_extracted) & tag_name == "input" & required == FALSE ~ "ALL",
                  TRUE ~ type_extracted
+               )) |>
+      mutate(unique_id =
+               case_when(
+                 !grepl("jspsych", id) ~ paste0(id, "_", value),
+                 TRUE ~ id
+
                ))
 
     # DF_elements_options |> as_tibble() |> View()
@@ -197,18 +203,41 @@ get_elements <- function(remDr, index = 1, try_number = 1, DEBUG = FALSE) {
   # Extract remDr elements --------------------------------------------------
 
     # Get only IDs of inputs and buttons
-    ID_names = DF_elements_options %>% dplyr::filter(tag_name %in% c("input", "button")) %>% tidyr::drop_na(id) %>% dplyr::pull(id)
-    DIV_names = DF_elements_options %>% dplyr::filter(tag_name %in% c("div")) %>% tidyr::drop_na(id) %>% dplyr::pull(id)
+    ID_unique_names = DF_elements_options %>% dplyr::filter(tag_name %in% c("input", "button")) %>% tidyr::drop_na(unique_id) |> distinct(unique_id) |> dplyr::pull(unique_id)
+    ID_names = DF_elements_options %>% dplyr::filter(tag_name %in% c("input", "button")) %>% tidyr::drop_na(id) |> distinct(id) |> dplyr::pull(id)
+    DIV_names = DF_elements_options %>% dplyr::filter(tag_name %in% c("div")) %>% tidyr::drop_na(id) |> distinct(id) %>% dplyr::pull(id)
     # Now we are getting id, name and class using DF_elements_options$id. Maybe try to actually use name and class
-    # This could be problematic for Consent, and because of some empty elements, elements with repated id's etc.
+    # This could be problematic for Consent, and because of some empty elements, elements with repeated id's etc.
       # Name_names = DF_elements_options %>% dplyr::filter(tag_name %in% c("input", "button")) %>% tidyr::drop_na(name) %>% dplyr::pull(name)
       # Class_names = DF_elements_options %>% dplyr::filter(tag_name %in% c("input", "button")) %>% tidyr::drop_na(class) %>% dplyr::pull(class)
 
 
     # Extract all elements with an id. We look for it in the "id", "name" and "class"
-    if (length(ID_names) != 0) list_elements_ids = 1:length(ID_names) %>% purrr::map(~ remDr$findElements(using = 'id', value = ID_names[.x])) %>% stats::setNames(ID_names) %>% unlist()
-    if (length(ID_names) != 0) list_elements_names = 1:length(ID_names) %>% purrr::map(~ remDr$findElements(using = 'name', value = ID_names[.x])) %>% stats::setNames(ID_names) %>% unlist()
-    if (length(ID_names) != 0) list_elements_class = 1:length(ID_names) %>% purrr::map(~ remDr$findElements(using = 'class', value = ID_names[.x])) %>% stats::setNames(ID_names) %>% unlist()
+# names(list_elements_names)
+# DF_elements_options |> as_tibble() |> View()
+
+    # If likert Questions
+    if (any(DF_elements_options |> as_tibble() |> pull(id) %in% "jspsych-survey-likert-next")) {
+      if (length(ID_names) != 0) list_elements_ids = 1:length(ID_names) %>% purrr::map(~ remDr$findElements(using = 'id', value = ID_names[.x])) %>% stats::setNames(ID_names) %>% unlist()
+      # if (length(ID_names) != 0) list_elements_names = 1:length(ID_names) %>% purrr::map(~ remDr$findElements(using = 'name', value = ID_names[.x])) %>% stats::setNames(paste0(ID_names, "_")) %>% unlist()
+
+      # HACK to work with likert scales
+      if (length(ID_unique_names) != 0) {
+        list_elements_names = 1:length(ID_names) %>%
+          purrr::map( ~ {
+            IDs_temp = DF_elements_options |> as_tibble() |> filter(id == ID_names[.x]) |> pull(unique_id)
+            ELEMENTS = remDr$findElements(using = 'name', value = ID_names[.x])
+            if (length(IDs_temp) == length(ELEMENTS)) ELEMENTS |> stats::setNames(IDs_temp)
+          }  ) |> unlist()
+      }
+      if (length(ID_names) != 0) list_elements_class = 1:length(ID_names) %>% purrr::map(~ remDr$findElements(using = 'class', value = ID_names[.x])) %>% stats::setNames(ID_names) %>% unlist()
+
+    } else {
+      if (length(ID_names) != 0) list_elements_ids = 1:length(ID_names) %>% purrr::map(~ remDr$findElements(using = 'id', value = ID_names[.x])) %>% stats::setNames(ID_names) %>% unlist()
+      if (length(ID_names) != 0) list_elements_names = 1:length(ID_names) %>% purrr::map(~ remDr$findElements(using = 'name', value = ID_names[.x])) %>% stats::setNames(ID_names) %>% unlist()
+      if (length(ID_names) != 0) list_elements_class = 1:length(ID_names) %>% purrr::map(~ remDr$findElements(using = 'class', value = ID_names[.x])) %>% stats::setNames(ID_names) %>% unlist()
+    }
+
 
     if (DEBUG == TRUE & length(ID_names)) cli::cli_alert_info("remDr$findElements using id: {length(list_elements_ids)}; name: {length(list_elements_names)}; class: {length(list_elements_class)}")
 

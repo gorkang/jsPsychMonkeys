@@ -1,6 +1,6 @@
 Package: jsPsychMonkeys
 Title: Release monkeys to a jsPsych experiment using the R package {targets}, docker and {RSelenium}
-Version: 0.3.5.900
+Version: 0.3.5.901
 Date: 2024-05-07
 Authors@R: c(person("Gorka", "Navarrete", email = "gorkang@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7678-8656")))
 Description: Release monkeys to a jsPsych experiment using the R package {targets}, docker and {RSelenium}.

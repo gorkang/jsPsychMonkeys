@@ -63,6 +63,8 @@ interact_with_element <- function(list_get_elements, remDr = NULL, DEBUG = FALSE
 
       selected_button_id = list_get_elements$name_buttons$id
 
+      # names(list_get_elements$list_elements)
+
       # Click!
       list_get_elements$list_elements[[selected_button_id]]$clickElement()
 
