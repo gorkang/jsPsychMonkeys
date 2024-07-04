@@ -92,7 +92,9 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
   # DEBUG
   # targets::tar_load_globals()
   # debug_function("complete_task")
+  # uid = 1
   # container_name = paste0("monkey_", uid)
+
   # just_check = TRUE
   # port = NULL
   # DEBUG = TRUE
@@ -142,7 +144,9 @@ reconnect_to_VNC <- function(container_name = NULL, just_check = FALSE, port = N
 
           container_ports_found = as.integer(gsub('.*:(.*)$', '\\1', container_port_raw_clean))
           if (length(container_ports_found) > 2) cli::cli_alert_warning("Multiple ports found: {container_ports_found}. \n - If the VNC command suplied below does not work, try the other ports.")
-          container_port <- min(container_ports_found)
+
+          # IF NOT CONNECTING, try max()
+          container_port <- max(container_ports_found)
           if (is.na(container_port[1])) cat(crayon::red("Port not found?"))
 
         }

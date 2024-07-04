@@ -224,8 +224,10 @@ create_docker <-
     # Get port ---------------------------------------------------------------
 
     container_port_raw <- system(sprintf('docker port %s', container_name), intern = TRUE)
-    container_port <- max(as.integer(gsub('.*:(.*)$', '\\1', container_port_raw)))
-    if (is.na(container_port)) cat(crayon::red("Port not found?"))
+    # IF WE GET ERROR ! Warning: creating closing browsers failed: Error in checkError(res):  Undefined error in httr call. httr output: Empty reply from server
+    # It may be because we are using the wrong port (create_remDr() needs the min() port (before it was the max), but reconnect_to_VNC() needs the max port)???
+    container_port <- min(as.integer(gsub('.*:(.*)$', '\\1', container_port_raw)))
+    if (all(is.na(container_port))) cat(crayon::red("Port not found?"))
 
 
 
