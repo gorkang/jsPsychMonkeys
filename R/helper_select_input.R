@@ -262,7 +262,14 @@ select_input <- function(list_get_elements, remDr = NULL, DEBUG = FALSE, seed = 
 
     # input_text = as.character(sample(min_num:max_num, number_textboxes))
     if (!exists("input_text")) {
-      input_text = as.character(random_number_trimmed(number_textboxes, min = min_num, max = max_num))
+
+      # OLD WAY, only works if all fields have the same max min criteria (?) Fails in PSQQ
+      # input_text = as.character(random_number_trimmed(n = number_textboxes, min = min_num, max = max_num))
+      input_text = seq_along(min_num) |>
+        map_chr(~{
+          as.character(random_number_trimmed(n = 1, min = min_num[.x], max = max_num[.x]))
+        })
+
     } else {
       input_text = as.character(input_text)
     }
