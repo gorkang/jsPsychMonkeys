@@ -1,10 +1,12 @@
-# jsPsychMonkeys 0.3.5.901
+# jsPsychMonkeys 0.3.5.902
 
 Minor updates
 
 * Sync version number with admin, maker, monkeys and manual
 * All non-mysql credentials parameters are now credentials_file instead of list_credentials
 * Works with Likert scales
+* Works with two number text fields with different max/min criteria
+* Works when text overlaps button (send enter key instead of click)
 
 
 # jsPsychMonkeys 0.2.7

@@ -23,7 +23,6 @@ interact_with_element <- function(list_get_elements, remDr = NULL, DEBUG = FALSE
 
     if (length(list_get_elements$name_inputs$id) > 0) {
 
-      # source("R/helper_select_input.R")
       output_select_input = select_input(list_get_elements = list_get_elements, remDr = remDr, DEBUG = DEBUG, seed = seed)
 
 
@@ -67,6 +66,10 @@ interact_with_element <- function(list_get_elements, remDr = NULL, DEBUG = FALSE
 
       # Click!
       list_get_elements$list_elements[[selected_button_id]]$clickElement()
+
+      # If click does not work, (e.g. AARS because of overlap between tag and button), send ENTER key
+      list_get_elements$list_elements[[selected_button_id]]$sendKeysToElement(list("u'\ue006'"))
+
 
       # If button was Fullscreen, wait a couple seconds so the interface is responsive
       if (selected_button_id == "jspsych-fullscreen-btn") Sys.sleep(3)

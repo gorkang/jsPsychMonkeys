@@ -1,7 +1,7 @@
 Package: jsPsychMonkeys
 Title: Release monkeys to a jsPsych experiment using the R package {targets}, docker and {RSelenium}
-Version: 0.3.5.901
-Date: 2024-05-07
+Version: 0.3.5.902
+Date: 2024-08-09
 Authors@R: c(person("Gorka", "Navarrete", email = "gorkang@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0001-7678-8656")))
 Description: Release monkeys to a jsPsych experiment using the R package {targets}, docker and {RSelenium}.
 Maintainer: Gorka Navarrete <gorkang@gmail.com>
@@ -52,6 +52,6 @@ Remotes:
   gorkang/jsPsychMaker,
   gorkang/jsPsychHelpeR
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Config/testthat/edition: 3
 Encoding: UTF-8
