@@ -7,6 +7,7 @@ Minor updates
 * Works with Likert scales
 * Works with two number text fields with different max/min criteria
 * Works when text overlaps button (send enter key instead of click)
+* Fix issue with credentials location
 
 
 # jsPsychMonkeys 0.2.7
