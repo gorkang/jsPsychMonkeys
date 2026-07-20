@@ -8,6 +8,7 @@ Minor updates
 * Works with two number text fields with different max/min criteria
 * Works when text overlaps button (send enter key instead of click)
 * Fix issue with credentials location
+* Manual condition added for "number of kids question"
 
 
 # jsPsychMonkeys 0.2.7
