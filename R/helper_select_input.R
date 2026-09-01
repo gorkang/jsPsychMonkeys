@@ -255,6 +255,7 @@ select_input <- function(list_get_elements, remDr = NULL, DEBUG = FALSE, seed = 
     if (grepl("Rut Completo| rut ", content_text)) input_text = random_number_trimmed(1, sd = 100000000 * 20, min = 100000000, max = 999999999)
     if (grepl("celular", content_text)) input_text = random_number_trimmed(1, min = 900000000, max = 999999999, distrib = "uniform")
     if (grepl("How old are you|edad", content_text)) input_text = random_number_trimmed(1, mean = 20, sd = 10, min = 17, max = 90)
+    if (grepl("año de nacimiento|year of birth", content_text)) input_text = random_number_trimmed(1, mean = 1990, sd = 10, min = 1970, max = 2000)
     if (grepl("cantidad de hijos", content_text)) input_text = random_number_trimmed(1, mean = 3, sd = 2, min = 0, max = 5)
 
     # If max and min exist, replace default limits
