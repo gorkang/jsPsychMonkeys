@@ -21,12 +21,23 @@ jsPsychAdmin::create_jsPsychMonkeys_zip(add_renv_cache = FALSE)
 devtools::load_all()
 
 # uid can only be numeric
+uid_manual = 999
+protocol_manual = "protocols_DEV/99955"
+
 # LOCAL
-release_the_monkeys(local_folder_tasks = "/home/emrys/Downloads/protocolALL999", uid = 1, open_VNC = TRUE, disable_web_security = TRUE)
+release_the_monkeys(local_folder_tasks = "/home/emrys/Downloads/99954", uid = uid_manual, open_VNC = TRUE, disable_web_security = TRUE)
 
-# SERVER
-release_the_monkeys(server_folder_tasks = "41", uid = "9991", open_VNC = TRUE, keep_alive = FALSE, debug_file = FALSE, console_logs = TRUE, credentials_folder = ".vault/")
+# SERVER - SINGLE PARTICIPANT  - VNC
+release_the_monkeys(server_folder_tasks = protocol_manual, uid = uid_manual, open_VNC = TRUE, keep_alive = TRUE,
+                    debug_file = FALSE, console_logs = TRUE, credentials_folder = ".vault/",
+                    screenshot = TRUE)
 
+
+# SERVER - MULTI
+release_the_monkeys(server_folder_tasks = "99953", uid = 99100:99200, open_VNC = FALSE,
+                    keep_alive = FALSE, debug_file = FALSE, console_logs = TRUE, credentials_folder = ".vault/",
+                    sequential_parallel = "parallel", number_of_cores = 10
+)
 
 targets::tar_load_globals()
 debug_function("complete_task")
@@ -45,12 +56,16 @@ list_get_elements = get_elements(remDr = remDr, DEBUG = DEBUG); list_get_element
 # list_get_elements$DF_elements_options |> View()
 # list_get_elements$name_contents |> View()
 # list_get_elements$name_buttons |> View()
+# list_get_elements$name_inputs |> View()
 
 
-# FINALIZAR ESTUDIO >
+# TYPICAL ISSUES:
 
-# # In complete_task.R
-# rstudioapi::navigateToFile("R/helper_select_input.R")
+# In complete_task.R
+# ISSUE WITH text or input entered
+rstudioapi::navigateToFile("R/helper_select_input.R")
+
+# ISSUE with button:
 # rstudioapi::navigateToFile("R/interact_with_element.R")
 interact_with_element(list_get_elements = list_get_elements, index = 1, seed = 11)
 
