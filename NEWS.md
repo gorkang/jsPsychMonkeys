@@ -1,3 +1,9 @@
+# jsPsychMonkeys 0.3.5.903
+
+Minor updates
+
+* Manual input for year of birth
+
 # jsPsychMonkeys 0.3.5.902
 
 Minor updates

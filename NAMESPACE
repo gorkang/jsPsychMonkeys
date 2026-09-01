@@ -26,9 +26,11 @@ export(setup_folders)
 import(XML)
 importFrom(fs,path_abs)
 importFrom(furrr,future_walk)
-importFrom(future,multisession)
-importFrom(future,plan)
-importFrom(future,tweak)
+importFrom(future,
+  multisession,
+  plan,
+  tweak
+)
 importFrom(future.callr,callr)
 importFrom(magrittr,"%>%")
 importFrom(tarchetypes,tar_map)
